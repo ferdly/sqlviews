@@ -1,0 +1,8 @@
+name = sqlVIEWS
+description = Write Nodes Types(soon any entity type) as an SQL View
+package = QIQgroup Tools
+core = 7.x
+files[] = sqlviews.module
+files[] = src/nodeTypeSQL.php
+files[] = src/fieldSQL.php
+files[] = src/columnSQL.php
