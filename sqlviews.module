@@ -205,6 +205,9 @@ function sqlviews_todo_page() {
 	$todo_array['brainstorm']['legend'] = 'Brain Strom';
 	$todo_array['brainstorm']['item'][] = 'Include Article and Basic Page';
 	$todo_array['brainstorm']['item'][] = 'Flesh-Out how to handle all kinds of Date fields &mdash; databse Date, ISO Date string, Integer';
+	$todo_array['entity']['item'][] = 'Write \'Entity\' class with an array of EntityType objects';
+	$todo_array['entity']['item'][] = 'Loop through each \'Entity Bundle\' for-each \'Entity\' with an array of Bundle objects';
+	$todo_array['entity']['item'][] = '\_ indeed, current \'Node\'-centric module is like full-blown, where the only \'Bundles\' are Node \'Content-Types\.';
 
 	$buffer = '';
 	$fieldset_class = ' class="collapsible"';
