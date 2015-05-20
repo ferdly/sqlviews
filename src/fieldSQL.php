@@ -45,7 +45,7 @@ class fieldSQL /* WILL SOON extend something*/ {
 		$field_data_array['table_alias'] = $this->table_alias;
 		$field_data_array['cardinality'] = $this->cardinality;
 		$field_data_array['type'] = $this->type;
-		$this->field_join_string = 'JOIN' . $space_string . $this->table_name . $space_string . $this->table_alias;
+		$this->field_join_string = 'LEFT JOIN' . $space_string . $this->table_name . $space_string . $this->table_alias;
 		$join_right_string = $node_data_array['entity_table_alias'] . '.' . $node_data_array['entity_table_foriegnkey'];
 		$this->field_join_string .= $space_string . $crlf_string . 'ON' . $space_string . $join_right_string . ' = ' . $this->table_alias . '.' . 'entity_id';
 		$column_select_string_array = array();
