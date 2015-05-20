@@ -335,6 +335,7 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 		$query_string .= $space_string . $crlf_string . $crlf_string . 'FROM' . $space_string . $this->entity_table_name . $space_string . $this->entity_table_alias;
 		$query_string .= $space_string . $crlf_string . $this->join_string;
 		$query_string .= $space_string . $crlf_string . $crlf_string . "WHERE n.type = '" . trim($this->type) . "'";
+		$query_string .= $space_string . $crlf_string . 'GROUP BY n.nid'; 
 		$query_string .= ''; // no ORDER BY
 		$this->query_string = $query_string;
 		$this->select_string_node = 'NNULL';

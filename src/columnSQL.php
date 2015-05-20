@@ -38,8 +38,12 @@ class columnSQL {
 			return;
 		}
 		$column_select_string = $field_data_array['table_alias'] . '.' . $this->column_name;
-		$column_select_string = $field_data_array['cardinality'] + 0 != 1?'group_concat(' . $column_select_string . ')':$column_select_string;
+		// $column_select_string = $field_data_array['cardinality'] + 0 != 1?'group_concat(' . $column_select_string . ')':$column_select_string;
+		// $column_select_string = $field_data_array['cardinality'] + 0 != 1?"CONCAT(IFNULL(" . $column_select_string . ", ''), ' [', CASE WHEN COUNT(" . $column_select_string . ") > 0 THEN CONCAT('+', CAST((COUNT(" . $column_select_string . ") - 1) AS CHAR)) ELSE '0' END, ']')":$column_select_string;
 		$label = $field_data_array['label'];
+		$label_append = $field_data_array['cardinality'] + 0 < 0?' [#!]':'';
+		$label_append = $field_data_array['cardinality'] + 0 > 1?' [#' . $field_data_array['cardinality'] . ']':$label_append;
+		$label .= $label_append;
 		$label .= $this->column_key == 'value'?'':'-' . ucwords(str_replace('_', ' ', $this->column_key));
 		$label = isset($field_data_array['label_overload'])?$field_data_array['label_overload']:$label;
 		$label = $double_quote . $label . $double_quote;
@@ -52,13 +56,19 @@ class columnSQL {
 
 	function overloadLogic (&$field_data_array) {
 		$type = $field_data_array['type'];
-		$supported_type_array = array('addressfield');
+		$supported_type_array = array(
+			'addressfield', '
+			body',
+			);
 		if (in_array($type, $supported_type_array) === false) {
 			return;
 		}
 		switch ($type) {
 			case 'addressfield':
 				$this->overloadLogic_AddressField($field_data_array);
+				break;
+			case 'body':
+				$this->overloadLogic_Body($field_data_array);
 				break;
 			
 			default:
@@ -68,6 +78,10 @@ class columnSQL {
 		return;
 	}
 
+	function overloadLogic_Body (&$field_data_array) {
+		//'LEFT(' . $z . ', 25)'
+		return;
+	}
 	function overloadLogic_AddressField (&$field_data_array) {
 		$toskip_column_key_array = array('country','sub_administrative_area','dependent_locality','sub_premise','name_line','data',);
 		#\_ This MUST become aware of Settings and Country
