@@ -28,25 +28,25 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 	public $field_bundle_settings = array(); //Table: variables; variables::name: field_bundle_settings_node__{node_type}
 	/* </from Serialized Data> */
 	/* <Loaded (or 'Unpackd') Data> */
-	public $weighted_field_array = array(); 
+	public $weighted_field_array = array();
 	public $field_preobject_array = array();
 	public $field_object_array = array(); // Array of Field Objects
 	public $field_object_array_count = -99999;
 	/* </Loaded (or 'Unpackd') Data> */
 	/* <Code Only Data> */
 	public $country = 'US';
-	public $select_string_order = array(); 
-	public $select_string_node; 
-	public $select_string_ids; 
-	public $select_string_stamps; 
-	public $select_string_user; 
+	public $select_string_order = array();
+	public $select_string_node;
+	public $select_string_ids;
+	public $select_string_stamps;
+	public $select_string_user;
 	public $select_string_fields;
-	public $select_string; 
-	public $join_string_fields; 
+	public $select_string;
+	public $join_string_fields;
 	public $join_string; //for users
 	public $query_string;
 	/* <Return Code/Data> */
-	public $view_string; 
+	public $view_string;
 	/* </Return Code/Data> */
 
 	function __construct($type_machine_name) {
@@ -59,19 +59,19 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 		$this->select_string_stamps = "FROM_UNIXTIME(n.created,'%b %e, %Y %l:%i:%s %p') as \"created\"\r\n,FROM_UNIXTIME(n.changed,'%b %e, %Y %l:%i:%s %p') as \"changed\"";
 		$this->select_string_user = 'u.name AS "Author"';//constant user data (name, email, both, more?... eventually maybe a preference)
 		$this->join_string = "JOIN users u \r\nON u.uid = n.uid\r\n"; // write it here if there is any non-field related Joins WITH TRAILING SPACE
-		$field_config_instance_array = db_query('SELECT id, field_id, field_name, data FROM {field_config_instance} WHERE bundle = :bundle', array(':bundle' => 
+		$field_config_instance_array = db_query('SELECT id, field_id, field_name, data FROM {field_config_instance} WHERE bundle = :bundle', array(':bundle' =>
 		'many_fields'))->fetchAll();
 		}
 	function gatherNodeTypeData() {
 		if (empty($this->select_string_node)) {
 			$this->gatherNodeData();
 		}
-		$node_type = db_query('SELECT * FROM {node_type} WHERE type = :type', 
-			array(':type' => 
+		$node_type = db_query('SELECT * FROM {node_type} WHERE type = :type',
+			array(':type' =>
 			$this->type))->fetchObject();
 		$this->has_title =$node_type->has_title;
 		$this->title_label = $node_type->title_label;
-		
+
 
 		// $sql = 'SELECT * FROM node_type WHERE type = ' . "'{$this->type}'";
 		// $result['has_title'] = 1; // OF COURSE: will be dynamic from database
@@ -98,16 +98,16 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 		if (isset($this->has_title) === false) {
 			$this->gatherNodeTypeData();
 		}
-		$field_config_instance_array = 
-		db_query('SELECT id, field_id, field_name, data, deleted FROM {field_config_instance} WHERE bundle = :bundle', 
-			array(':bundle' => 
+		$field_config_instance_array =
+		db_query('SELECT id, field_id, field_name, data, deleted FROM {field_config_instance} WHERE bundle = :bundle',
+			array(':bundle' =>
 			$this->type))->fetchAll();
 			// 'many_fields'))->fetchAll();
 		foreach ($field_config_instance_array as $index => $row) {
 			$row->data = (object) unserialize($row->data);
-				$field_config_this = 
-				db_query('SELECT * FROM {field_config} WHERE id = :field_id', 
-					array(':field_id' => 
+				$field_config_this =
+				db_query('SELECT * FROM {field_config} WHERE id = :field_id',
+					array(':field_id' =>
 					$row->field_id))->fetchObject();
 				$field_config_this->data = (object) unserialize($field_config_this->data);
 				$fields[$row->field_name]['instance'] = $row;
@@ -176,34 +176,34 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 			// $test_this = $instance_this->field->data->storage['details']['sql']['FIELD_LOAD_CURRENT'][$table_name];
 			// dpm($test_this);
 			$index = $weighted_field_array[$fieldname_this]['index'];
-			$field_preobject_array[$fieldname_this]['index'] = $index; 
-			$field_preobject_array[$fieldname_this]['weight'] = $weighted_field_array[$fieldname_this]['weight']; 
-			$field_preobject_array[$fieldname_this]['field_name'] = $fieldname_this; 
-			$field_preobject_array[$fieldname_this]['label'] = $instance_this->instance->data->label; 
+			$field_preobject_array[$fieldname_this]['index'] = $index;
+			$field_preobject_array[$fieldname_this]['weight'] = $weighted_field_array[$fieldname_this]['weight'];
+			$field_preobject_array[$fieldname_this]['field_name'] = $fieldname_this;
+			$field_preobject_array[$fieldname_this]['label'] = $instance_this->instance->data->label;
 			$field_preobject_array[$fieldname_this]['field_config_instance_id'] = $instance_this->instance->id;
-			$field_preobject_array[$fieldname_this]['field_config_id'] = $instance_this->field->id; 
-			$field_preobject_array[$fieldname_this]['field_config_instance_deleted'] = $instance_this->instance->deleted; 
-			$field_preobject_array[$fieldname_this]['type'] = $instance_this->field->type; 
-			$field_preobject_array[$fieldname_this]['module'] = $instance_this->field->module; 
-			$field_preobject_array[$fieldname_this]['active'] = $instance_this->field->active; 
-			$field_preobject_array[$fieldname_this]['locked'] = $instance_this->field->locked; 
-			$field_preobject_array[$fieldname_this]['cardinality'] = $instance_this->field->cardinality; 
-			$field_preobject_array[$fieldname_this]['field_config_deleted'] = $instance_this->field->deleted; 
+			$field_preobject_array[$fieldname_this]['field_config_id'] = $instance_this->field->id;
+			$field_preobject_array[$fieldname_this]['field_config_instance_deleted'] = $instance_this->instance->deleted;
+			$field_preobject_array[$fieldname_this]['type'] = $instance_this->field->type;
+			$field_preobject_array[$fieldname_this]['module'] = $instance_this->field->module;
+			$field_preobject_array[$fieldname_this]['active'] = $instance_this->field->active;
+			$field_preobject_array[$fieldname_this]['locked'] = $instance_this->field->locked;
+			$field_preobject_array[$fieldname_this]['cardinality'] = $instance_this->field->cardinality;
+			$field_preobject_array[$fieldname_this]['field_config_deleted'] = $instance_this->field->deleted;
 			// $tablename = key($fields[$index]['storage']['details']['sql']['FIELD_LOAD_CURRENT']);
-			$field_preobject_array[$fieldname_this]['table_name'] = $table_name; //$instance_this->field->data->storage['details']['sql']['FIELD_LOAD_CURRENT'][$table_name]; 
-			// $table_data = $test_this; 
-			// // $table_data = $fields[$index]['storage']['details']['sql']['FIELD_LOAD_CURRENT'][$tablename]; 
+			$field_preobject_array[$fieldname_this]['table_name'] = $table_name; //$instance_this->field->data->storage['details']['sql']['FIELD_LOAD_CURRENT'][$table_name];
+			// $table_data = $test_this;
+			// // $table_data = $fields[$index]['storage']['details']['sql']['FIELD_LOAD_CURRENT'][$tablename];
 			// $columns = $fields[$index]['columns'];
 			// $columns_orig = $test_this;
 			// foreach ($columns_orig as $column_key => $column_array) {
 			//  	$columns[$column_key]['column_key'] = $column_key;
 			//  	$columns[$column_key]['column_name'] = $columns[$column_key];
-			//  } 
-			$field_preobject_array[$fieldname_this]['columns'] = $columns; 
-			//#$instance_this['description'] = 'AS COLUMN COMMENT'; 
-			//#$instance_this['bundle'] must match $this->type -- but that is the point! -- too foundational to test; 
+			//  }
+			$field_preobject_array[$fieldname_this]['columns'] = $columns;
+			//#$instance_this['description'] = 'AS COLUMN COMMENT';
+			//#$instance_this['bundle'] must match $this->type -- but that is the point! -- too foundational to test;
 		}
-		$this->field_preobject_array = $field_preobject_array; 
+		$this->field_preobject_array = $field_preobject_array;
 		#\_ FAUX for Testing this functions REAL purpose is to explode the array and load into fieldSQL objects
 	} //END function gatherObjectReadyFieldArray()
 
@@ -223,7 +223,7 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 			$field_object_this = new fieldSQL($field_array_this);
 			$column_array = $field_object_this->columns;
 			if ($field_array_this['type'] == 'addressfield') {
-				$column_loop_array = array( 'first_name' => 1, 'last_name' => 2, 'name_line' => 3, 'organisation_name' => 4, 'thoroughfare' => 5, 'premise' => 6, 'locality' => 7, 'administrative_area' => 8, 'postal_code' => 9, 'country' => 10, 'sub_administrative_area' => 11, 'dependent_locality' => 12, 'sub_premise' => 13, 'data' => 14,); 
+				$column_loop_array = array( 'first_name' => 1, 'last_name' => 2, 'name_line' => 3, 'organisation_name' => 4, 'thoroughfare' => 5, 'premise' => 6, 'locality' => 7, 'administrative_area' => 8, 'postal_code' => 9, 'country' => 10, 'sub_administrative_area' => 11, 'dependent_locality' => 12, 'sub_premise' => 13, 'data' => 14,);
 			}else{
 				$column_loop_array = $column_array;
 			}
@@ -237,7 +237,7 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 			$this->field_preobject_array[$fieldname_this] = 'NNULL';
 		}
 
-	} //END function instantiateFieldObjects() 
+	} //END function instantiateFieldObjects()
 
 	function composeSelectStringFields_JoinStringFields() {
 		if ($this->field_object_array_count != count($this->field_object_array)) {
@@ -248,7 +248,7 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 			$this->join_string_fields = 'EEMPTY';
 		}
 		/** Try New (more sophistacted construction) after Looping is Working
-		$a = array_map(function($obj) { return $obj->foo; }, 
+		$a = array_map(function($obj) { return $obj->foo; },
  			array(1=>$obj1 , 2=>$obj2 , 3=>$obj3));
 
 		$a = implode(", ", $a);
@@ -256,8 +256,12 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 		$field_select_string_array = array();
 		$field_join_string_array = array();
 		foreach ($this->field_object_array as $index => $field_object_this) {
-			$field_select_string_array[] = $field_object_this->field_select_list_string;
-			$field_join_string_array[] = $field_object_this->field_join_string;
+			$column_object_array_count = count($field_object_this->column_object_array) + 0;
+			$columns_count = is_array($field_object_this->columns)?count($field_object_this->columns) + 0:7;
+			if ($columns_count + $column_object_array_count != 0) {
+				$field_select_string_array[] = $field_object_this->field_select_list_string;
+				$field_join_string_array[] = $field_object_this->field_join_string;
+			}
 		}
 		$this->select_string_fields = implode("\r\n,", $field_select_string_array);
 		$this->join_string_fields = implode("\r\n", $field_join_string_array);
@@ -311,7 +315,7 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 				case 'user':
 					$select_string .= $comma . $this->select_string_user;
 					break;
-				
+
 				default:
 					$error[] = $value; // SHOULD BE IMPOSSIBLE, so not Thrown (or Caught) at this time
 					break;
@@ -335,7 +339,7 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 		$query_string .= $space_string . $crlf_string . $crlf_string . 'FROM' . $space_string . $this->entity_table_name . $space_string . $this->entity_table_alias;
 		$query_string .= $space_string . $crlf_string . $this->join_string;
 		$query_string .= $space_string . $crlf_string . $crlf_string . "WHERE n.type = '" . trim($this->type) . "'";
-		$query_string .= $space_string . $crlf_string . 'GROUP BY n.nid'; 
+		$query_string .= $space_string . $crlf_string . 'GROUP BY n.nid';
 		$query_string .= ''; // no ORDER BY
 		$this->query_string = $query_string;
 		$this->select_string_node = 'NNULL';
@@ -350,6 +354,7 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 		if (empty($this->query_string)) {
 			$this->composeQueryString();
 		}
+		qdpm($this->field_object_array);
 		$view_name = $this->type . '_' . strtoupper($this->entity) . '_VIEW';
 		$view_name = 'sqlVIEW_' . $this->type . '_' . strtoupper($this->entity);
 		$space_string = ' ';
@@ -359,7 +364,7 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 		$view_string .= $space_string . $crlf_string . $crlf_string . $this->query_string;
 		$view_string .= $space_string . $crlf_string . ';';
 		$view_string .= $space_string . $crlf_string . "/*END $view_name */";
-		
+
 		$this->view_string =$view_string;
 		$this->query_string = 'NNULL';
 
@@ -372,7 +377,7 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 		}
 
 		echo 'Use PDO to execute the "CREATE OR REPLACE VIEW" code.';
-		
+
 	} //END function instantiateView()
 
 
@@ -387,7 +392,7 @@ function gather_field_table_data($field_name, $prefix = 'field_data_', $site = '
 	$table_query = db_query(
 	'SELECT *
 FROM INFORMATION_SCHEMA.COLUMNS
-WHERE TABLE_NAME= :table_name AND TABLE_SCHEMA = :site', 
+WHERE TABLE_NAME= :table_name AND TABLE_SCHEMA = :site',
 array(':table_name'=>$table_name,
 	':site'=>$site))->fetchAll();
 	// return $table_query;
