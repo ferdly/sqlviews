@@ -354,7 +354,6 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 		if (empty($this->query_string)) {
 			$this->composeQueryString();
 		}
-		qdpm($this->field_object_array);
 		$view_name = $this->type . '_' . strtoupper($this->entity) . '_VIEW';
 		$view_name = 'sqlVIEW_' . $this->type . '_' . strtoupper($this->entity);
 		$space_string = ' ';
