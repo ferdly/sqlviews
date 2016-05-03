@@ -45,22 +45,32 @@ function generate_sql_switch($query_name, $ago = FALSE, $options_array = array()
 }
 
 function gather_sql_ago() {
-    $sql = 'sql_ago code block (as include)';
+    include 'sql/ago_sql_code.inc';
+    $sql = @$ago_sql_code;
+    $sql = !empty($sql) ? $sql : 'sql_ago code block as include() FAILED to Load!';
     return $sql;
 }
 function gather_sql_users() {
-    $sql = 'sql_users code block (as include)';
+    include 'sql/users_view_sql_code.inc';
+    $sql = @$users_view_sql_code;
+    $sql = !empty($sql) ? $sql : 'sql_users code block as include() FAILED to Load!';
     return $sql;
 }
 function gather_sql_users_ago() {
-    $sql = 'sql_users_ago code block (as include)';
+    include 'sql/users_ago_view_sql_code.inc';
+    $sql = @$users_ago_view_sql_code;
+    $sql = !empty($sql) ? $sql : 'sql_users_ago code block as include() FAILED to Load!';
     return $sql;
 }
 function gather_sql_users_roles() {
-    $sql = 'sql_users_roles code block (as include)';
+    include 'sql/users_roles_view_sql_code.inc';
+    $sql = @$users_roles_view_sql_code;
+    $sql = !empty($sql) ? $sql : 'sql_users_roles code block as include() FAILED to Load!';
     return $sql;
 }
 function gather_sql_users_roles_ago() {
-    $sql = 'sql_users_roles_ago code block (as include)';
+    include 'sql/users_roles_ago_view_sql_code.inc';
+    $sql = @$users_roles_ago_view_sql_code;
+    $sql = !empty($sql) ? $sql : 'sql_users_roles_ago code block as include() FAILED to Load!';
     return $sql;
 }
