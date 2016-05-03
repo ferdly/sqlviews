@@ -2,7 +2,7 @@
 
 
 $users_roles_ago_view_sql_code = <<<HDOCX
-CREATE OR REPLACE VIEW users_roles_view AS
+CREATE OR REPLACE VIEW users_roles_ago_view AS
 SELECT ur.uid
 , ur.rid
 , u.name
