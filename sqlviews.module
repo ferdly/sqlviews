@@ -71,7 +71,7 @@ function sqlviews_form() {
 
   $form_key = 'output_options';
   $form[$form_key]['#required'] = true;
-  $form[$form_key]['#type'] = 'checkboxes';
+  $form[$form_key]['#type'] = 'radios';
   $form[$form_key]['#title'] = t('Select which Outputs you would like to execute');
   $form[$form_key]['#options'] = array(
     'code'=>'Render the SQL \'VIEW\' code',
@@ -84,7 +84,8 @@ function sqlviews_form() {
   $form[$form_key]['#field_suffix'] =
     t("<ul>NOTES:
         <li>'users_view' is a Drupal Universal user-friendly view of the Users'</li>
-        <li>'users_roles_view' is a Drupal Universal user-friendly view of the Users-Roles<br>that is, one role each for user-role combinations'</li>
+        <li>'users_roles_view' is a Drupal Universal user-friendly view of the Users-Roles<br>that is, one row
+        for each user-role combinations'</li>
         <li>the 'ago' versions includes an MySQL User-Defined-Function getAgo()</li>
     </ul>");
   $form['submit'] = array(
@@ -135,13 +136,20 @@ function sqlviews_form_submit($form, &$form_state) {
 function sqlviews_result() {
 	global $databases;
 
-	dpm($_GET);
+	dpm($_GET, '$_GET');
  	$database = $databases['default']['default']['database'];
   // dpm($database);
 	$node_type_result = node_type_get_names();
 	$node_keys = array_keys($node_type_result);
 	dpm($node_keys);
-	$option_keys = array('code','execute');
+	$option_keys = array(
+        'code',
+        'execute',
+        'users',
+        'users_roles',
+        'users_ago',
+        'users_roles_ago',
+        );
 
 	$node_type_array = array();
 	$option_array = array();
@@ -150,17 +158,31 @@ function sqlviews_result() {
 			$node_type_array[] = $value;
 		}
 		if (in_array($key, $option_keys)) {
-			$$key = $value;
+            $key_words = explode('_', $key);
+            if ($key_words[0] == 'users') {
+                $users_key = in_array('roles', $key_words) ? 'roles' : 'users';
+                $ago = in_array('ago', $key_words);
+                $$users_key = $users_key;
+            }else{
+		      	$$key = $value;
+                $ago = FALSE;
+            }
 		}
 		$option_array = array();
 	}
 	$node_type = count($node_type_array) == 1?$node_type_array[0]:'ERROR: count='. count($node_type_array);
 	$option_code = empty($code)?'NNULL':$code;
-	$option_execute = empty($execute)?'NNULL':$execute;
+    $option_execute = empty($execute)?'NNULL':$execute;
+    $option_users = empty($users)?'NNULL':$users;
+	$option_roles = empty($roles)?'NNULL':$roles;
 
-	dpm($node_type);
-	dpm($option_code);
-	dpm($option_execute);
+	dpm($node_type, '$node_type');
+    dpm($option_code, '$option_code');
+    dpm($option_execute, '$option_execute');
+    dpm($option_users, '$option_users');
+    dpm($option_roles, '$option_roles');
+    $ago_string = $ago ? 'TTRUE' : 'FFALSE';
+    dpm($ago_string, '$ago_string');
 
 	// $node_type = 'many_fields';
 	// $node_type = 'nonuser_contact';
