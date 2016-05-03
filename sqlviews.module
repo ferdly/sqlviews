@@ -49,7 +49,7 @@ function sqlviews_page() {
 }
 
 function sqlviews_form() {
-  global $databases; 
+  global $databases;
   // dpm($databases);
   $database = $databases['default']['default']['database'];
   // dpm($database);
@@ -74,9 +74,19 @@ function sqlviews_form() {
   $form[$form_key]['#type'] = 'checkboxes';
   $form[$form_key]['#title'] = t('Select which Outputs you would like to execute');
   $form[$form_key]['#options'] = array(
-    'code'=>'Render the SQL \'VIEW\' code', 
-    'execute'=>'Execute the SQL \'VIEW\' code to Create (or Replace) the \'database VIEW\' for \'' . $database . '\'', 
-    );
+    'code'=>'Render the SQL \'VIEW\' code',
+    'execute'=>'Execute the SQL \'VIEW\' code to Create (or Replace) the \'database VIEW\' for \'' . $database . '\'',
+     'users'=>'Render the SQL code for \'users_view\'',
+     'users_roles'=>'Render the SQL code for \'users_roles_view\'',
+     'users_ago'=>'Render the SQL code for \'users_view\' using the getAgo() function',
+     'users_roles_ago'=>'Render the SQL code for \'users_roles_view\' using the getAgo() function',
+   );
+  $form[$form_key]['#field_suffix'] =
+    t("<ul>NOTES:
+        <li>'users_view' is a Drupal Universal user-friendly view of the Users'</li>
+        <li>'users_roles_view' is a Drupal Universal user-friendly view of the Users-Roles<br>that is, one role each for user-role combinations'</li>
+        <li>the 'ago' versions includes an MySQL User-Defined-Function getAgo()</li>
+    </ul>");
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => 'Execute',
@@ -89,7 +99,7 @@ function sqlviews_form_submit($form, &$form_state) {
   dpm($form);
   dpm($form_state);
   dpm($_POST);
- 
+
  if (is_string($form_state['values']['node_type_chex'])) {
  	$string = $form_state['values']['node_type_chex'];
  	$options['query'][$string] = $string;
@@ -186,7 +196,7 @@ function sqlviews_result() {
 	$text_area = '<br><hr>
 		<textarea name="message" rows="60" cols="90">
 		' . $node_type_sql->view_string . '
-		</textarea>	
+		</textarea>
 		<br><hr><br>';
   $build = array(
     'header_text' => array(
