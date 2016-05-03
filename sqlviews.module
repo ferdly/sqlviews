@@ -188,7 +188,31 @@ function sqlviews_result() {
 	// $node_type = 'nonuser_contact';
 	// $node_type = 'article';
 	// $node_type = 'page';
-	$node_type_sql = new nodeTypeSQL($node_type);
+    if ($option_execute != 'NNULL' || $option_code != 'NNULL') {
+        $node_type_sql = new nodeTypeSQL($node_type);
+     }else{
+        $query_name = '';
+        $query_name .= $option_users != 'NNULL' ? $option_users : '';
+        $query_name .= $option_roles != 'NNULL' ?  'users_' . $option_roles : '';
+        require_once 'src/utilityUsersSQL.php';
+        // $users_utility_string = 'Users Utility: ';
+        // $users_utility_string .= $option_users != 'NNULL' ? $option_users : '';
+        // $users_utility_string .= $option_roles != 'NNULL' ? $option_roles : '';
+        // $users_utility_string .= $ago_string == 'TTRUE' ? '_ago' : '';
+        $users_utility_string = generate_sql_switch($query_name, $ago);
+        $text_area = '<br><hr>
+            <textarea name="message" rows="60" cols="90">
+            ' . $users_utility_string . '
+            </textarea>
+            <br><hr><br>';
+          $build = array(
+            'header_text' => array(
+              '#type' => 'markup',
+              '#markup' => '<p>' . t("Simple Test Page to Render the sqlVIEW of Node Type '{$node_type}'.") . '</p><p>' . t(" That is, &mdash; displayed below &mdash; the SQL Code to render a result set of a stored query on the Node Type data, which the database users can see (and query) just as if it were a persistent database table. It is purposely composed to be as 'Human Readable' as is possibe.") . '</p>' . $text_area,
+            ),
+          );
+        return $build;
+     }
 	// $node_type_sql = new nodeTypeSQL('nonuser_contact');
 	// $node_type_sql = new nodeTypeSQL('article');
 
