@@ -1,0 +1,6 @@
+<?php
+
+
+$users_roles_ago_view_sql_code = <<<HDOCX
+users_roles_ago_view_sql_code incule() SUCCEEDED!
+HDOCX;
