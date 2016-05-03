@@ -15,6 +15,7 @@ function generate_sql_switch($query_name, $ago = FALSE, $options_array = array()
     $buffer = '';
     // $crlf = '<br><hr><br>';
     $crlf = "\r\n";
+    $buffer .= $crlf;
     if ($ago) {
         $buffer .= gather_sql_ago();
         $buffer .= $crlf;
