@@ -359,7 +359,7 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 		$space_string = ' ';
 		$crlf_string = "\r\n"; // figure this out globally
 		$view_string = '';
-		$view_string .= 'CREATE OR REPLACE VIEW' . $space_string . $view_name . $space_string . 'AS';
+		$view_string .= $crlf_string . 'CREATE OR REPLACE VIEW' . $space_string . $view_name . $space_string . 'AS';
 		$view_string .= $space_string . $crlf_string . $crlf_string . $this->query_string;
 		$view_string .= $space_string . $crlf_string . ';';
 		$view_string .= $space_string . $crlf_string . "/*END $view_name */";

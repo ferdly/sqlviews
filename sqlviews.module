@@ -50,9 +50,9 @@ function sqlviews_page() {
 
 function sqlviews_form() {
   global $databases;
-  // dpm($databases);
+  // dpm($databases, '$databases');
   $database = $databases['default']['default']['database'];
-  // dpm($database);
+  // dpm($database, '$database');
   $node_type_result = node_type_get_names();
   $disabled_type_overload_array = array('article', 'page');
   foreach ($node_type_result as $key => $value) {
@@ -60,7 +60,7 @@ function sqlviews_form() {
       $node_type_result[$key] = $value . ' [disabled]';
     }
   }
-  // dpm($node_type_result);
+  dpm($node_type_result, '$node_type_result');
   $form_key = 'node_type_chex';
   $form[$form_key]['#required'] = true;
   $form[$form_key]['#type'] = 'radios';
@@ -97,9 +97,9 @@ function sqlviews_form() {
 
 function sqlviews_form_submit($form, &$form_state) {
   drupal_set_message(t('The form has been submitted.'));
-  dpm($form);
-  dpm($form_state);
-  dpm($_POST);
+  dpm($form, '$form');
+  dpm($form_state, '$form_state');
+  dpm($_POST, '$_POST');
 
  if (is_string($form_state['values']['node_type_chex'])) {
  	$string = $form_state['values']['node_type_chex'];
@@ -125,7 +125,7 @@ function sqlviews_form_submit($form, &$form_state) {
   //   // 'query' => array_merge($options_node_type, $options_output_options),
   //   'query' => array('node_type'=>'unbasic_page'),
   //   );
-  dpm($options);
+  dpm($options,'$options');
   $form_state['redirect'] = array('sqlviews/result', $options);
 }
 
@@ -138,10 +138,10 @@ function sqlviews_result() {
 
 	dpm($_GET, '$_GET');
  	$database = $databases['default']['default']['database'];
-  // dpm($database);
+  // dpm($database, '$database');
 	$node_type_result = node_type_get_names();
 	$node_keys = array_keys($node_type_result);
-	dpm($node_keys);
+	dpm($node_keys, '$node_keys');
 	$option_keys = array(
         'code',
         'execute',
@@ -195,10 +195,6 @@ function sqlviews_result() {
         $query_name .= $option_users != 'NNULL' ? $option_users : '';
         $query_name .= $option_roles != 'NNULL' ?  'users_' . $option_roles : '';
         require_once 'src/utilityUsersSQL.php';
-        // $users_utility_string = 'Users Utility: ';
-        // $users_utility_string .= $option_users != 'NNULL' ? $option_users : '';
-        // $users_utility_string .= $option_roles != 'NNULL' ? $option_roles : '';
-        // $users_utility_string .= $ago_string == 'TTRUE' ? '_ago' : '';
         $users_utility_string = generate_sql_switch($query_name, $ago);
         $text_area = '<br><hr>
             <textarea name="message" rows="60" cols="90">
