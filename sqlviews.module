@@ -62,7 +62,7 @@ function sqlviews_form() {
   }
   dpm($node_type_result, '$node_type_result');
   $form_key = 'node_type_chex';
-  $form[$form_key]['#required'] = true;
+  // $form[$form_key]['#required'] = true;
   $form[$form_key]['#type'] = 'radios';
   $form[$form_key]['#title'] = t('Select the Node-Types for which you would like to create a view');
   $form[$form_key]['#options'] = $node_type_result;
@@ -75,24 +75,41 @@ function sqlviews_form() {
   $form[$form_key]['#title'] = t('Select which Outputs you would like to execute');
   $form[$form_key]['#options'] = array(
     'code'=>'Render the SQL \'VIEW\' code',
+    /**
+     * @circleback = Execute may never be in the cards for this module
+     * * \_ I wouldn't trust it if I wasn't an SQL guy
+     * *     and _as_ an SQL guy I would just run the generated code
     'execute'=>'Execute the SQL \'VIEW\' code to Create (or Replace) the \'database VIEW\' for \'' . $database . '\'',
+     */
      'users'=>'Render the SQL code for \'users_view\'',
      'users_roles'=>'Render the SQL code for \'users_roles_view\'',
      'users_ago'=>'Render the SQL code for \'users_view\' using the getAgo() function',
      'users_roles_ago'=>'Render the SQL code for \'users_roles_view\' using the getAgo() function',
    );
+  $form[$form_key]['code']['#description'] = '<ul><li>The Output Options below are universal Drupal User Views not connected to a particular Node-Type</li></ul>';
   $form[$form_key]['#field_suffix'] =
     t("<ul>NOTES:
         <li>'users_view' is a Drupal Universal user-friendly view of the Users'</li>
         <li>'users_roles_view' is a Drupal Universal user-friendly view of the Users-Roles<br>that is, one row
         for each user-role combinations'</li>
-        <li>the 'ago' versions includes an MySQL User-Defined-Function getAgo()</li>
+        <li>the 'ago' versions includes a MySQL User-Defined-Function getAgo()</li>
+        <li>by 'Universal' it means that this code should be useable for any Drupal Site's database of the same major version using MySQL</li>
     </ul>");
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => 'Execute',
     );
   return $form;
+}
+
+function sqlviews_form_validate($form, &$form_state) {
+  $node_type = $form_state['values']['node_type_chex'];
+  $output_options = $form_state['values']['output_options'];
+  if (empty($node_type)) {
+    if ($output_options == 'code' || $output_options == 'execute') {
+      form_set_error('node_type_chex', 'Node-Type is required for the selected Option.');
+    }
+  }
 }
 
 function sqlviews_form_submit($form, &$form_state) {
