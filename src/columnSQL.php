@@ -70,6 +70,7 @@ class columnSQL {
 				$label .= $label_append;
 				$label .= $this->column_key == 'value'?'':'-' . ucwords(str_replace('_', ' ', $this->column_key));
 				$label = isset($field_data_array['label_overload'])?$field_data_array['label_overload']:$label;
+				$label = str_replace('"', "'", $label);
 				$label = $double_quote . $label . $double_quote;
 				break;
 			case 'label_machine':
@@ -78,6 +79,8 @@ class columnSQL {
 				$label .= $label_append;
 				$label .= $this->column_key == 'value'?'':'_' . ucwords(str_replace('_', ' ', $this->column_key));
 				$label = isset($field_data_array['label_overload'])?$field_data_array['label_overload']:$label;
+				$label = str_replace('"', '', $label);
+				$label = str_replace("'", '', $label);
 				$label = strtolower(str_replace(' ', '_', str_replace('-', '_', $label)));
 				break;
 			case 'machine':
@@ -87,6 +90,8 @@ class columnSQL {
 				$label .= $label_append;
 				// $label .= $this->column_key == 'value'?'':'_' . ucwords(str_replace('_', ' ', $this->column_key));
 				// $label = isset($field_data_array['label_overload'])?$field_data_array['label_overload']:$label;
+				$label = str_replace('"', '', $label);
+				$label = str_replace("'", '', $label);
 				$label = strtolower(str_replace(' ', '_', str_replace('-', '_', $label)));
 				break;
 
