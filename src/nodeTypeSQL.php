@@ -61,6 +61,8 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 			'machine',
 			);
 		$label_option_default = 'label';
+		// $label_option_default = 'label_machine';
+		// $label_option_default = 'machine';
 		$label_option = $this->label_option;
 		$label_option = empty($label_option) ? $label_option_default : $label_option;
 		$label_option = in_array($label_option, $label_option_supported_array) ? $label_option : $label_option_default;
@@ -70,8 +72,11 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 		$vid_string = $this->label_option == 'label' ? '"RevisionID"' : 'vid';
 		$vid_string = $this->label_option == 'label_machine' ? 'revision_id' : $vid_string;
 		$this->select_string_ids = "n.nid as {$nid_string}\r\n,n.vid as $vid_string";
-		$this->select_string_stamps = "FROM_UNIXTIME(n.created,'%b %e, %Y %l:%i:%s %p') as \"created\"\r\n,FROM_UNIXTIME(n.changed,'%b %e, %Y %l:%i:%s %p') as \"changed\"";
+		$created_string = $this->label_option == 'label' ? '"Created"' : 'created';
+		$changed_string = $this->label_option == 'label' ? '"Changed"' : 'changed';
+		$this->select_string_stamps = "FROM_UNIXTIME(n.created,'%b %e, %Y %l:%i:%s %p') as {$created_string}\r\n,FROM_UNIXTIME(n.changed,'%b %e, %Y %l:%i:%s %p') as {$changed_string}";
 		$author_string = $this->label_option == 'label' ? '"Author"' : 'author';
+		$author_string = $this->label_option == 'machine' ? 'name' : $author_string;
 		$this->select_string_user = 'u.name AS ' . $author_string;//constant user data (name, email, both, more?... eventually maybe a preference)
 		$this->join_string = "JOIN users u \r\nON u.uid = n.uid\r\n"; // write it here if there is any non-field related Joins WITH TRAILING SPACE
 		$field_config_instance_array = db_query('SELECT id, field_id, field_name, data FROM {field_config_instance} WHERE bundle = :bundle', array(':bundle' =>

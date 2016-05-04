@@ -86,7 +86,7 @@ function sqlviews_form() {
      'users_ago'=>'Render the SQL code for \'users_view\' using the getAgo() function',
      'users_roles_ago'=>'Render the SQL code for \'users_roles_view\' using the getAgo() function',
    );
-  $form[$form_key]['code']['#description'] = '<ul><li>The Output Options below are universal Drupal User Views not connected to a particular Node-Type</li></ul>';
+  $form[$form_key]['code']['#description'] = '<ul><li>The Output Options below are universal Drupal User Views not connected to a particular Node-Type or Label-Option</li></ul>';
   $form[$form_key]['#field_suffix'] =
     t("<ul>NOTES:
         <li>'users_view' is a Drupal Universal user-friendly view of the Users'</li>

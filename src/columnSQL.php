@@ -61,7 +61,7 @@ class columnSQL {
 
 	function un_pack_label(&$field_data_array) {
 		$double_quote = '"';
-		$label = $field_data_array['label'];
+		$label = trim($field_data_array['label']);
 		$label_option = $this->label_option;
 		switch ($label_option) {
 			case 'label':
@@ -71,6 +71,23 @@ class columnSQL {
 				$label .= $this->column_key == 'value'?'':'-' . ucwords(str_replace('_', ' ', $this->column_key));
 				$label = isset($field_data_array['label_overload'])?$field_data_array['label_overload']:$label;
 				$label = $double_quote . $label . $double_quote;
+				break;
+			case 'label_machine':
+				$label_append = $field_data_array['cardinality'] + 0 < 0?'_iE':'';
+				$label_append = $field_data_array['cardinality'] + 0 > 1?'_i' . $field_data_array['cardinality']:$label_append;
+				$label .= $label_append;
+				$label .= $this->column_key == 'value'?'':'_' . ucwords(str_replace('_', ' ', $this->column_key));
+				$label = isset($field_data_array['label_overload'])?$field_data_array['label_overload']:$label;
+				$label = strtolower(str_replace(' ', '_', str_replace('-', '_', $label)));
+				break;
+			case 'machine':
+				$label = trim($this->column_name);// overloads above SWITCH
+				$label_append = $field_data_array['cardinality'] + 0 < 0?'_iE':'';
+				$label_append = $field_data_array['cardinality'] + 0 > 1?'_i' . $field_data_array['cardinality']:$label_append;
+				$label .= $label_append;
+				// $label .= $this->column_key == 'value'?'':'_' . ucwords(str_replace('_', ' ', $this->column_key));
+				// $label = isset($field_data_array['label_overload'])?$field_data_array['label_overload']:$label;
+				$label = strtolower(str_replace(' ', '_', str_replace('-', '_', $label)));
 				break;
 
 			default:
