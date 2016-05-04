@@ -63,10 +63,12 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 		$label_option_default = 'label';
 		// $label_option_default = 'label_machine';
 		// $label_option_default = 'machine';
+		dpm($this->label_option, 'form_label_option');
 		$label_option = $this->label_option;
 		$label_option = empty($label_option) ? $label_option_default : $label_option;
 		$label_option = in_array($label_option, $label_option_supported_array) ? $label_option : $label_option_default;
 		$this->label_option = $label_option;
+		dpm($this->label_option, 'managed_label_option');
 		$nid_string = $this->label_option == 'label' ? '"NodeID"' : 'nid';
 		$nid_string = $this->label_option == 'label_machine' ? 'node_id' : $nid_string;
 		$vid_string = $this->label_option == 'label' ? '"RevisionID"' : 'vid';

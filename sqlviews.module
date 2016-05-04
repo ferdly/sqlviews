@@ -61,6 +61,17 @@ function sqlviews_form() {
     }
   }
   dpm($node_type_result, '$node_type_result');
+  $form_key = 'label_option';
+  $form[$form_key]['#required'] = true;
+  $form[$form_key]['#type'] = 'radios';
+  $form[$form_key]['#title'] = t('Select which Label-Option you would like to execute');
+  $form[$form_key]['#default_value'] = 'label';
+  $form[$form_key]['#options'] = array(
+    'label'=>'Column Names will match assigned Label',
+    'label_machine'=>'Column Names will match assigned Label rendered as a \'machine_name\'',
+    'machine'=>'Column Names will match internal Drupal \'machine_name\'',
+    );
+
   $form_key = 'node_type_chex';
   // $form[$form_key]['#required'] = true;
   $form[$form_key]['#type'] = 'radios';
@@ -137,7 +148,7 @@ function sqlviews_form_submit($form, &$form_state) {
  		}
  	}
  }
-
+ $options['query']['label_option'] = $_POST['label_option'];
   // $options = array(
   //   // 'query' => array_merge($options_node_type, $options_output_options),
   //   'query' => array('node_type'=>'unbasic_page'),
@@ -155,6 +166,7 @@ function sqlviews_result() {
 
 	dpm($_GET, '$_GET');
  	$database = $databases['default']['default']['database'];
+  $label_option = $_GET['label_option'];
   // dpm($database, '$database');
 	$node_type_result = node_type_get_names();
 	$node_keys = array_keys($node_type_result);
@@ -207,6 +219,7 @@ function sqlviews_result() {
 	// $node_type = 'page';
     if ($option_execute != 'NNULL' || $option_code != 'NNULL') {
         $node_type_sql = new nodeTypeSQL($node_type);
+        $node_type_sql->label_option = $label_option;
      }else{
         $query_name = '';
         $query_name .= $option_users != 'NNULL' ? $option_users : '';
