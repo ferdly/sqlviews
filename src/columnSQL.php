@@ -6,18 +6,19 @@ class columnSQL {
 	public $column_key;
 	public $column_name;
 	public $label;
+	public $label_option;
 	public $type;
 	public $length;//number?
 	public $size;//string?
 	public $description;
-	public $serialize = 0; 
+	public $serialize = 0;
 	// public $value; //just and instance of $column_key
 	// public $format; //just and instance of $column_key
 	/* </drupal/sql direct> */
 	/* <to be UnPacked> */
-	public $common_type; 
+	public $common_type;
 	public $mask_open;
-	public $mask_close; 
+	public $mask_close;
 	public $column_select_string;
 	/* </to be UnPacked> */
 
@@ -40,19 +41,44 @@ class columnSQL {
 		$column_select_string = $field_data_array['table_alias'] . '.' . $this->column_name;
 		// $column_select_string = $field_data_array['cardinality'] + 0 != 1?'group_concat(' . $column_select_string . ')':$column_select_string;
 		// $column_select_string = $field_data_array['cardinality'] + 0 != 1?"CONCAT(IFNULL(" . $column_select_string . ", ''), ' [', CASE WHEN COUNT(" . $column_select_string . ") > 0 THEN CONCAT('+', CAST((COUNT(" . $column_select_string . ") - 1) AS CHAR)) ELSE '0' END, ']')":$column_select_string;
-		$label = $field_data_array['label'];
-		$label_append = $field_data_array['cardinality'] + 0 < 0?' [#!]':'';
-		$label_append = $field_data_array['cardinality'] + 0 > 1?' [#' . $field_data_array['cardinality'] . ']':$label_append;
-		$label .= $label_append;
-		$label .= $this->column_key == 'value'?'':'-' . ucwords(str_replace('_', ' ', $this->column_key));
-		$label = isset($field_data_array['label_overload'])?$field_data_array['label_overload']:$label;
-		$label = $double_quote . $label . $double_quote;
-		$this->label = $label;
+		// $label = $field_data_array['label'];
+		// $label_append = $field_data_array['cardinality'] + 0 < 0?' [#!]':'';
+		// $label_append = $field_data_array['cardinality'] + 0 > 1?' [#' . $field_data_array['cardinality'] . ']':$label_append;
+		// $label .= $label_append;
+		// $label .= $this->column_key == 'value'?'':'-' . ucwords(str_replace('_', ' ', $this->column_key));
+		// $label = isset($field_data_array['label_overload'])?$field_data_array['label_overload']:$label;
+		// $label = $double_quote . $label . $double_quote;
+
+		// $this->label = $label;
+		$this->un_pack_label($field_data_array);
+		$label = $this->label;
+
 		$column_select_string .= ' AS ' . $label;
 		$this->column_select_string = $column_select_string;
 
 
 	} //END function un_pack()
+
+	function un_pack_label(&$field_data_array) {
+		$double_quote = '"';
+		$label = $field_data_array['label'];
+		$label_option = $this->label_option;
+		switch ($label_option) {
+			case 'label':
+				$label_append = $field_data_array['cardinality'] + 0 < 0?' [#!]':'';
+				$label_append = $field_data_array['cardinality'] + 0 > 1?' [#' . $field_data_array['cardinality'] . ']':$label_append;
+				$label .= $label_append;
+				$label .= $this->column_key == 'value'?'':'-' . ucwords(str_replace('_', ' ', $this->column_key));
+				$label = isset($field_data_array['label_overload'])?$field_data_array['label_overload']:$label;
+				$label = $double_quote . $label . $double_quote;
+				break;
+
+			default:
+				$holder = 'no default code, default checking logic above should kick-in';
+				break;
+		}
+		$this->label = $label;
+	}
 
 	function overloadLogic (&$field_data_array) {
 		$type = $field_data_array['type'];
@@ -70,7 +96,7 @@ class columnSQL {
 			case 'body':
 				$this->overloadLogic_Body($field_data_array);
 				break;
-			
+
 			default:
 				$holder = 'do nothing at this time (probably forever)';
 				break;
@@ -117,7 +143,7 @@ class columnSQL {
 			case 'last_name':
 				$field_data_array['label_overload'] = 'Last';
 				break;
-			
+
 			default:
 				$holder = 'do nothing at this time (probably forever)';
 				break;

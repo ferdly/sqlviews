@@ -22,6 +22,7 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 	public $title; //node table
 	public $has_title; //node_type table
 	public $title_label; //node_type table
+	public $label_option;
 	public $type_name; //node_type table -- human readable name
 	/* </from Tables> */
 	/* <from Serialized Data> */
@@ -54,10 +55,24 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 	}
 
 	function gatherNodeData() {
-
-		$this->select_string_ids = "n.nid as \"NodeID\"\r\n,n.vid as \"RevisionID\"";
+		$label_option_supported_array = array(
+			'label',
+			'label_machine',
+			'machine',
+			);
+		$label_option_default = 'label';
+		$label_option = $this->label_option;
+		$label_option = empty($label_option) ? $label_option_default : $label_option;
+		$label_option = in_array($label_option, $label_option_supported_array) ? $label_option : $label_option_default;
+		$this->label_option = $label_option;
+		$nid_string = $this->label_option == 'label' ? '"NodeID"' : 'nid';
+		$nid_string = $this->label_option == 'label_machine' ? 'node_id' : $nid_string;
+		$vid_string = $this->label_option == 'label' ? '"RevisionID"' : 'vid';
+		$vid_string = $this->label_option == 'label_machine' ? 'revision_id' : $vid_string;
+		$this->select_string_ids = "n.nid as {$nid_string}\r\n,n.vid as $vid_string";
 		$this->select_string_stamps = "FROM_UNIXTIME(n.created,'%b %e, %Y %l:%i:%s %p') as \"created\"\r\n,FROM_UNIXTIME(n.changed,'%b %e, %Y %l:%i:%s %p') as \"changed\"";
-		$this->select_string_user = 'u.name AS "Author"';//constant user data (name, email, both, more?... eventually maybe a preference)
+		$author_string = $this->label_option == 'label' ? '"Author"' : 'author';
+		$this->select_string_user = 'u.name AS ' . $author_string;//constant user data (name, email, both, more?... eventually maybe a preference)
 		$this->join_string = "JOIN users u \r\nON u.uid = n.uid\r\n"; // write it here if there is any non-field related Joins WITH TRAILING SPACE
 		$field_config_instance_array = db_query('SELECT id, field_id, field_name, data FROM {field_config_instance} WHERE bundle = :bundle', array(':bundle' =>
 		'many_fields'))->fetchAll();
@@ -70,7 +85,10 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 			array(':type' =>
 			$this->type))->fetchObject();
 		$this->has_title =$node_type->has_title;
-		$this->title_label = $node_type->title_label;
+		$title_label = trim($node_type->title_label);
+		$machine_title_label = strtolower(str_replace(' ', '_', str_replace('-', '_', $title_label)));
+		$title_label = $this->label_option == 'label' ? '"' . $title_label. '"' : $machine_title_label;
+		$this->title_label = $title_label;
 
 
 		// $sql = 'SELECT * FROM node_type WHERE type = ' . "'{$this->type}'";
@@ -80,7 +98,7 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 		// $this->title_label = $result['title_label'];
 		$this->entity_table_alias = substr($this->entity_table_name, 0, 1);
 		$this->entity_table_foriegnkey = 'nid';
-		$select_string_node = $this->has_title == 1?$this->entity_table_alias . ".title AS \"{$this->title_label}\"":'';
+		$select_string_node = $this->has_title == 1?$this->entity_table_alias . ".title AS {$this->title_label}":'';
 		$this->select_string_node = $select_string_node;
 	} //END function gatherNodeTypeData()
 
@@ -221,6 +239,7 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 		$field_array = $this->field_preobject_array;
 		foreach ($field_array as $fieldname_this => $field_array_this) {
 			$field_object_this = new fieldSQL($field_array_this);
+			$field_object_this->label_option = $this->label_option;
 			$column_array = $field_object_this->columns;
 			if ($field_array_this['type'] == 'addressfield') {
 				$column_loop_array = array( 'first_name' => 1, 'last_name' => 2, 'name_line' => 3, 'organisation_name' => 4, 'thoroughfare' => 5, 'premise' => 6, 'locality' => 7, 'administrative_area' => 8, 'postal_code' => 9, 'country' => 10, 'sub_administrative_area' => 11, 'dependent_locality' => 12, 'sub_premise' => 13, 'data' => 14,);
@@ -229,6 +248,7 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 			}
 			foreach ($column_loop_array as $column_key => $column_array_this) {
 				$column_object_this = new columnSQL($column_array[$column_key]);
+				$column_object_this->label_option = $field_object_this->label_option;
 				$field_object_this->column_object_array[] = $column_object_this;
 				$field_object_this->columns = 'NNULL';
 			}

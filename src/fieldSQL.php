@@ -8,6 +8,7 @@ class fieldSQL /* WILL SOON extend something*/ {
 	public $field_name;
 	public $table_name;
 	public $label;
+	public $label_option;
 	public $field_config_instance_id;
 	public $field_config_id;
 	public $field_config_instance_deleted;
