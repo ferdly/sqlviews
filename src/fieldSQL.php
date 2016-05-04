@@ -1,4 +1,5 @@
 <?php
+
 class fieldSQL /* WILL SOON extend something*/ {
 	/* <drupal/sql direct> */
 	#\_ some may be vestigial ($index), but keep until no longer needed
@@ -6,10 +7,10 @@ class fieldSQL /* WILL SOON extend something*/ {
 	public $weight;
 	public $field_name;
 	public $table_name;
-	public $label; 
-	public $field_config_instance_id; 
+	public $label;
+	public $field_config_instance_id;
 	public $field_config_id;
-	public $field_config_instance_deleted; 
+	public $field_config_instance_deleted;
 	public $field_config_deleted;
 	public $type;
 	public $module;

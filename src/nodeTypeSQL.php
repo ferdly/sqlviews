@@ -129,7 +129,7 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 			$instance_weights[$fieldname_this] = $instance_this->instance->data->display['default']['weight'] + 0;
 			// $show = $instance_this->instance->data->display->default;
 			// $show = $instance_this->instance->data->display['default']['weight'];
-			// dpm($show);
+			// dpm($show, '$show');
 			// die();
 		}
 		asort($instance_weights);
@@ -164,7 +164,7 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 		foreach ($weighted_field_array as $fieldname_this => $weighted_field_this) {
 			$instance_this = $instances[$fieldname_this];
 			// $instance_this = empty($instance_this)?'EEMPTY':$instance_this;
-			// dpm($instance_this);
+			// dpm($instance_this, '$instance_this');
 			$table_name = key($instance_this->field->data->storage['details']['sql']['FIELD_LOAD_CURRENT']);
 			$table_data = array();
 			$columns = array();
@@ -174,7 +174,7 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 				$columns[$key]['column_name'] = $value;
 			}
 			// $test_this = $instance_this->field->data->storage['details']['sql']['FIELD_LOAD_CURRENT'][$table_name];
-			// dpm($test_this);
+			// dpm($test_this, '$test_this');
 			$index = $weighted_field_array[$fieldname_this]['index'];
 			$field_preobject_array[$fieldname_this]['index'] = $index;
 			$field_preobject_array[$fieldname_this]['weight'] = $weighted_field_array[$fieldname_this]['weight'];
