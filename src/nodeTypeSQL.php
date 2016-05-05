@@ -59,6 +59,7 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 			'label',
 			'label_machine',
 			'machine',
+			'machine_abbrv',
 			);
 		$label_option_default = 'label';
 		// $label_option_default = 'label_machine';

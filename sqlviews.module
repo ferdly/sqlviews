@@ -70,6 +70,7 @@ function sqlviews_form() {
     'label'=>'Column Names will match assigned Label',
     'label_machine'=>'Column Names will match assigned Label rendered as a \'machine_name\'',
     'machine'=>'Column Names will match internal Drupal \'machine_name\'',
+    'machine_abbrv'=>"Column Names will match internal Drupal 'machine_name' less 'field' at the beginning and/or 'value at the end.",
     );
 
   $form_key = 'node_type_chex';
