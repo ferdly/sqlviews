@@ -1,7 +1,8 @@
 <?php
 
 function sqlviews_overview() {
-    return 'Hello SQL-Views Overview!';
+  include 'sqlviews.admin.content.overview.inc';
+  return $overview;
 }
 
 function sqlviews_page($which_form) {

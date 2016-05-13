@@ -15,7 +15,7 @@
 function sqlviews_menu() {
   $admin_config_dev_sqlviews_path = 'admin/config/development/sqlviews';
   $items[$admin_config_dev_sqlviews_path] = array(
-    'title' => 'SQL-Views Configuration',
+    'title' => 'SQL-Views',
     'description' => 'Description of SQL-Views Configuration',
     'page callback' => 'sqlviews_overview',
     /*pretrash*/// 'page arguments' => array('sqlviews_admin'),
