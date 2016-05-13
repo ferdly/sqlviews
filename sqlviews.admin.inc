@@ -255,7 +255,7 @@ function sqlviews_result() {
 }
 
 
-function sqlviews_orig_page() {
+function sqlviews_dpm_page() {
     // drupal_set_message(__FUNCTION__);
   // $build = array(
   //   'header_text' => array(
@@ -264,10 +264,10 @@ function sqlviews_orig_page() {
   //   ),
   // );
   // return $build;
-    return drupal_get_form('sqlviews_orig_form');
+    return drupal_get_form('sqlviews_dpm_form');
 }
 
-function sqlviews_orig_form() {
+function sqlviews_dpm_form() {
   global $databases;
   // dpm($databases, '$databases');
   $database = $databases['default']['default']['database'];
@@ -333,7 +333,7 @@ function sqlviews_orig_form() {
   return $form;
 }
 
-function sqlviews_orig_form_validate($form, &$form_state) {
+function sqlviews_dpm_form_validate($form, &$form_state) {
   $node_type = $form_state['values']['node_type_chex'];
   $output_options = $form_state['values']['output_options'];
   if (empty($node_type)) {
@@ -343,7 +343,7 @@ function sqlviews_orig_form_validate($form, &$form_state) {
   }
 }
 
-function sqlviews_orig_form_submit($form, &$form_state) {
+function sqlviews_dpm_form_submit($form, &$form_state) {
   drupal_set_message(t('The ORIG form has been submitted.'));
   dpm($form, '$form');
   dpm($form_state, '$form_state');
@@ -381,7 +381,7 @@ function sqlviews_orig_form_submit($form, &$form_state) {
  * Page demonstrating embedding a form on a page.
  * This should be MOOT at this juncture, but seems like a more extensible way to work
  */
-function sqlviews_orig_result() {
+function sqlviews_dpm_result() {
     global $databases;
 
     dpm($_GET, '$_GET');

@@ -67,7 +67,7 @@ function sqlviews_menu() {
   $items['sqlviews'] = array(
     'title' => 'sqlVIEWS Test',
     'description' => 'Simple Test Page to Render the sqlVIEW.',
-    'page callback' => 'sqlviews_orig_page',
+    'page callback' => 'sqlviews_dpm_page',
     'access callback' => TRUE,
     'file' => 'sqlviews.admin.inc',
   );
@@ -81,7 +81,7 @@ function sqlviews_menu() {
   $items['sqlviews/result'] = array(
     'title' => 'sqlVIEWS Result',
     'description' => 'Render Results for the sqlVIEW module.',
-    'page callback' => 'sqlviews_orig_result',
+    'page callback' => 'sqlviews_dpm_result',
     'access callback' => TRUE,
     'type'=> MENU_CALLBACK,
     'file' => 'sqlviews.admin.inc',
@@ -105,7 +105,7 @@ function sqlviews_permission() {
  * Page demonstrating embedding a form on a page.
  * This should be MOOT at this juncture, but seems like a more extensible way to work
  */
-function sqlviews_orig_todo_page() {
+function sqlviews_todo_page() {
 	drupal_set_message('Line: ' . __LINE__. ' File: ' . __FILE__);
 	$todo_array['brainstorm']['legend'] = 'Brain Strom';
 	$todo_array['brainstorm']['item'][] = 'Include Article and Basic Page';
