@@ -119,6 +119,7 @@ class columnSQL {
 				$holder = 'no default code, default checking logic above should kick-in';
 				break;
 		}
+		$label = simple_sanatize_label($label);
 		$this->label = $label;
 	}
 

@@ -92,10 +92,13 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 		$node_type = db_query('SELECT * FROM {node_type} WHERE type = :type',
 			array(':type' =>
 			$this->type))->fetchObject();
-		$this->has_title =$node_type->has_title;
+		$this->has_title = $node_type->has_title;
 		$title_label = trim($node_type->title_label);
 		$machine_title_label = strtolower(str_replace(' ', '_', str_replace('-', '_', $title_label)));
 		$title_label = $this->label_option == 'label' ? '"' . $title_label. '"' : $machine_title_label;
+		$title_label = $this->label_option == 'machine' ? 'title' : $title_label;
+		$title_label = $this->label_option == 'machine_abbrv' ? 'title' : $title_label;
+		$title_label = simple_sanatize_label($title_label);
 		$this->title_label = $title_label;
 
 
@@ -427,4 +430,25 @@ array(':table_name'=>$table_name,
 		$table_query_result[$row->COLUMN_NAME] = $row;
 	}
 	return (object) $table_query_result;
+}
+
+function simple_sanatize_label($label) {
+	$double_quotes = TRUE;
+	$double_quotes = substr($label, 0 , 1) != '"' ? FALSE : $double_quotes;
+	$double_quotes = substr($label, -1) != '"' ? FALSE : $double_quotes;
+	$char_array = array('~','`','!','@','#','$','%','^','&','*','(',')','-','+','=','{',
+		'[','}',']','}','|','\\',':',';','"',"'",'<',',','>','.','?','/');
+	foreach ($char_array as $index => $char_this) {
+		$label = str_replace($char_this, '', $label);
+	}
+	while(strpos($label, '__') !== FALSE) {
+		$label = str_replace('__', '_', $label);
+	}
+	while(strpos($label, '  ') !== FALSE) {
+		$label = str_replace('  ', ' ', $label);
+	}
+	if ($double_quotes) {
+		$label = '"' . $label . '"';
+	}
+	return $label;
 }
