@@ -64,6 +64,7 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 		$label_option_default = 'label';
 		// $label_option_default = 'label_machine';
 		// $label_option_default = 'machine';
+		// $label_option_default = 'machine_abbrv';
 		// dpm($this->label_option, 'form_label_option');
 		$label_option = $this->label_option;
 		$label_option = empty($label_option) ? $label_option_default : $label_option;
@@ -192,45 +193,53 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 		/* <Loop through $instaces to get Weights where fieldname is key> */
 		foreach ($weighted_field_array as $fieldname_this => $weighted_field_this) {
 			$instance_this = $instances[$fieldname_this];
-			// $instance_this = empty($instance_this)?'EEMPTY':$instance_this;
-			// dpm($instance_this, '$instance_this');
-			$table_name = key($instance_this->field->data->storage['details']['sql']['FIELD_LOAD_CURRENT']);
-			$table_data = array();
-			$columns = array();
-			$table_data = $instance_this->field->data->storage['details']['sql']['FIELD_LOAD_CURRENT'][$table_name];
-			foreach ($table_data as $key => $value) {
-				$columns[$key]['column_key'] = $key;
-				$columns[$key]['column_name'] = $value;
-			}
-			// $test_this = $instance_this->field->data->storage['details']['sql']['FIELD_LOAD_CURRENT'][$table_name];
-			// dpm($test_this, '$test_this');
-			$index = $weighted_field_array[$fieldname_this]['index'];
-			$field_preobject_array[$fieldname_this]['index'] = $index;
-			$field_preobject_array[$fieldname_this]['weight'] = $weighted_field_array[$fieldname_this]['weight'];
-			$field_preobject_array[$fieldname_this]['field_name'] = $fieldname_this;
-			$field_preobject_array[$fieldname_this]['label'] = $instance_this->instance->data->label;
-			$field_preobject_array[$fieldname_this]['field_config_instance_id'] = $instance_this->instance->id;
-			$field_preobject_array[$fieldname_this]['field_config_id'] = $instance_this->field->id;
-			$field_preobject_array[$fieldname_this]['field_config_instance_deleted'] = $instance_this->instance->deleted;
-			$field_preobject_array[$fieldname_this]['type'] = $instance_this->field->type;
-			$field_preobject_array[$fieldname_this]['module'] = $instance_this->field->module;
-			$field_preobject_array[$fieldname_this]['active'] = $instance_this->field->active;
-			$field_preobject_array[$fieldname_this]['locked'] = $instance_this->field->locked;
-			$field_preobject_array[$fieldname_this]['cardinality'] = $instance_this->field->cardinality;
-			$field_preobject_array[$fieldname_this]['field_config_deleted'] = $instance_this->field->deleted;
-			// $tablename = key($fields[$index]['storage']['details']['sql']['FIELD_LOAD_CURRENT']);
-			$field_preobject_array[$fieldname_this]['table_name'] = $table_name; //$instance_this->field->data->storage['details']['sql']['FIELD_LOAD_CURRENT'][$table_name];
-			// $table_data = $test_this;
-			// // $table_data = $fields[$index]['storage']['details']['sql']['FIELD_LOAD_CURRENT'][$tablename];
-			// $columns = $fields[$index]['columns'];
-			// $columns_orig = $test_this;
-			// foreach ($columns_orig as $column_key => $column_array) {
-			//  	$columns[$column_key]['column_key'] = $column_key;
-			//  	$columns[$column_key]['column_name'] = $columns[$column_key];
-			//  }
-			$field_preobject_array[$fieldname_this]['columns'] = $columns;
-			//#$instance_this['description'] = 'AS COLUMN COMMENT';
-			//#$instance_this['bundle'] must match $this->type -- but that is the point! -- too foundational to test;
+			if ($instance_this->field->active == 1) {
+				// $instance_this = empty($instance_this)?'EEMPTY':$instance_this;
+				// dpm($instance_this, '$instance_this');
+
+				$table_name = '';
+				if (is_array($instance_this->field->data->storage['details']['sql']['FIELD_LOAD_CURRENT'])) {
+					$table_name = key($instance_this->field->data->storage['details']['sql']['FIELD_LOAD_CURRENT']);
+				}
+				$table_data = array();
+				$columns = array();
+				if (!empty($table_name)) {
+				$table_data = $instance_this->field->data->storage['details']['sql']['FIELD_LOAD_CURRENT'][$table_name];
+					foreach ($table_data as $key => $value) {
+						$columns[$key]['column_key'] = $key;
+						$columns[$key]['column_name'] = $value;
+					}
+				}
+				// $test_this = $instance_this->field->data->storage['details']['sql']['FIELD_LOAD_CURRENT'][$table_name];
+				// dpm($test_this, '$test_this');
+				$index = $weighted_field_array[$fieldname_this]['index'];
+				$field_preobject_array[$fieldname_this]['index'] = $index;
+				$field_preobject_array[$fieldname_this]['weight'] = $weighted_field_array[$fieldname_this]['weight'];
+				$field_preobject_array[$fieldname_this]['field_name'] = $fieldname_this;
+				$field_preobject_array[$fieldname_this]['label'] = $instance_this->instance->data->label;
+				$field_preobject_array[$fieldname_this]['field_config_instance_id'] = $instance_this->instance->id;
+				$field_preobject_array[$fieldname_this]['field_config_id'] = $instance_this->field->id;
+				$field_preobject_array[$fieldname_this]['field_config_instance_deleted'] = $instance_this->instance->deleted;
+				$field_preobject_array[$fieldname_this]['type'] = $instance_this->field->type;
+				$field_preobject_array[$fieldname_this]['module'] = $instance_this->field->module;
+				$field_preobject_array[$fieldname_this]['active'] = $instance_this->field->active;
+				$field_preobject_array[$fieldname_this]['locked'] = $instance_this->field->locked;
+				$field_preobject_array[$fieldname_this]['cardinality'] = $instance_this->field->cardinality;
+				$field_preobject_array[$fieldname_this]['field_config_deleted'] = $instance_this->field->deleted;
+				// $tablename = key($fields[$index]['storage']['details']['sql']['FIELD_LOAD_CURRENT']);
+				$field_preobject_array[$fieldname_this]['table_name'] = $table_name; //$instance_this->field->data->storage['details']['sql']['FIELD_LOAD_CURRENT'][$table_name];
+				// $table_data = $test_this;
+				// // $table_data = $fields[$index]['storage']['details']['sql']['FIELD_LOAD_CURRENT'][$tablename];
+				// $columns = $fields[$index]['columns'];
+				// $columns_orig = $test_this;
+				// foreach ($columns_orig as $column_key => $column_array) {
+				//  	$columns[$column_key]['column_key'] = $column_key;
+				//  	$columns[$column_key]['column_name'] = $columns[$column_key];
+				//  }
+				$field_preobject_array[$fieldname_this]['columns'] = $columns;
+				//#$instance_this['description'] = 'AS COLUMN COMMENT';
+				//#$instance_this['bundle'] must match $this->type -- but that is the point! -- too foundational to test;
+			} //END if ($instance_this->field->active == 1)
 		}
 		$this->field_preobject_array = $field_preobject_array;
 		#\_ FAUX for Testing this functions REAL purpose is to explode the array and load into fieldSQL objects
