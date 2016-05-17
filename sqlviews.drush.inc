@@ -283,6 +283,31 @@ function _which_nodetype_arguments($which = 'array'){
 
 function _do_developer_vardump(){
   $header = 'Result of ' . __FUNCTION__ . '(' . ")\r\n==========\r\n";
+
+  $which = 'FieldPreOb';
+  // $which = 'SQL';
+
+  if ($which == 'FieldPreOb') {
+    $type_machine_name = 'project_app_gp';
+    $node_type = new nodeTypeSQL($type_machine_name);
+    $node_type->label_option = 'machine_abbrv';
+    $node_type->gatherObjectReadyFieldArray();
+    $field_preobject_array = $node_type->field_preobject_array;
+
+    $field_name_array = array('field_app_references');
+    foreach ($field_preobject_array as $key => $field_array) {
+      if (in_array($key, $field_name_array)) {
+        $output[$key] = $field_array;
+      }
+    }
+    $result = $header . print_r($output, TRUE);
+    drush_print($result);
+    return;
+  }
+
+
+
+
   $before = <<<CODEREH
 SELECT
 n.title AS title
