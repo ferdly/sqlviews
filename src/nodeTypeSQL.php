@@ -445,6 +445,9 @@ function simple_sanatize_label($label) {
 	$double_quotes = TRUE;
 	$double_quotes = substr($label, 0 , 1) != '"' ? FALSE : $double_quotes;
 	$double_quotes = substr($label, -1) != '"' ? FALSE : $double_quotes;
+	/*< Special Characters > append as they occur */
+	$label = str_replace('é', 'e', $label);
+	/*</ Special Characters >*/
 	$char_array = array('~','`','!','@','#','$','%','^','&','*','(',')','-','+','=','{',
 		'[','}',']','}','|','\\',':',';','"',"'",'<',',','>','.','?','/');
 	foreach ($char_array as $index => $char_this) {
