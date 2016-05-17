@@ -36,6 +36,65 @@ class fieldSQL /* WILL SOON extend something*/ {
 		}
 	}
 
+	function instantiateColumnObjects() {
+			// $column_array = $this->columns;
+			// if ($field_array_this['type'] == 'addressfield') {
+			// 	$column_loop_array = array( 'first_name' => 1, 'last_name' => 2, 'name_line' => 3, 'organisation_name' => 4, 'thoroughfare' => 5, 'premise' => 6, 'locality' => 7, 'administrative_area' => 8, 'postal_code' => 9, 'country' => 10, 'sub_administrative_area' => 11, 'dependent_locality' => 12, 'sub_premise' => 13, 'data' => 14,);
+			// }else{
+			// 	$column_loop_array = $column_array;
+			// }
+			// foreach ($column_loop_array as $column_key => $column_array_this) {
+			// 	$column_object_this = new columnSQL($column_array[$column_key]);
+			// 	$column_object_this->label_option = $field_object_this->label_option;
+			// 	$field_object_this->column_object_array[] = $column_object_this;
+			// 	$field_object_this->columns = 'NNULL';
+			// }
+		switch ($this->type) {
+			case 'addressfield':
+				$this->instantiateColumnObjects_loop($column_loop_array);
+				break;
+
+			default:
+				$column_loop_array = $this->columns;
+				$this->instantiateColumnObjects_loop($column_loop_array);
+				break;
+		}
+
+	}
+	function gatherColumnLoopArray_AddressField(){
+	$column_loop_array = array(
+		'first_name' => 1,
+		 'last_name' => 2,
+		 'name_line' => 3,
+		 'organisation_name' => 4,
+		 'thoroughfare' => 5,
+		 'premise' => 6,
+		 'locality' => 7,
+		 'administrative_area' => 8,
+		 'postal_code' => 9,
+		 'country' => 10,
+		 'sub_administrative_area' => 11,
+		 'dependent_locality' => 12,
+		 'sub_premise' => 13,
+		 'data' => 14,
+		 );
+	return $column_loop_array;
+	}
+
+	function gatherColumnLoopArray_FieldCollection(){
+		$column_loop_array = $this->columns;
+		return $column_loop_array;
+	}
+
+	function instantiateColumnObjects_loop($column_loop_array){
+		foreach ($column_loop_array as $column_key => $column_array_this) {
+			$column_object_this = new columnSQL($column_array[$column_key]);
+			$column_object_this->label_option = $this->label_option;
+			$this->column_object_array[] = $column_object_this;
+			$this->columns = 'NNULL';
+		}
+	}
+
 	function un_pack($node_data_array) {
 		$this->table_alias = 'ta' . $this->index;
 		$space_string = ' ';
@@ -48,9 +107,12 @@ class fieldSQL /* WILL SOON extend something*/ {
 		$field_data_array['cardinality'] = $this->cardinality;
 		$field_data_array['type'] = $this->type;
 		$fc = $field_data_array['type'] == 'field_collection' ? '_zfc' : '';
-		$this->field_join_string = 'LEFT JOIN' . $space_string . $this->table_name . $space_string . $this->table_alias;
-		$join_right_string = $node_data_array['entity_table_alias'] . '.' . $node_data_array['entity_table_foriegnkey'];
-		$this->field_join_string .= $space_string . $crlf_string . 'ON' . $space_string . $join_right_string . ' = ' . $this->table_alias . '.' . 'entity_id';
+
+		// $this->un_pack_JoinString($field_data_array, $node_data_array);
+		#\_ NOW BELOW! for Column Join-String implementation
+		// $this->field_join_string = 'LEFT JOIN' . $space_string . $this->table_name . $space_string . $this->table_alias;
+		// $join_right_string = $node_data_array['entity_table_alias'] . '.' . $node_data_array['entity_table_foriegnkey'];
+		// $this->field_join_string .= $space_string . $crlf_string . 'ON' . $space_string . $join_right_string . ' = ' . $this->table_alias . '.' . 'entity_id';
 		$column_select_string_array = array();
 		$column_keys_to_skip_array = array('format','summary'); //believed to be reserved for body
 		foreach ($this->column_object_array as $index => $column_object_this) {
@@ -61,7 +123,22 @@ class fieldSQL /* WILL SOON extend something*/ {
 				}
 			}
 		}
+		$this->un_pack_JoinString($field_data_array, $node_data_array);
 		$this->field_select_list_string = implode("\r\n,", $column_select_string_array);
 	} //END function un_pack()
+
+	function un_pack_JoinString(&$field_data_array,&$node_data_array ) {
+		$space_string = ' ';
+		$crlf_string = "\r\n"; //figure out globally
+
+		$this->field_join_string = 'LEFT JOIN' . $space_string . $this->table_name . $space_string . $this->table_alias;
+		$join_right_string = $node_data_array['entity_table_alias'] . '.' . $node_data_array['entity_table_foriegnkey'];
+		$this->field_join_string .= $space_string . $crlf_string . 'ON' . $space_string . $join_right_string . ' = ' . $this->table_alias . '.' . 'entity_id';
+		// foreach ($this->column_object_array as $index => $column_object_this) {
+		// 	if (!empty($column_object_this->column_join_string)) {
+		// 		$this->field_join_string .= $crlf_string . $column_object_this->column_join_string;
+		// 	}
+		// }
+	}
 
 }

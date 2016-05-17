@@ -20,6 +20,7 @@ class columnSQL {
 	public $mask_open;
 	public $mask_close;
 	public $column_select_string;
+	public $column_join_string;
 	/* </to be UnPacked> */
 
 	function __construct($column_array) {
