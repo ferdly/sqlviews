@@ -126,8 +126,9 @@ class columnSQL {
 	function overloadLogic (&$field_data_array) {
 		$type = $field_data_array['type'];
 		$supported_type_array = array(
-			'addressfield', '
-			body',
+			'addressfield',
+			'body',
+			'field_collection',
 			);
 		if (in_array($type, $supported_type_array) === false) {
 			return;
@@ -138,6 +139,9 @@ class columnSQL {
 				break;
 			case 'body':
 				$this->overloadLogic_Body($field_data_array);
+				break;
+			case 'field_collection':
+				$this->overloadLogic_FieldCollection($field_data_array);
 				break;
 
 			default:
@@ -151,6 +155,7 @@ class columnSQL {
 		//'LEFT(' . $z . ', 25)'
 		return;
 	}
+
 	function overloadLogic_AddressField (&$field_data_array) {
 		$toskip_column_key_array = array('country','sub_administrative_area','dependent_locality','sub_premise','name_line','data',);
 		#\_ This MUST become aware of Settings and Country
@@ -192,6 +197,11 @@ class columnSQL {
 				break;
 		}
 
+	} //END function overloadLogic_AddressField (&$field_data_array)
+
+	function overloadLogic_FieldCollection (&$field_data_array) {
+		$field_data_array['label'] .= '_fcz';
+		return;
 	}
 
 }

@@ -47,6 +47,7 @@ class fieldSQL /* WILL SOON extend something*/ {
 		$field_data_array['table_alias'] = $this->table_alias;
 		$field_data_array['cardinality'] = $this->cardinality;
 		$field_data_array['type'] = $this->type;
+		$fc = $field_data_array['type'] == 'field_collection' ? '_zfc' : '';
 		$this->field_join_string = 'LEFT JOIN' . $space_string . $this->table_name . $space_string . $this->table_alias;
 		$join_right_string = $node_data_array['entity_table_alias'] . '.' . $node_data_array['entity_table_foriegnkey'];
 		$this->field_join_string .= $space_string . $crlf_string . 'ON' . $space_string . $join_right_string . ' = ' . $this->table_alias . '.' . 'entity_id';
@@ -56,7 +57,7 @@ class fieldSQL /* WILL SOON extend something*/ {
 			if (in_array($column_object_this->column_key, $column_keys_to_skip_array) !== true) {
 				$this->column_object_array[$index]->un_pack($field_data_array);
 				if (!empty($this->column_object_array[$index]->column_select_string)) {
-					$column_select_string_array[] = $this->column_object_array[$index]->column_select_string;
+					$column_select_string_array[] = $this->column_object_array[$index]->column_select_string . $fc;
 				}
 			}
 		}
