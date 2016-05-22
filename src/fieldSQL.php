@@ -51,6 +51,7 @@ class fieldSQL /* WILL SOON extend something*/ {
 			// }
 		switch ($this->type) {
 			case 'addressfield':
+				$column_loop_array = $this->gatherColumnLoopArray_AddressField();
 				$this->instantiateColumnObjects_loop($column_loop_array);
 				break;
 
@@ -87,6 +88,7 @@ class fieldSQL /* WILL SOON extend something*/ {
 	}
 
 	function instantiateColumnObjects_loop($column_loop_array){
+		$column_array = $this->columns;
 		foreach ($column_loop_array as $column_key => $column_array_this) {
 			$column_object_this = new columnSQL($column_array[$column_key]);
 			$column_object_this->label_option = $this->label_option;
