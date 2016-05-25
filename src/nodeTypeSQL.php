@@ -46,6 +46,7 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 	public $join_string_fields;
 	public $join_string; //for users
 	public $query_string;
+	public $error_array = array();
 	/* <Return Code/Data> */
 	public $view_string;
 	/* </Return Code/Data> */
@@ -147,12 +148,70 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 				$fields[$row->field_name] = (object) $fields[$row->field_name];
 		}
 		$this->field_bundle_settings = $fields;
+		$this->validateFieldCodeRequire();
+	}
+
+	function validateFieldCodeRequire() {
+
+		$drupal_core_field_type_module_array = array(
+	        'number',
+	        'text',
+	        'list',
+	        'taxonomy',
+	        'image',
+	        'file',
+	    	);
+		$field_bundle_settings = $this->field_bundle_settings;
+
+	    $field_array = array();
+	    $sqlviews_unsupported_module_array = array();
+	    foreach ($field_bundle_settings as $key => $object_this) {
+	      $used = $object_this->field->active == 1 ? TRUE : FALSE;
+	      $used = $$object_this->field->deleted == 0 ? $used : FALSE;
+	      $module = $object_this->field->module;
+	      $supported = in_array($module, $drupal_core_field_type_module_array);
+	      // $supported = in_array($module, $sqlviews_unsupported_module_array) ?
+	      				TRUE : $supported;
+	      if (!$supported) {
+	      	$sqlviews_unsupported_module_array[$key] = $module;
+	      }
+	      if ($used === TRUE) {
+	        $field_array[$key]['field_name'] = $object_this->field->field_name;
+	        $field_array[$key]['module'] = $module;
+	        $field_array[$key]['cardinality'] = $object_this->field->cardinality;
+	        // $field_array[$key]['active'] = $object_this->field->active;
+	        // $field_array[$key]['deleted'] = $object_this->field->deleted;
+	      }
+	    } //END foreach()
+    $require_base_path = __FILE__;
+    $require_base_path = str_replace(DRUPAL_ROOT, '', $require_base_path) ;
+    $require_base_path_array = explode('/', $require_base_path) ;
+    array_pop($require_base_path_array) ;
+    array_pop($require_base_path_array) ;
+    // $require_base_path = str_replace(basename(__FILE__), '', $require_base_path) ;
+    $require_base_path = implode('/',$require_base_path_array) . '/';
+    foreach ($sqlviews_unsupported_module_array as $key => $module_name) {
+    	$file_name = $module_name . '_fieldSQL.php';
+    	$path = $module_name . '_field/src/';
+    	$full_path = DRUPAL_ROOT . $require_base_path . $path . $file_name;
+    	$module_exists = file_exists($full_path);
+    	if ($module_exists) {
+    		$this->field_bundle_settings[$key]->module_path = $full_path;
+    		require_once $full_path;
+    	}else{
+    		$this->error_array['field_module'][] = "The code to manage the field, '{$key}', could not be included.[" . $require_base_path . $path . $file_name . ']';
+    	}
+    }
 	}
 
 	function gatherWeightedFieldArray() {
 		if(count($this->field_bundle_settings) == 0) {
 			$this->gatherFieldBundleSettings();
 		}
+		if(count($this->error_array) > 0) {
+			$this->view_string = print_r($this->error_array, TRUE);
+			return;
+	}
 		$instances = $this->field_bundle_settings;
 		foreach ($instances as $fieldname_this => $instance_this) {
 			// $instance_weights[$fieldname_this] = $instance_this['display']['default']['weight']; //NOT widget-weight, pretty sure
@@ -186,6 +245,9 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 	function gatherObjectReadyFieldArray() {
 		if ($this->field_object_array_count < 0) {
 			$this->gatherWeightedFieldArray();
+		}
+		if(count($this->error_array) > 0) {
+			return;
 		}
 		$instances = $this->field_bundle_settings;
 		// $fields = $this->field_bundle_settings['fields'];
@@ -250,6 +312,9 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 		if ($this->field_object_array_count != count($this->field_preobject_array)) {
 			$this->gatherObjectReadyFieldArray();
 		}
+		if(count($this->error_array) > 0) {
+			return;
+		}
 		require_once('fieldSQL.php');
 		require_once('columnSQL.php');
 		$node_data_array = array();
@@ -283,6 +348,9 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 		if ($this->field_object_array_count != count($this->field_object_array)) {
 			$this->instantiateFieldObjects();
 		}
+		if(count($this->error_array) > 0) {
+			return;
+		}
 		if ($this->field_object_array_count == 0) {
 			$this->select_string_fields = 'EEMPTY';
 			$this->join_string_fields = 'EEMPTY';
@@ -311,6 +379,9 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 		if (empty($this->join_string_fields)) {
 			$this->composeSelectStringFields_JoinStringFields();
 		}
+		if(count($this->error_array) > 0) {
+			return;
+		}
 		$join_string = $this->join_string;
 		$join_string .= $this->join_string_fields == 'EEMPTY'?'':$this->join_string_fields;
 		$this->join_string = $join_string;
@@ -319,6 +390,9 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 	function composeSelectString() {
 		if (empty($this->select_string_fields)) {
 			$this->composeSelectStringFields_JoinStringFields();
+		}
+		if(count($this->error_array) > 0) {
+			return;
 		}
 
 		// $select_string_node = ''; //"n.title as \"{$title_label}\"";
@@ -372,6 +446,9 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 		if ($this->join_string_fields != 'NNULL') {
 			$this->composeJoinString();
 		}
+		if(count($this->error_array) > 0) {
+			return;
+		}
 		$space_string = ' ';
 		$crlf_string = "\r\n"; // figure this out globally
 		$query_string = '';
@@ -393,6 +470,9 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 	function composeViewString() {
 		if (empty($this->query_string)) {
 			$this->composeQueryString();
+		}
+		if(count($this->error_array) > 0) {
+			return;
 		}
 		$view_name = $this->type . '_' . strtoupper($this->entity) . '_VIEW';
 		$view_name = 'sqlVIEW_' . $this->type . '_' . strtoupper($this->entity);

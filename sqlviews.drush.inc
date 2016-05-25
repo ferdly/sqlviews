@@ -284,8 +284,82 @@ function _which_nodetype_arguments($which = 'array'){
 function _do_developer_vardump(){
   $header = 'Result of ' . __FUNCTION__ . '(' . ")\r\n==========\r\n";
 
-  $which = 'FieldPreOb';
+    // $require_base_path = __FILE__;
+    // $result = $header . print_r($require_base_path, TRUE);
+    // drush_print($result);
+    // $require_base_path = str_replace(DRUPAL_ROOT, '', $require_base_path) ;
+    // $result = $header . print_r($require_base_path, TRUE);
+    // drush_print($result);
+    // $require_base_path = str_replace(basename(__FILE__), '', $require_base_path) ;
+    // // $require_base_path_array = explode('/', $require_base_path_array);
+    // $result = $header . print_r($require_base_path, TRUE);
+    // drush_print($result);
+    // return;
+
+
+  $which = 'FieldBundleSettings';
+  // $which = 'FieldPreOb';
   // $which = 'SQL';
+
+  if ($which == 'FieldBundleSettings') {
+    // $field_info_array = field_info_fields();
+    // $result = $header . print_r($field_info_array, TRUE);
+    // drush_print($result);
+    // return;
+    // $field_info = _field_info_field_cache();
+    // $field_info = field_info_instance($entity_type, $field_name, $bundle_name)
+    // $field_info = array();
+    // foreach ($field_info_array as $key => $field_info_info_array) {
+    //   $field_info[$key]['field_name'] = $field_info_info_array['field_name'];
+    //   $field_info[$key]['type'] = $field_info_info_array['type'];
+    //   $field_info[$key]['module'] = $field_info_info_array['module'];
+    //   $field_info[$key]['columns'] = $field_info_info_array['columns'];
+    //   $field_info[$key]['cardinality'] = $field_info_info_array['cardinality'];
+    //   $field_info[$key]['active'] = $field_info_info_array['active'];
+    //   $field_info[$key]['deleted'] = $field_info_info_array['deleted'];
+    // }
+            // [id] => 2
+            // [field_name] => body
+            // [type] => text_with_summary
+            // [module] => text
+            // [active] => 1
+            // [locked] => 0
+            // [cardinality] => 1
+            // [deleted] => 0
+            // [columns] => Array
+    // $result = $header . print_r($field_info, TRUE);
+    // drush_print($result);
+    // return;
+
+    require_once 'src/nodeTypeSQL.php';
+
+    $type_machine_name = 'job_application';
+    $node_type = new nodeTypeSQL($type_machine_name);
+    $node_type->label_option = 'machine_abbrv';
+    $node_type->gatherFieldBundleSettings();
+    $field_bundle_settings = $node_type->field_bundle_settings;
+    $result = $header . print_r($field_bundle_settings, TRUE);
+    drush_print($result);
+    return;
+
+    $field_array = array();
+    foreach ($field_bundle_settings as $key => $object_this) {
+      $use = $object_this->field->active == 1 ? TRUE : FALSE;
+      $use = $$object_this->field->deleted == 0 ? $use : FALSE;
+      if ($use === TRUE) {
+        $field_array[$key]['field_name'] = $object_this->field->field_name;
+        $field_array[$key]['module'] = $object_this->field->module;
+        $field_array[$key]['cardinality'] = $object_this->field->cardinality;
+        // $field_array[$key]['active'] = $object_this->field->active;
+        // $field_array[$key]['deleted'] = $object_this->field->deleted;
+      }
+    }
+
+    $result = $header . print_r($field_array, TRUE);
+    drush_print($result);
+    return;
+  }
+  // gatherFieldBundleSettings()
 
   if ($which == 'FieldPreOb') {
     $type_machine_name = 'project_app_gp';
@@ -469,6 +543,7 @@ function _do_sql_view_code($type_machine_name){
 
   $node_type_sql->database = $databases['default']['default']['database'];
   $node_type_sql->composeViewString();
+  // $node_type_sql->gatherWeightedFieldArray();
 
   $output = $node_type_sql->view_string;
 
