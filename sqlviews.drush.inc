@@ -297,8 +297,9 @@ function _do_developer_vardump(){
     // return;
 
 
-  $which = 'FieldBundleSettings';
-  // $which = 'FieldPreOb';
+  // $which = 'FieldBundleSettings';
+  $which = 'FieldPreOb';
+  // $which = 'FieldObjectArray';
   // $which = 'SQL';
 
   if ($which == 'FieldBundleSettings') {
@@ -358,11 +359,12 @@ function _do_developer_vardump(){
     $result = $header . print_r($field_array, TRUE);
     drush_print($result);
     return;
-  }
+  } //END if ($which == 'FieldBundleSettings')
   // gatherFieldBundleSettings()
 
   if ($which == 'FieldPreOb') {
-    $type_machine_name = 'project_app_gp';
+    // $type_machine_name = 'job_application';
+    $type_machine_name = 'property';
     $node_type = new nodeTypeSQL($type_machine_name);
     $node_type->label_option = 'machine_abbrv';
     $node_type->gatherObjectReadyFieldArray();
@@ -374,10 +376,34 @@ function _do_developer_vardump(){
         $output[$key] = $field_array;
       }
     }
+    $output = $field_preobject_array;
     $result = $header . print_r($output, TRUE);
     drush_print($result);
     return;
-  }
+  } //END if ($which == 'FieldPreOb')
+
+  if ($which = 'FieldObjectArray') {
+    // $type_machine_name = 'job_application';
+    $type_machine_name = 'property';
+    $node_type = new nodeTypeSQL($type_machine_name);
+    // $node_type->label_option = 'machine_abbrv';
+    $node_type->instantiateFieldObjects();
+    $output_full = $node_type->field_object_array;
+    // $output_full = $node_type->field_object_array->column_object_array;
+    $output_abbrv = array();
+    foreach ($node_type->field_object_array as $index => $field_object_this) {
+      if ($field_object_this->field_name != 'body') {
+        $field_join_string = empty($field_object_this->field_join_string) ? 'EEMPTY' : $field_object_this->field_join_string;
+        $output_abbrv[$field_object_this->field_name]['field_join_string'] = $field_join_string;
+        $output_abbrv[$field_object_this->field_name]['column_object_array'] = $field_object_this->column_object_array;
+      }
+    }
+    $result = $header;
+    // $result .= "output_abbrv:\r\n=============\r\n" . print_r($output_abbrv, TRUE);
+    $result .= "output_full:\r\n============\r\n" . print_r($output_full, TRUE);
+    drush_print($result);
+    return;
+  } //END if ($which = 'FieldObjectArray')
 
 
 

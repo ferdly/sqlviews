@@ -47,6 +47,15 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 	public $join_string; //for users
 	public $query_string;
 	public $error_array = array();
+	public $drupal_core_field_type_module_array = array(
+	        'number',
+	        'text',
+	        'list',
+	        'taxonomy',
+	        'image',
+	        'file',
+	    	);
+
 	/* <Return Code/Data> */
 	public $view_string;
 	/* </Return Code/Data> */
@@ -153,14 +162,6 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 
 	function validateFieldCodeRequire() {
 
-		$drupal_core_field_type_module_array = array(
-	        'number',
-	        'text',
-	        'list',
-	        'taxonomy',
-	        'image',
-	        'file',
-	    	);
 		$field_bundle_settings = $this->field_bundle_settings;
 
 	    $field_array = array();
@@ -169,7 +170,7 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 	      $used = $object_this->field->active == 1 ? TRUE : FALSE;
 	      $used = $$object_this->field->deleted == 0 ? $used : FALSE;
 	      $module = $object_this->field->module;
-	      $supported = in_array($module, $drupal_core_field_type_module_array);
+	      $supported = in_array($module, $this->drupal_core_field_type_module_array);
 	      // $supported = in_array($module, $sqlviews_unsupported_module_array) ?
 	      				TRUE : $supported;
 	      if (!$supported) {
@@ -323,24 +324,32 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 		$node_data_array['country'] = $this->country;
 		$field_array = $this->field_preobject_array;
 		foreach ($field_array as $fieldname_this => $field_array_this) {
-			$field_object_this = new fieldSQL($field_array_this);
-			$field_object_this->label_option = $this->label_option;
-			$column_array = $field_object_this->columns;
-			if ($field_array_this['type'] == 'addressfield') {
-				$column_loop_array = array( 'first_name' => 1, 'last_name' => 2, 'name_line' => 3, 'organisation_name' => 4, 'thoroughfare' => 5, 'premise' => 6, 'locality' => 7, 'administrative_area' => 8, 'postal_code' => 9, 'country' => 10, 'sub_administrative_area' => 11, 'dependent_locality' => 12, 'sub_premise' => 13, 'data' => 14,);
+			$is_core = in_array($field_array_this['module'], $this->drupal_core_field_type_module_array);
+			if ($is_core) {
+				$field_object_this = new fieldSQL($field_array_this);
 			}else{
-				$column_loop_array = $column_array;
+				$class_name = $field_array_this['module'] . '_fieldSQL';
+				$field_object_this = new $class_name($field_array_this);
 			}
-			foreach ($column_loop_array as $column_key => $column_array_this) {
-				$column_object_this = new columnSQL($column_array[$column_key]);
-				$column_object_this->label_option = $field_object_this->label_option;
-				$field_object_this->column_object_array[] = $column_object_this;
-				$field_object_this->columns = 'NNULL';
-			}
+			$field_object_this->label_option = $this->label_option;
+			$field_object_this->column_object_array = $field_object_this->instantiateColumnObjects($field_array_this);
+			$field_object_this->columns = 'NNULL';
+		// 	$column_array = $field_object_this->columns;
+		// 	if ($field_array_this['type'] == 'addressfield') {
+		// 		$column_loop_array = array( 'first_name' => 1, 'last_name' => 2, 'name_line' => 3, 'organisation_name' => 4, 'thoroughfare' => 5, 'premise' => 6, 'locality' => 7, 'administrative_area' => 8, 'postal_code' => 9, 'country' => 10, 'sub_administrative_area' => 11, 'dependent_locality' => 12, 'sub_premise' => 13, 'data' => 14,);
+		// 	}else{
+		// 		$column_loop_array = $column_array;
+		// 	}
+		// 	foreach ($column_loop_array as $column_key => $column_array_this) {
+		// 		$column_object_this = new columnSQL($column_array[$column_key]);
+		// 		$column_object_this->label_option = $field_object_this->label_option;
+		// 		$field_object_this->column_object_array[] = $column_object_this;
+		// 		$field_object_this->columns = 'NNULL';
+		// 	}
 			$field_object_this->un_pack($node_data_array);
 			$this->field_object_array[] = $field_object_this;
-			$this->field_preobject_array[$fieldname_this] = 'NNULL';
-		}
+			// $this->field_preobject_array[$fieldname_this] = 'NNULL';
+		} //END foreach ($field_array as $fieldname_this => $field_array_this)
 
 	} //END function instantiateFieldObjects()
 

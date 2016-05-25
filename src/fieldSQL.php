@@ -36,30 +36,44 @@ class fieldSQL /* WILL SOON extend something*/ {
 		}
 	}
 
-	function instantiateColumnObjects() {
+	function instantiateColumnObjects($field_array_this = array(), $column_loop_array_overload = array()) {
 			// $column_array = $this->columns;
+			if (count($column_loop_array_overload) == 0) {
+				$column_loop_array = $this->columns;
+				// $label_overload = '';
+			}else{
+				$column_loop_array = $column_loop_array_overload;
+				// $label_overload = !empty($column_loop_array['label_overload']) ? $column_loop_array['label_overload'] : '';
+			}
 			// if ($field_array_this['type'] == 'addressfield') {
 			// 	$column_loop_array = array( 'first_name' => 1, 'last_name' => 2, 'name_line' => 3, 'organisation_name' => 4, 'thoroughfare' => 5, 'premise' => 6, 'locality' => 7, 'administrative_area' => 8, 'postal_code' => 9, 'country' => 10, 'sub_administrative_area' => 11, 'dependent_locality' => 12, 'sub_premise' => 13, 'data' => 14,);
 			// }else{
 			// 	$column_loop_array = $column_array;
 			// }
-			// foreach ($column_loop_array as $column_key => $column_array_this) {
-			// 	$column_object_this = new columnSQL($column_array[$column_key]);
-			// 	$column_object_this->label_option = $field_object_this->label_option;
-			// 	$field_object_this->column_object_array[] = $column_object_this;
-			// 	$field_object_this->columns = 'NNULL';
-			// }
-		switch ($this->type) {
-			case 'addressfield':
-				$column_loop_array = $this->gatherColumnLoopArray_AddressField();
-				$this->instantiateColumnObjects_loop($column_loop_array);
-				break;
+			foreach ($column_loop_array as $column_key => $value) {
+				// $label_overload = !empty($value['label_overload']) ? $value['label_overload'] : '';
+				$column_array_this = $this->columns[$column_key];
+				// $column_object_this = new columnSQL($column_array[$column_key]);
+				$column_object_this = new columnSQL($column_array_this);
+				$column_object_this->label_option = $this->label_option;
+				// $column_object_this->label_overload = $label_overload;
+				// $column_object_array[] = $column_object_this;
+				$column_object_array[$column_key] = $column_object_this;
+				// $field_object_this->column_object_array[] = $column_object_this;
+				// $field_object_this->columns = 'NNULL';
+			}
+			return $column_object_array;
+		// switch ($this->type) {
+		// 	case 'addressfield':
+		// 		$column_loop_array = $this->gatherColumnLoopArray_AddressField();
+		// 		$this->instantiateColumnObjects_loop($column_loop_array);
+		// 		break;
 
-			default:
-				$column_loop_array = $this->columns;
-				$this->instantiateColumnObjects_loop($column_loop_array);
-				break;
-		}
+		// 	default:
+		// 		$column_loop_array = $this->columns;
+		// 		$this->instantiateColumnObjects_loop($column_loop_array);
+		// 		break;
+		// }
 
 	}
 	function gatherColumnLoopArray_AddressField(){
@@ -108,6 +122,7 @@ class fieldSQL /* WILL SOON extend something*/ {
 		$field_data_array['table_alias'] = $this->table_alias;
 		$field_data_array['cardinality'] = $this->cardinality;
 		$field_data_array['type'] = $this->type;
+		// $field_data_array['label_overload'] = '';
 		$fc = $field_data_array['type'] == 'field_collection' ? '_zfc' : '';
 
 		// $this->un_pack_JoinString($field_data_array, $node_data_array);
@@ -119,6 +134,7 @@ class fieldSQL /* WILL SOON extend something*/ {
 		$column_keys_to_skip_array = array('format','summary'); //believed to be reserved for body
 		foreach ($this->column_object_array as $index => $column_object_this) {
 			if (in_array($column_object_this->column_key, $column_keys_to_skip_array) !== true) {
+				$field_data_array['label_overload'] = !empty($column_object_this->label_overload) ? $column_object_this->label_overload : '';
 				$this->column_object_array[$index]->un_pack($field_data_array);
 				if (!empty($this->column_object_array[$index]->column_select_string)) {
 					$column_select_string_array[] = $this->column_object_array[$index]->column_select_string . $fc;
@@ -132,7 +148,10 @@ class fieldSQL /* WILL SOON extend something*/ {
 	function un_pack_JoinString(&$field_data_array,&$node_data_array ) {
 		$space_string = ' ';
 		$crlf_string = "\r\n"; //figure out globally
-
+		$field_join_string_scrap = $this->field_join_string;
+		// if (!empty($field_join_string_scrap)) {
+		// 	return;
+		// }
 		$this->field_join_string = 'LEFT JOIN' . $space_string . $this->table_name . $space_string . $this->table_alias;
 		$join_right_string = $node_data_array['entity_table_alias'] . '.' . $node_data_array['entity_table_foriegnkey'];
 		$this->field_join_string .= $space_string . $crlf_string . 'ON' . $space_string . $join_right_string . ' = ' . $this->table_alias . '.' . 'entity_id';
@@ -141,6 +160,7 @@ class fieldSQL /* WILL SOON extend something*/ {
 		// 		$this->field_join_string .= $crlf_string . $column_object_this->column_join_string;
 		// 	}
 		// }
+		$this->field_join_string .= $field_join_string_scrap;
 	}
 
 }

@@ -7,6 +7,7 @@ class columnSQL {
 	public $column_name;
 	public $label;
 	public $label_option;
+	public $label_override;
 	public $type;
 	public $length;//number?
 	public $size;//string?
@@ -61,8 +62,10 @@ class columnSQL {
 	} //END function un_pack()
 
 	function un_pack_label(&$field_data_array) {
+		// $label_overload = $field_data_array['label_overload'];
 		$double_quote = '"';
 		$label = trim($field_data_array['label']);
+		// $label = !empty($label_overload) ? $label_overload : $label;
 		$label_option = $this->label_option;
 		switch ($label_option) {
 			case 'label':
@@ -70,7 +73,7 @@ class columnSQL {
 				$label_append = $field_data_array['cardinality'] + 0 > 1?' [#' . $field_data_array['cardinality'] . ']':$label_append;
 				$label .= $label_append;
 				$label .= $this->column_key == 'value'?'':'-' . ucwords(str_replace('_', ' ', $this->column_key));
-				$label = isset($field_data_array['label_overload'])?$field_data_array['label_overload']:$label;
+				$label = !empty($field_data_array['label_overload'])?$field_data_array['label_overload']:$label;
 				$label = str_replace('"', "'", $label);
 				$label = $double_quote . $label . $double_quote;
 				break;
@@ -79,7 +82,7 @@ class columnSQL {
 				$label_append = $field_data_array['cardinality'] + 0 > 1?'_i' . $field_data_array['cardinality']:$label_append;
 				$label .= $label_append;
 				$label .= $this->column_key == 'value'?'':'_' . ucwords(str_replace('_', ' ', $this->column_key));
-				$label = isset($field_data_array['label_overload'])?$field_data_array['label_overload']:$label;
+				$label = !empty($field_data_array['label_overload'])?$field_data_array['label_overload']:$label;
 				$label = str_replace('"', '', $label);
 				$label = str_replace("'", '', $label);
 				$label = strtolower(str_replace(' ', '_', str_replace('-', '_', $label)));
@@ -90,7 +93,7 @@ class columnSQL {
 				$label_append = $field_data_array['cardinality'] + 0 > 1?'_i' . $field_data_array['cardinality']:$label_append;
 				$label .= $label_append;
 				// $label .= $this->column_key == 'value'?'':'_' . ucwords(str_replace('_', ' ', $this->column_key));
-				// $label = isset($field_data_array['label_overload'])?$field_data_array['label_overload']:$label;
+				// $label = !empty($field_data_array['label_overload'])?$field_data_array['label_overload']:$label;
 				$label = str_replace('"', '', $label);
 				$label = str_replace("'", '', $label);
 				$label = strtolower(str_replace(' ', '_', str_replace('-', '_', $label)));
@@ -110,7 +113,7 @@ class columnSQL {
 				$label_append = $field_data_array['cardinality'] + 0 > 1?'_i' . $field_data_array['cardinality']:$label_append;
 				$label .= $label_append;
 				// $label .= $this->column_key == 'value'?'':'_' . ucwords(str_replace('_', ' ', $this->column_key));
-				// $label = isset($field_data_array['label_overload'])?$field_data_array['label_overload']:$label;
+				// $label = !empty($field_data_array['label_overload'])?$field_data_array['label_overload']:$label;
 				$label = str_replace('"', '', $label);
 				$label = str_replace("'", '', $label);
 				$label = strtolower(str_replace(' ', '_', str_replace('-', '_', $label)));
@@ -120,7 +123,7 @@ class columnSQL {
 				$holder = 'no default code, default checking logic above should kick-in';
 				break;
 		}
-		$label = simple_sanatize_label($label);
+		// $label = simple_sanatize_label($label);
 		$this->label = $label;
 	}
 
