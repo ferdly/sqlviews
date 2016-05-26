@@ -6,7 +6,7 @@ class addressfield_fieldSQL extends fieldSQL {
         parent::__construct($field_array);
     }
 
-    function instantiateColumnObjects($field_array_this = array()) {
+    public function instantiateColumnObjects($field_array_this = array()) {
         $column_loop_array_overload = array(
             'first_name' => 1,
             'last_name' => 2,

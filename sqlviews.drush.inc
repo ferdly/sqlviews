@@ -298,8 +298,9 @@ function _do_developer_vardump(){
 
 
   // $which = 'FieldBundleSettings';
-  $which = 'FieldPreOb';
-  // $which = 'FieldObjectArray';
+  // $which = 'FieldPreOb';
+  $which = 'FieldObjectArray';
+  // $which = 'reference_prof';
   // $which = 'SQL';
 
   if ($which == 'FieldBundleSettings') {
@@ -382,9 +383,9 @@ function _do_developer_vardump(){
     return;
   } //END if ($which == 'FieldPreOb')
 
-  if ($which = 'FieldObjectArray') {
-    // $type_machine_name = 'job_application';
-    $type_machine_name = 'property';
+  if ($which == 'FieldObjectArray') {
+    $type_machine_name = 'job_application';
+    // $type_machine_name = 'property';
     $node_type = new nodeTypeSQL($type_machine_name);
     // $node_type->label_option = 'machine_abbrv';
     $node_type->instantiateFieldObjects();
@@ -403,9 +404,21 @@ function _do_developer_vardump(){
     $result .= "output_full:\r\n============\r\n" . print_r($output_full, TRUE);
     drush_print($result);
     return;
-  } //END if ($which = 'FieldObjectArray')
+  } //END if ($which == 'FieldObjectArray')
 
+  if ($which == 'reference_prof') {
+    $bundle = 'field_reference_prof';//$field_array_this['field_name'];
+    $field_config_instance_array =
+        db_query('SELECT id, field_id, field_name, data, deleted FROM {field_config_instance
+          WHERE bundle = :bundle',
+            array(':bundle' =>
+            $bundle))->fetchAll();
+    $output = $field_config_instance_array;
+    $result = $header . print_r($output, TRUE);
+    drush_print($result);
+    return;
 
+  }
 
 
   $before = <<<CODEREH
