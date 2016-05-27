@@ -12,34 +12,24 @@ function _do_developer_vardump(){
   // drush_print('$which: ' . $which . ' [' . __LINE__ . ']');
   // return;
 
-  $header = 'Result of ' . __FUNCTION__ . '(' . ")\r\n==========\r\n";
-
-    // $require_base_path = __FILE__;
-    // $result = $header . print_r($require_base_path, TRUE);
-    // drush_print($result);
-    // $require_base_path = str_replace(DRUPAL_ROOT, '', $require_base_path) ;
-    // $result = $header . print_r($require_base_path, TRUE);
-    // drush_print($result);
-    // $require_base_path = str_replace(basename(__FILE__), '', $require_base_path) ;
-    // // $require_base_path_array = explode('/', $require_base_path_array);
-    // $result = $header . print_r($require_base_path, TRUE);
-    // drush_print($result);
-    // return;
-
   /*<Preset $type_machine_name> of course, can overload, but why?*/
   $type_machine_name = 'job_application';
+  // $type_machine_name = 'property';
   /*</Preset $type_machine_name>*/
-
+  /*<Preset $label_option> of course, can overload, but why?*/
+  $label_option = 'machine_abbrv';
+  /*</Preset $label_option>*/
   $supported_which_array = array(
         'FieldBundleSettings',
         'FieldPreOb',
         'FieldObjectArray',
         'reference_prof',
         'SQL',
+        'field_reference_prof',
     );
   if ($argument_which == 'which') {
     $arguments = array_combine($supported_which_array, $supported_which_array);
-    $argument_which = drush_choice($arguments, dt('Which Example would you like to interact with using \'PHP-Coder\'?'));
+    $argument_which = drush_choice($arguments, dt('Which Object-Attribute would you like to \'Developer-Vardump\'?'));
     if ($argument_which == '0') {
         drush_user_abort('Buh-Bye! Developer-Vardump Which-Which!');
         return;
@@ -60,47 +50,80 @@ function _do_developer_vardump(){
   }else{
       // $which = 'FieldBundleSettings';
       // $which = 'FieldPreOb';
-      $which = 'FieldObjectArray';
+      // $which = 'FieldObjectArray';
       // $which = 'reference_prof';
       // $which = 'SQL';
+      // $which = 'field_reference_prof';
+      $which = 'instantiate_field_array_DEV';
+      /* \_ Un-Comment one above for default $which */
+  }
+
+  $header = 'Result of ' . __FUNCTION__ . '(' . $which . ')';
+  $header_len = strlen($header);
+  $header .= "\r\n";
+  for ($i=0; $i < $header_len; $i++) {
+    $header .= '=';
+  }
+  $header .= "\r\n";
+
+
+if ($which == 'instantiate_field_array_DEV') {
+    $node_type = new nodeTypeSQL($type_machine_name);
+    $node_type->label_option = $label_option;
+
+    $node_type->gatherFieldsArrayToNodeType();
+    $result_array = $node_type->field_object_array;
+    $result = $header . print_r($result_array, TRUE);
+    drush_print($result);
+    return;
+}
+
+
+  if ($which == 'field_reference_prof') {
+    $bundle = 'job_application';
+    // $field_config_instance_array =
+    // db_query('SELECT field_id FROM {field_config_instance} WHERE bundle = :bundle AND deleted = :deleted',
+    //     array(
+    //       ':bundle' =>$bundle,
+    //       ':deleted' => 0,
+    //     ))->fetchAll();
+$field_config_instance_object_array = db_select('field_config_instance','fci')
+    ->fields('fci',array('field_id'))
+    ->condition('bundle',$bundle)
+    ->execute()
+    ->fetchAll();
+    $field_id_array = array_map(
+      create_function('$o', 'return $o->field_id;'),
+      $field_config_instance_object_array);
+    $result_array = $field_id_array;
+    // foreach ($field_config_instance_array as $index => $row) {
+      // $row->data = (object) unserialize($row->data);
+      // $field_config_this =
+          // db_query('SELECT * FROM {field_config} WHERE id = :field_id',
+              // array(':field_id' =>
+              // $row->field_id))->fetchObject();
+      // $field_config_this->data = (object) unserialize($field_config_this->data);
+      // unset($field_config_this->data);
+      // $fields[$row->field_name]['instance'] = $row;
+      // $fields[$row->field_name]['field'] = $field_config_this;
+      // $columns_this = gather_field_table_data($row->field_name);
+      // $fields[$row->field_name]['columns'] = $columns_this;
+      // $fields[$row->field_name] = (object) $fields[$row->field_name];
+    // }
+
+    // $result = $header . print_r($field_config_instance_array, TRUE);
+    // $result = $header . print_r($result_array, TRUE);
+    $result = $header . print_r($result_array, TRUE);
+    drush_print($result);
+    return;
   }
 
   if ($which == 'FieldBundleSettings') {
-    drush_print('$which: ' . $which . ' [' . __LINE__ . ']');
-    return;
-    // $field_info_array = field_info_fields();
-    // $result = $header . print_r($field_info_array, TRUE);
-    // drush_print($result);
-    // return;
-    // $field_info = _field_info_field_cache();
-    // $field_info = field_info_instance($entity_type, $field_name, $bundle_name)
-    // $field_info = array();
-    // foreach ($field_info_array as $key => $field_info_info_array) {
-    //   $field_info[$key]['field_name'] = $field_info_info_array['field_name'];
-    //   $field_info[$key]['type'] = $field_info_info_array['type'];
-    //   $field_info[$key]['module'] = $field_info_info_array['module'];
-    //   $field_info[$key]['columns'] = $field_info_info_array['columns'];
-    //   $field_info[$key]['cardinality'] = $field_info_info_array['cardinality'];
-    //   $field_info[$key]['active'] = $field_info_info_array['active'];
-    //   $field_info[$key]['deleted'] = $field_info_info_array['deleted'];
-    // }
-            // [id] => 2
-            // [field_name] => body
-            // [type] => text_with_summary
-            // [module] => text
-            // [active] => 1
-            // [locked] => 0
-            // [cardinality] => 1
-            // [deleted] => 0
-            // [columns] => Array
-    // $result = $header . print_r($field_info, TRUE);
-    // drush_print($result);
-    // return;
 
     require_once 'src/nodeTypeSQL.php';
 
     $node_type = new nodeTypeSQL($type_machine_name);
-    $node_type->label_option = 'machine_abbrv';
+    $node_type->label_option = $label_option;
     $node_type->gatherFieldBundleSettings();
     $field_bundle_settings = $node_type->field_bundle_settings;
     $result = $header . print_r($field_bundle_settings, TRUE);
@@ -110,7 +133,7 @@ function _do_developer_vardump(){
     $field_array = array();
     foreach ($field_bundle_settings as $key => $object_this) {
       $use = $object_this->field->active == 1 ? TRUE : FALSE;
-      $use = $$object_this->field->deleted == 0 ? $use : FALSE;
+      $use = $object_this->field->deleted == 0 ? $use : FALSE;
       if ($use === TRUE) {
         $field_array[$key]['field_name'] = $object_this->field->field_name;
         $field_array[$key]['module'] = $object_this->field->module;
@@ -127,14 +150,12 @@ function _do_developer_vardump(){
   // gatherFieldBundleSettings()
 
   if ($which == 'FieldPreOb') {
-    drush_print('$which: ' . $which . ' [' . __LINE__ . ']');
-    return;
-    // $type_machine_name = 'job_application';
-    $type_machine_name = 'property';
+
     $node_type = new nodeTypeSQL($type_machine_name);
-    $node_type->label_option = 'machine_abbrv';
+    $node_type->label_option = $label_option;
     $node_type->gatherObjectReadyFieldArray();
     $field_preobject_array = $node_type->field_preobject_array;
+    $output_full = $field_preobject_array;
 
     $field_name_array = array('field_app_references');
     foreach ($field_preobject_array as $key => $field_array) {
@@ -142,22 +163,23 @@ function _do_developer_vardump(){
         $output[$key] = $field_array;
       }
     }
-    $output = $field_preobject_array;
-    $result = $header . print_r($output, TRUE);
+    $output_abbrv = $field_array;
+
+    $result = $header;
+    // $result .= "output_abbrv:\r\n=============\r\n" . print_r($output_abbrv, TRUE);
+    $result .= "output_full:\r\n============\r\n" . print_r($output_full, TRUE);
     drush_print($result);
     return;
   } //END if ($which == 'FieldPreOb')
 
   if ($which == 'FieldObjectArray') {
-    drush_print('$which: ' . $which . ' [' . __LINE__ . ']');
-    return;
-    $type_machine_name = 'job_application';
-    // $type_machine_name = 'property';
+
     $node_type = new nodeTypeSQL($type_machine_name);
-    // $node_type->label_option = 'machine_abbrv';
+    $node_type->label_option = $label_option;
     $node_type->instantiateFieldObjects();
     $output_full = $node_type->field_object_array;
     // $output_full = $node_type->field_object_array->column_object_array;
+
     $output_abbrv = array();
     foreach ($node_type->field_object_array as $index => $field_object_this) {
       if ($field_object_this->field_name != 'body') {
@@ -166,6 +188,7 @@ function _do_developer_vardump(){
         $output_abbrv[$field_object_this->field_name]['column_object_array'] = $field_object_this->column_object_array;
       }
     }
+
     $result = $header;
     // $result .= "output_abbrv:\r\n=============\r\n" . print_r($output_abbrv, TRUE);
     $result .= "output_full:\r\n============\r\n" . print_r($output_full, TRUE);
@@ -221,7 +244,7 @@ CODEREH;
 
   $type_machine_name = 'project_app_gp';
   $node_type = new nodeTypeSQL($type_machine_name);
-  $node_type->label_option = 'machine_abbrv';
+  $node_type->label_option = $label_option;
 
   // $node_type->gatherFieldBundleSettings();
   // $output = $node_type->field_bundle_settings;
