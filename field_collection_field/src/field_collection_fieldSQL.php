@@ -6,6 +6,19 @@ class field_collection_fieldSQL extends fieldSQL {
         parent::__construct($field_array);
         $this->field_join_string = "\r\nJOIN_STRING_FOR_" . $this->field_name;
     }
+    public function instantiateFieldAndReturn($field_config_ob) {
+        $field_config_array['field_name'] = $field_config_ob->field_name;
+        $field_config_array['id'] = $field_config_ob->id;
+        $field_config_array['type'] = $field_config_ob->type;
+        $field_config_array['module'] = $field_config_ob->module;
+        $return_field_object = new field_collection_fieldSQL($field_config_array);
+        // $return_field_object = $this::__construct($field_config_array);
+        return $return_field_object;
+    }
+    public function unpack_by_field_id() {
+        $field_id = $this->id;
+        $this->active = 1;
+    }
 
     function instantiateColumnObjects($field_array_this = array()) {
         $bundle = $field_array_this['field_name'];

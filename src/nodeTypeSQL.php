@@ -205,6 +205,17 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
     }
 	}
 
+	function gatherFieldsArrayToNodeType() {
+		if(count($this->field_bundle_settings) == 0) {
+			$this->gatherFieldBundleSettings();
+		}
+		if(count($this->error_array) > 0) {
+			$this->view_string = print_r($this->error_array, TRUE);
+			return;
+		}
+		$this->field_object_array = fieldSQL::instantiate_fieldsFromNodeType($this);
+	}
+
 	function gatherWeightedFieldArray() {
 		if(count($this->field_bundle_settings) == 0) {
 			$this->gatherFieldBundleSettings();

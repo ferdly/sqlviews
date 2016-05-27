@@ -27,16 +27,30 @@ class fieldSQL /* WILL SOON extend something*/ {
 	public $field_join_string;
 	/* </to be UnPacked> */
 
-	function __construct($field_array) {
-		if (is_array($field_array)) {
+	public function __construct($field_array) {
+		if (is_array($field_array) || is_object($field_array)) {
 			foreach ($field_array as $key => $value) {
 				# -> Some Way to limit to listed attributes (but should not be an issue)
 				$this->$key = $value;
 			}
 		}
 	}
+	public function instantiateFieldAndReturn($field_config_ob) {
+		// $field_config_array['field_name'] = $field_config_ob->field_name;
+		// $field_config_array['id'] = $field_config_ob->id;
+		// $field_config_array['type'] = $field_config_ob->type;
+		// $field_config_array['module'] = $field_config_ob->module;
+		$return_field_object = new fieldSQL($field_config_ob);
+		// $return_field_object = $this::__construct($field_config_array);
+		return $return_field_object;
+	}
 
-	function instantiateColumnObjects($field_array_this = array(), $column_loop_array_overload = array()) {
+	public function unpack_by_field_id() {
+		$field_id = $this->id;
+		$this->active = 1;
+	}
+
+	public function instantiateColumnObjects($field_array_this = array(), $column_loop_array_overload = array()) {
 			// $column_array = $this->columns;
 			if (count($column_loop_array_overload) == 0) {
 				$column_loop_array = $this->columns;
@@ -76,7 +90,8 @@ class fieldSQL /* WILL SOON extend something*/ {
 		// }
 
 	}
-	function gatherColumnLoopArray_AddressField(){
+
+	public function gatherColumnLoopArray_AddressField(){
 	$column_loop_array = array(
 		'first_name' => 1,
 		 'last_name' => 2,
@@ -96,12 +111,58 @@ class fieldSQL /* WILL SOON extend something*/ {
 	return $column_loop_array;
 	}
 
-	function gatherColumnLoopArray_FieldCollection(){
+	public function instantiate_fieldsFromNodeType(nodeTypeSQL $node_type_object){
+		// return array('feather','marcy','chester','marais');
+		$core = $node_type_object->drupal_core_field_type_module_array;
+		$label_option = $node_type_object->label_option;
+		// return $core;
+		$field_config_instance_array= db_select('field_config_instance','fci')
+            ->fields('fci',array('field_id'))
+            ->condition('bundle', $node_type_object->type)
+            ->condition('deleted', 0)
+            ->execute()
+            ->fetchAll();
+
+		$field_id_array = array_map(
+			create_function('$o', 'return $o->field_id;'),
+			$field_config_instance_array);
+
+		$field_config_array= db_select('field_config','fc')
+            ->fields('fc',array('id','field_name','type','module'))
+            ->condition('id', $field_id_array,'IN')
+            ->condition('active', 1)
+            ->condition('deleted', 0)
+            ->execute()
+            ->fetchAll();
+        foreach ($field_config_array as $key => $field_config) {
+        	$field_config->label_option = $label_option;
+			// $return_field_object_array[$field_config->field_name]['field_name'] = $field_config->field_name;
+			// $return_field_object_array[$field_config->field_name]['id'] = $field_config->id;
+			// $return_field_object_array[$field_config->field_name]['type'] = $field_config->type;
+			// $return_field_object_array[$field_config->field_name]['module'] = $field_config->module;
+        	if (in_array($field_config->module, $core)) {
+        		$field_config_ob = fieldSQL::instantiateFieldAndReturn($field_config);
+	    		// $return_field_object_array[$field_config->field_name] = $field_config_ob;
+        	}else{
+        		// $return_field_object_array[$field_config->field_name]['action'] = $field_config->module . '_fieldSQL';
+        		$class_name = $field_config->module . '_fieldSQL';
+        		$field_config_ob = $class_name::instantiateFieldAndReturn($field_config);
+	    		// $return_field_object_array[$field_config->field_name] = $field_config_ob;
+        	}
+        	$field_config_ob->unpack_by_field_id();
+    		$return_field_object_array[$field_config->field_name] = $field_config_ob;
+
+        }
+
+       	$result_array = $return_field_object_array;
+		return $result_array;
+	}
+	public function gatherColumnLoopArray_FieldCollection(){
 		$column_loop_array = $this->columns;
 		return $column_loop_array;
 	}
 
-	function instantiateColumnObjects_loop($column_loop_array){
+	public function instantiateColumnObjects_loop($column_loop_array){
 		$column_array = $this->columns;
 		foreach ($column_loop_array as $column_key => $column_array_this) {
 			$column_object_this = new columnSQL($column_array[$column_key]);
@@ -111,7 +172,7 @@ class fieldSQL /* WILL SOON extend something*/ {
 		}
 	}
 
-	function un_pack($node_data_array) {
+	public function un_pack($node_data_array) {
 		$this->table_alias = 'ta' . $this->index;
 		$space_string = ' ';
 		$crlf_string = "\r\n"; //figure out globally
@@ -145,7 +206,7 @@ class fieldSQL /* WILL SOON extend something*/ {
 		$this->field_select_list_string = implode("\r\n,", $column_select_string_array);
 	} //END function un_pack()
 
-	function un_pack_JoinString(&$field_data_array,&$node_data_array ) {
+	public function un_pack_JoinString(&$field_data_array,&$node_data_array ) {
 		$space_string = ' ';
 		$crlf_string = "\r\n"; //figure out globally
 		$field_join_string_scrap = $this->field_join_string;
