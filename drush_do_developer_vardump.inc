@@ -20,6 +20,8 @@ function _do_developer_vardump(){
   $label_option = 'machine_abbrv';
   /*</Preset $label_option>*/
   $supported_which_array = array(
+        'instantiate_field_array_DEV',
+        'field_info_field_by_id_DEV',
         'FieldBundleSettings',
         'FieldPreOb',
         'FieldObjectArray',
@@ -55,6 +57,7 @@ function _do_developer_vardump(){
       // $which = 'SQL';
       // $which = 'field_reference_prof';
       $which = 'instantiate_field_array_DEV';
+      // $which = 'field_info_field_by_id_DEV';
       /* \_ Un-Comment one above for default $which */
   }
 
@@ -66,8 +69,17 @@ function _do_developer_vardump(){
   }
   $header .= "\r\n";
 
-
+if ($which == 'field_info_field_by_id_DEV') {
+    $field_id_array = array(5,14);
+    foreach ($field_id_array as $index => $field_id) {
+      $result_array[] = field_info_field_by_id($field_id);
+    }
+    $result = $header . print_r($result_array, TRUE);
+    drush_print($result);
+    return;
+}
 if ($which == 'instantiate_field_array_DEV') {
+
     $node_type = new nodeTypeSQL($type_machine_name);
     $node_type->label_option = $label_option;
 
