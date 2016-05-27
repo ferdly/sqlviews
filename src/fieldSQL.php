@@ -13,6 +13,8 @@ class fieldSQL /* WILL SOON extend something*/ {
 	public $field_config_id;
 	public $field_config_instance_deleted;
 	public $field_config_deleted;
+	public $field_config_instance_data;
+	public $field_config_data;
 	public $type;
 	public $module;
 	public $active;
@@ -36,18 +38,37 @@ class fieldSQL /* WILL SOON extend something*/ {
 		}
 	}
 	public function instantiateFieldAndReturn($field_config_ob) {
-		// $field_config_array['field_name'] = $field_config_ob->field_name;
-		// $field_config_array['id'] = $field_config_ob->id;
-		// $field_config_array['type'] = $field_config_ob->type;
-		// $field_config_array['module'] = $field_config_ob->module;
 		$return_field_object = new fieldSQL($field_config_ob);
-		// $return_field_object = $this::__construct($field_config_array);
 		return $return_field_object;
 	}
 
 	public function unpack_by_field_id() {
 		$field_id = $this->id;
-		$this->active = 1;
+		$field_info_array = field_info_field_by_id($field_id);
+		if ($this->field_name != $field_info_array['field_name']) {
+			$this->error[] = 'FieldName MisMatch [File: ' . basename(__FILE__) . '; Line: ' . __LINE__ .';]';
+		}
+		// $weight;
+	// $this->field_name = $field_info_array['field_name'];
+	$table_array = $field_info_array['storage']['details']['sql']['FIELD_LOAD_CURRENT'];
+	$table_name = key($table_array);
+	$this->table_name = $table_name;
+	// $this->label = $field_info_array[''];
+	// $this->label_option = $field_info_array[''];
+	$this->field_config_instance_id = 'moot?';//$field_info_array[''];
+	$this->field_config_id = 'moot?';//$field_info_array[''];
+	$this->field_config_instance_deleted = 'moot?';//$field_info_array[''];
+	$this->field_config_deleted = 'moot?';//$field_info_array[''];
+	$this->type = $field_info_array['type'];
+	$this->module = $field_info_array['module'];
+	$this->active = $field_info_array['active'];
+	$this->locked = $field_info_array['locked'];
+	$this->cardinality = $field_info_array['cardinality'];
+	$this->columns = $field_info_array['columns'];
+	$data_unserialized = unserialize($this->field_config_instance_data);
+	$this->label = $data_unserialized['label'];
+	$this->weight = $data_unserialized['widget']['weight'];
+	$this->field_config_instance_data = 'EMPTIED in ' . basename(__FILE__) . ' on line ' . __LINE__;
 	}
 
 	public function instantiateColumnObjects($field_array_this = array(), $column_loop_array_overload = array()) {
@@ -112,12 +133,12 @@ class fieldSQL /* WILL SOON extend something*/ {
 	}
 
 	public function instantiate_fieldsFromNodeType(nodeTypeSQL $node_type_object){
-		// return array('feather','marcy','chester','marais');
 		$core = $node_type_object->drupal_core_field_type_module_array;
 		$label_option = $node_type_object->label_option;
-		// return $core;
 		$field_config_instance_array= db_select('field_config_instance','fci')
-            ->fields('fci',array('field_id'))
+            ->fields('fci',array('field_id','data'))
+            // ->addField('fci', 'field_id')
+            // ->addField('fci', 'data', 'fci_data')
             ->condition('bundle', $node_type_object->type)
             ->condition('deleted', 0)
             ->execute()
@@ -127,6 +148,12 @@ class fieldSQL /* WILL SOON extend something*/ {
 			create_function('$o', 'return $o->field_id;'),
 			$field_config_instance_array);
 
+		foreach ($field_config_instance_array as $index => $fci_this) {
+			$fci_array[$fci_this->field_id]['field_id'] = $fci_this->field_id;
+			$fci_array[$fci_this->field_id]['field_name'] = $fci_this->field_name;
+			$fci_array[$fci_this->field_id]['fci_data'] = $fci_this->data;
+		}
+
 		$field_config_array= db_select('field_config','fc')
             ->fields('fc',array('id','field_name','type','module'))
             ->condition('id', $field_id_array,'IN')
@@ -134,12 +161,11 @@ class fieldSQL /* WILL SOON extend something*/ {
             ->condition('deleted', 0)
             ->execute()
             ->fetchAll();
+        $i = 0;
         foreach ($field_config_array as $key => $field_config) {
+        	$this_field_id = $field_config->id;
         	$field_config->label_option = $label_option;
-			// $return_field_object_array[$field_config->field_name]['field_name'] = $field_config->field_name;
-			// $return_field_object_array[$field_config->field_name]['id'] = $field_config->id;
-			// $return_field_object_array[$field_config->field_name]['type'] = $field_config->type;
-			// $return_field_object_array[$field_config->field_name]['module'] = $field_config->module;
+        	$field_config->index = $i;
         	if (in_array($field_config->module, $core)) {
         		$field_config_ob = fieldSQL::instantiateFieldAndReturn($field_config);
 	    		// $return_field_object_array[$field_config->field_name] = $field_config_ob;
@@ -149,6 +175,8 @@ class fieldSQL /* WILL SOON extend something*/ {
         		$field_config_ob = $class_name::instantiateFieldAndReturn($field_config);
 	    		// $return_field_object_array[$field_config->field_name] = $field_config_ob;
         	}
+        	$field_config_ob->field_config_instance_data = $fci_array[$this_field_id]['fci_data'];
+        	$i++;
         	$field_config_ob->unpack_by_field_id();
     		$return_field_object_array[$field_config->field_name] = $field_config_ob;
 
