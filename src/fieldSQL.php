@@ -195,6 +195,12 @@ class fieldSQL /* WILL SOON extend something*/ {
         }
 
        	$result_array = $return_field_object_array;
+       		usort($result_array, function($a, $b)
+			{
+    			// return strcmp($a->weight, $b->weight);
+    			return $a->weight > $b->weight;
+			});
+
 		return $result_array;
 	}
 	public function gatherColumnLoopArray_FieldCollection(){

@@ -13,6 +13,7 @@ class field_collection_fieldSQL extends fieldSQL {
         $field_collection_ob->bundle = $field_config_ob->field_name;
 
         $return_field_object->field_field_object_array = fieldSQL::instantiate_fieldsFromEntityBundle($field_collection_ob);
+        $return_field_object->field_select_is_hidden = 1;
 
         return $return_field_object;
     }
