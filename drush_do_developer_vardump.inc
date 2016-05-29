@@ -22,6 +22,7 @@ function _do_developer_vardump(){
   $supported_which_array = array(
         'instantiate_field_array_DEV',
         'field_info_field_by_id_DEV',
+        'schema_DEV',
         'FieldBundleSettings',
         'FieldPreOb',
         'FieldObjectArray',
@@ -58,6 +59,7 @@ function _do_developer_vardump(){
       // $which = 'field_reference_prof';
       $which = 'instantiate_field_array_DEV';
       // $which = 'field_info_field_by_id_DEV';
+      // $which = 'schema_DEV';
       /* \_ Un-Comment one above for default $which */
   }
 
@@ -69,6 +71,20 @@ function _do_developer_vardump(){
   }
   $header .= "\r\n";
 
+if ($which == 'schema_DEV') {
+  require_once 'src/nodeTypeSQL.php';
+
+  // $table_name = 'feather_marcy_chester_marais';
+  // $result_array = table_alias_from_table_name($table_name);
+  // $schema = drupal_get_schema();
+  // $schema_tablenames = array_keys($schema);
+  // $result_array = array_combine($schema_tablenames, $schema_tablenames);
+  $result_array = best_table_alias_array();
+  $result = $header . print_r($result_array, TRUE);
+  drush_print($result);
+  return;
+}
+
 if ($which == 'field_info_field_by_id_DEV') {
     $field_id_array = array(5,14);
     foreach ($field_id_array as $index => $field_id) {
@@ -79,7 +95,7 @@ if ($which == 'field_info_field_by_id_DEV') {
     return;
 }
 if ($which == 'instantiate_field_array_DEV') {
-
+      require_once 'src/nodeTypeSQL.php';
     $node_type = new nodeTypeSQL($type_machine_name);
     $node_type->label_option = $label_option;
 
