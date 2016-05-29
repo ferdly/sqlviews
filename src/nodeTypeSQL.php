@@ -48,15 +48,8 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 	public $query_string;
 	public $error_array = array();
 	/* <Utility Code> */
-	public $drupal_core_field_type_module_array = array(
-	        'number',
-	        'text',
-	        'list',
-	        'taxonomy',
-	        'image',
-	        'file',
-	    	);
-	public static $all_table_alias_array;
+	public static $drupal_core_field_type_module_array = null;
+	public static $all_table_alias_array = null;
 	/* </Utility Code> */
 
 	/* <Return Code/Data> */
@@ -65,6 +58,19 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 
 	function __construct($type_machine_name) {
 		$this->type = $type_machine_name;
+	    if (is_null(self::$all_table_alias_array)) {
+        	self::$all_table_alias_array = best_table_alias_array();
+    	}
+	    if (is_null(self::$drupal_core_field_type_module_array)) {
+        	self::$drupal_core_field_type_module_array = array(
+	        'number',
+	        'text',
+	        'list',
+	        'taxonomy',
+	        'image',
+	        'file',
+	    	);
+    	}
 	}
 
 	function gatherNodeData() {
@@ -173,7 +179,7 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 	      $used = $object_this->field->active == 1 ? TRUE : FALSE;
 	      $used = $$object_this->field->deleted == 0 ? $used : FALSE;
 	      $module = $object_this->field->module;
-	      $supported = in_array($module, $this->drupal_core_field_type_module_array);
+	      $supported = in_array($module, self::$drupal_core_field_type_module_array);
 	      // $supported = in_array($module, $sqlviews_unsupported_module_array) ?
 	      				TRUE : $supported;
 	      if (!$supported) {
@@ -338,7 +344,7 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 		$node_data_array['country'] = $this->country;
 		$field_array = $this->field_preobject_array;
 		foreach ($field_array as $fieldname_this => $field_array_this) {
-			$is_core = in_array($field_array_this['module'], $this->drupal_core_field_type_module_array);
+			$is_core = in_array($field_array_this['module'], self::$drupal_core_field_type_module_array);
 			if ($is_core) {
 				$field_object_this = new fieldSQL($field_array_this);
 			}else{

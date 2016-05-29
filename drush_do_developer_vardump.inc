@@ -98,6 +98,7 @@ if ($which == 'instantiate_field_array_DEV') {
       require_once 'src/nodeTypeSQL.php';
     $node_type = new nodeTypeSQL($type_machine_name);
     $node_type->label_option = $label_option;
+    // nodeTypeSQL::$all_table_alias_array = best_table_alias_array();
 
     $node_type->gatherFieldsArrayToNodeType();
     $result_array = $node_type->field_object_array;

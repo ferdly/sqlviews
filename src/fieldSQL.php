@@ -33,14 +33,6 @@ class fieldSQL /* WILL SOON extend something*/ {
 	public $field_select_is_hidden = 0;
 	/* </to be UnPacked> */
 	/* <Utility Code> */
-	public $drupal_core_field_type_module_array = array(
-	        'number',
-	        'text',
-	        'list',
-	        'taxonomy',
-	        'image',
-	        'file',
-	    	);
 	/* </Utility Code> */
 
 	public function __construct($field_array) {
@@ -67,6 +59,7 @@ class fieldSQL /* WILL SOON extend something*/ {
 	$table_array = $field_info_array['storage']['details']['sql']['FIELD_LOAD_CURRENT'];
 	$table_name = key($table_array);
 	$this->table_name = $table_name;
+	$this->table_alias = nodeTypeSQL::$all_table_alias_array[$this->table_name];
 	// $this->label = $field_info_array[''];
 	// $this->label_option = $field_info_array[''];
 	$this->field_config_instance_id = 'moot?';//$field_info_array[''];
@@ -151,7 +144,7 @@ class fieldSQL /* WILL SOON extend something*/ {
 		$bundle = $entity_bundle_object->bundle;
 		$type = $entity_bundle_object->type; //backward compatible for node
 		$bundle = empty($bundle) ? $type : $bundle;//backward compatible for node
-		$core = $this->drupal_core_field_type_module_array;
+		$core = nodeTypeSQL::$drupal_core_field_type_module_array;
 		$label_option = $entity_bundle_object->label_option;
 		$field_config_instance_array= db_select('field_config_instance','fci')
             ->fields('fci',array('field_id','data'))
