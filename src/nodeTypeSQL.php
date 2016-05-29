@@ -47,6 +47,7 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 	public $join_string; //for users
 	public $query_string;
 	public $error_array = array();
+	/* <Utility Code> */
 	public $drupal_core_field_type_module_array = array(
 	        'number',
 	        'text',
@@ -55,6 +56,8 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 	        'image',
 	        'file',
 	    	);
+	public static $all_table_alias_array;
+	/* </Utility Code> */
 
 	/* <Return Code/Data> */
 	public $view_string;
@@ -213,7 +216,7 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 			$this->view_string = print_r($this->error_array, TRUE);
 			return;
 		}
-		$this->field_object_array = fieldSQL::instantiate_fieldsFromNodeType($this);
+		$this->field_object_array = fieldSQL::instantiate_fieldsFromEntityBundle($this);
 	}
 
 	function gatherWeightedFieldArray() {
@@ -541,6 +544,12 @@ array(':table_name'=>$table_name,
 	return (object) $table_query_result;
 }
 
+
+/**
+ * NON-Method Utility Functions
+ * * perhaps these should be in an external library, but for now...
+ *
+ */
 function simple_sanatize_label($label) {
 	$double_quotes = TRUE;
 	$double_quotes = substr($label, 0 , 1) != '"' ? FALSE : $double_quotes;
@@ -564,3 +573,71 @@ function simple_sanatize_label($label) {
 	}
 	return $label;
 }
+
+function best_table_alias_array() {
+	#\_ keyed, by table name, array_flip() if you like
+	$best_table_alias_array = array();
+	$schema = drupal_get_schema();
+	$schema_tablenames = array_keys($schema);
+	$table_names_assoc = array_combine($schema_tablenames, $schema_tablenames);
+	// $table_names_assoc['north_carolina_state'] = 'north_carolina_state';
+	// $table_names_assoc['next_clash_song'] = 'next_clash_song';
+	/**
+	 * Because 'field_' prefixed tables propegate so quickly
+	 */
+	$hard_coded_alaises = array(
+		'field_collection_item' => 'fcli',
+		'field_collection_item_revision' => 'fclir',
+		#\_ append if a field is important enough not to have an 'indexed alias'
+		);
+	$pass_array = array('field','remaining');
+	foreach ($pass_array as $index => $pass) {
+		foreach ($table_names_assoc as $table_name_key => $table_name_value) {
+			$does_pass_field = substr($table_name_key, 0, 6) == 'field_' ? TRUE : FALSE;
+			$does_pass_remaining = isset($best_table_alias_array[$table_name_key]) ? FALSE : TRUE;
+			$does_pass_this = FALSE;
+			$does_pass_this = $pass == 'field'  ? $does_pass_field : $does_pass_this;
+			$does_pass_this = $pass == 'remaining'  ? $does_pass_remaining : $does_pass_this;
+			// if (!isset($best_table_alias_array[$table_name_key])) {
+			if ($does_pass_this) {
+				if (in_array($table_name_key, array_flip($hard_coded_alaises))) {
+					$alias = $hard_coded_alaises[$table_name_key];
+				}else{
+					$alias = table_alias_from_table_name($table_name_value);
+				}
+				if (in_array($alias, $best_table_alias_array)) {
+					$i = 0;
+					$alias_indexed = $alias;
+					while (in_array($alias_indexed, $best_table_alias_array)) {
+					$i++;
+					$alias_indexed = $alias . '_' .  $i;
+					}
+					$alias = $alias_indexed;
+				}
+				$best_table_alias_array[$table_name_key] = $alias;
+			} //END if ($does_pass_this)
+		} //END foreach ($table_names_assoc as $table_name_key => $table_name_value)
+	} //END foreach ($pass_array as $index => $pass)
+
+	// $best_table_alias_array = $table_names_assoc;
+	return $best_table_alias_array;
+}
+
+function table_alias_from_table_name($table_name) {
+	// $table_alias = 'z_' . $table_name;
+	// return $table_alias;
+	$table_name_word_array = explode('_',$table_name);
+	// $table_alias= $table_name_word_array;
+	// $field_id_array = array_map(
+	// 		create_function('$o', 'return $o->field_id;'),
+	// 		$field_config_instance_array);
+	$table_alias_array= array_map(
+			create_function('$e', 'return substr($e, 0, 1);'),
+			$table_name_word_array);
+	$table_alias = implode('', $table_alias_array);
+	return $table_alias;
+}
+
+/**
+ * END NON-Method Utility Functions
+ */

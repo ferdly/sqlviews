@@ -7,6 +7,13 @@ class field_collection_fieldSQL extends fieldSQL {
     }
     public function instantiateFieldAndReturn($field_config_ob) {
         $return_field_object = new field_collection_fieldSQL($field_config_ob);
+
+        $field_collection_ob = new stdClass();
+        $field_collection_ob->entity = 'field_collection_item';
+        $field_collection_ob->bundle = $field_config_ob->field_name;
+
+        $return_field_object->field_field_object_array = fieldSQL::instantiate_fieldsFromEntityBundle($field_collection_ob);
+
         return $return_field_object;
     }
     public function zunpack_by_field_id() {

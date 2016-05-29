@@ -23,11 +23,25 @@ class fieldSQL /* WILL SOON extend something*/ {
 	public $columns = array(); //Pre-Object Array
 	/* </drupal/sql direct> */
 	/* <to be UnPacked> */
+	public $field_field_object_array = array();
 	public $column_object_array = array();
 	public $table_alias;
+	public static $all_table_alias_array = array();
 	public $field_select_list_string;
 	public $field_join_string;
+	public $field_join_is_hidden = 0;
+	public $field_select_is_hidden = 0;
 	/* </to be UnPacked> */
+	/* <Utility Code> */
+	public $drupal_core_field_type_module_array = array(
+	        'number',
+	        'text',
+	        'list',
+	        'taxonomy',
+	        'image',
+	        'file',
+	    	);
+	/* </Utility Code> */
 
 	public function __construct($field_array) {
 		if (is_array($field_array) || is_object($field_array)) {
@@ -68,7 +82,7 @@ class fieldSQL /* WILL SOON extend something*/ {
 	$data_unserialized = unserialize($this->field_config_instance_data);
 	$this->label = $data_unserialized['label'];
 	$this->weight = $data_unserialized['widget']['weight'];
-	$this->field_config_instance_data = 'EMPTIED in ' . basename(__FILE__) . ' on line ' . __LINE__;
+	$this->field_config_instance_data = 'EMPTIED after UnPack in ' . basename(__FILE__) . ' on line ' . __LINE__;
 	}
 
 	public function instantiateColumnObjects($field_array_this = array(), $column_loop_array_overload = array()) {
@@ -132,14 +146,19 @@ class fieldSQL /* WILL SOON extend something*/ {
 	return $column_loop_array;
 	}
 
-	public function instantiate_fieldsFromNodeType(nodeTypeSQL $node_type_object){
-		$core = $node_type_object->drupal_core_field_type_module_array;
-		$label_option = $node_type_object->label_option;
+	public function instantiate_fieldsFromEntityBundle($entity_bundle_object){
+		$entity = $entity_bundle_object->entity;
+		$bundle = $entity_bundle_object->bundle;
+		$type = $entity_bundle_object->type; //backward compatible for node
+		$bundle = empty($bundle) ? $type : $bundle;//backward compatible for node
+		$core = $this->drupal_core_field_type_module_array;
+		$label_option = $entity_bundle_object->label_option;
 		$field_config_instance_array= db_select('field_config_instance','fci')
             ->fields('fci',array('field_id','data'))
             // ->addField('fci', 'field_id')
             // ->addField('fci', 'data', 'fci_data')
-            ->condition('bundle', $node_type_object->type)
+            ->condition('entity_type', $entity)
+            ->condition('bundle', $bundle)
             ->condition('deleted', 0)
             ->execute()
             ->fetchAll();
