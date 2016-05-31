@@ -7,9 +7,9 @@ function sqlviews_drush_command() {
 /**
  * Essential to the function of the Drush Command
  */
-  $items['developer-vardump'] = array(
+  $items['field-report'] = array(
     'aliases' => array(
-      'devv',
+      'f-rpt',
       ),
     'arguments' => array(
       'which' => 'is argument',
@@ -19,65 +19,15 @@ function sqlviews_drush_command() {
       'dev' => 'is option',
     ),
   );
-  $items['gather-node-type'] = array(
+  $items['developer-vardump'] = array(
     'aliases' => array(
-      'gnode',
+      'devv',
       ),
     'arguments' => array(
-      'list' => 'is argument',
-      'groupby' => 'is argument',
-      'cube' => 'is argument',
+      'which' => 'is argument',
     ),
     'options' => array(
-      'lab' => 'is option',
-      'orderby_desc' => 'is option',
-      'dev' => 'is option',
-      'content_types' => 'is option',
-    ),
-  );
-  $items['instantiate-node-type'] = array(
-    'aliases' => array(
-      'inode',
-      ),
-    'arguments' => array(
-      'list' => 'is argument',
-      'groupby' => 'is argument',
-      'cube' => 'is argument',
-    ),
-    'options' => array(
-      'orderby' => 'is option',
-      'orderby_desc' => 'is option',
-      'dev' => 'is option',
-      'content_types' => 'is option',
-    ),
-  );
-  $items['instantiate-node-fields'] = array(
-    'aliases' => array(
-      'inodef',
-      ),
-    'arguments' => array(
-      'list' => 'is argument',
-      'groupby' => 'is argument',
-      'cube' => 'is argument',
-    ),
-    'options' => array(
-      'orderby' => 'is option',
-      'orderby_desc' => 'is option',
-      'dev' => 'is option',
-      'content_types' => 'is option',
-    ),
-  );
-  $items['instantiate-field-objects'] = array(
-    'aliases' => array(
-      'ifield',
-      ),
-    'arguments' => array(
-      'list' => 'is argument',
-      'groupby' => 'is argument',
-      'cube' => 'is argument',
-    ),
-    'options' => array(
-      'label' => 'is option',
+      'context' => 'is option',
       'dev' => 'is option',
     ),
   );
@@ -115,7 +65,7 @@ function drush_sqlviews_developer_vardump() {
   _do_developer_vardump();
 } //END function drush_node_tablelist($which_list = FALSE)
 
-function drush_sqlviews_gather_node_type($which_type = FALSE) {
+function drush_sqlviews_field_report($which_type = FALSE) {
 //drush_mymodule_custom_save_node
   // Check for existence of argument
     $arguments = _which_nodetype_arguments(); //use custom function to encapsulate
@@ -137,82 +87,7 @@ function drush_sqlviews_gather_node_type($which_type = FALSE) {
 
   // drush_print($which_type);
   // return;
-  _do_gather_node_type($which_type);
-} //END function drush_node_tablelist($which_list = FALSE)
-
-function drush_sqlviews_instantiate_node_type($which_type = FALSE) {
-//drush_mymodule_custom_save_node
-  // Check for existence of argument
-    $arguments = _which_nodetype_arguments(); //use custom function to encapsulate
-    if (!$which_type) {
-        $which_type = drush_choice($arguments, dt('Which Example would you like to interact with using \'PHP-Coder\'?'));
-    }
-
-  // Check for correct argument
-  $correct_args = array_keys($arguments);
-  if (!in_array($which_type, $correct_args)) {
-    if ($which_type == '0') {
-      drush_user_abort('Buh-Bye! sqlViews Gather Node!');
-      return;
-    }
-    $string = _which_type_arguments('string');
-    return drush_set_error(dt('"@type" is not a valid example. ',
-      array('@type' => $example)) . $string);
-  }
-
-  // drush_print($which_type);
-  // return;
-  _do_instantiate_node_type($which_type);
-} //END function drush_node_tablelist($which_list = FALSE)
-
-function drush_sqlviews_instantiate_node_fields($which_type = FALSE) {
-//drush_mymodule_custom_save_node
-  // Check for existence of argument
-    $arguments = _which_nodetype_arguments(); //use custom function to encapsulate
-    if (!$which_type) {
-        $which_type = drush_choice($arguments, dt('Which Example would you like to interact with using \'PHP-Coder\'?'));
-    }
-
-  // Check for correct argument
-  $correct_args = array_keys($arguments);
-  if (!in_array($which_type, $correct_args)) {
-    if ($which_type == '0') {
-      drush_user_abort('Buh-Bye! sqlViews Gather Node!');
-      return;
-    }
-    $string = _which_type_arguments('string');
-    return drush_set_error(dt('"@type" is not a valid example. ',
-      array('@type' => $example)) . $string);
-  }
-
-  // drush_print($which_type);
-  // return;
-  _do_instantiate_node_fields($which_type);
-} //END function drush_node_tablelist($which_list = FALSE)
-
-function drush_sqlviews_instantiate_field_objects($which_type = FALSE) {
-//drush_mymodule_custom_save_node
-  // Check for existence of argument
-    $arguments = _which_nodetype_arguments(); //use custom function to encapsulate
-    if (!$which_type) {
-        $which_type = drush_choice($arguments, dt('Which Example would you like to interact with using \'PHP-Coder\'?'));
-    }
-
-  // Check for correct argument
-  $correct_args = array_keys($arguments);
-  if (!in_array($which_type, $correct_args)) {
-    if ($which_type == '0') {
-      drush_user_abort('Buh-Bye! sqlViews Gather Node!');
-      return;
-    }
-    $string = _which_type_arguments('string');
-    return drush_set_error(dt('"@type" is not a valid example. ',
-      array('@type' => $example)) . $string);
-  }
-
-  // drush_print($which_type);
-  // return;
-  _do_instantiate_field_objects($which_type);
+  _do_field_report($which_type);
 } //END function drush_node_tablelist($which_list = FALSE)
 
 function drush_sqlviews_sql_view_code($which_type = FALSE) {
@@ -342,81 +217,41 @@ function _render_drush_context_sqlviews($print = FALSE) {
   return $developer_friedly_array;
 } //END function _render_drush_context_gr($print = FALSE)
 
-/**
- * NOT in Module (see if it works)
- */
-
-
-function _do_gather_node_type($type_machine_name){
-  $header = 'Result of ' . __FUNCTION__ . '(' . $type_machine_name . ")\r\n==========\r\n";
-  $node_types_array = node_type_get_types();
-  $result = $header . print_r($node_types_array[$type_machine_name], TRUE);
-  drush_print($result);
-}
-
-function _do_instantiate_node_type($type_machine_name){
-  $header = 'Result of ' . __FUNCTION__ . '(' . $type_machine_name . ")\r\n==========\r\n";
-  require_once 'src/nodeTypeSQL.php';
-  $node_type = new nodeTypeSQL($type_machine_name);
-  // $node_type->gatherNodeData();
-  $node_type->gatherNodeTypeData();
-
-  $result = $header . print_r($node_type, TRUE);
-  drush_print($result);
-}
-
-function _do_instantiate_node_fields($type_machine_name){
-  $header = 'Result of ' . __FUNCTION__ . '(' . $type_machine_name . ")\r\n==========\r\n";
-  require_once 'src/nodeTypeSQL.php';
-  $node_type = new nodeTypeSQL($type_machine_name);
-
-  // $node_type->gatherFieldBundleSettings();
-  // $output = $node_type->field_bundle_settings;
-
-  // $node_type->gatherWeightedFieldArray();
-  // $output = $node_type->weighted_field_array;
-
-  $node_type->gatherObjectReadyFieldArray();
-  $output = $node_type->field_preobject_array;
-
-  $result = $header . print_r($output, TRUE);
-  drush_print($result);
-}
-
-function _do_instantiate_field_objects($type_machine_name){
-
-  $header = 'Result of ' . 'drush_get_option(dev' . ")\r\n==========\r\n";
-  $dev_option = drush_get_option('dev', FALSE);
-  // drush_print($header . print_r($dev_option, TRUE));
-  // return;
-  $label_option_default = 'label';
-  $label_option = drush_get_option('label', $label_option_default);
-  $header = 'Result of ' . __FUNCTION__ . '(' . $type_machine_name . ")\r\n==========\r\n";
-  require_once 'src/nodeTypeSQL.php';
-  $node_type = new nodeTypeSQL($type_machine_name);
-  $node_type->label_option = $label_option;
-
-  // $node_type->gatherFieldBundleSettings();
-  // $output = $node_type->field_bundle_settings;
-
-  // $node_type->gatherWeightedFieldArray();
-  // $output = $node_type->weighted_field_array;
-
-  // $node_type->instantiateFieldObjects();
-
-  $node_type->composeSelectStringFields_JoinStringFields();
-  $dev_result = '';
-  if ($dev_option) {
-    $dev_header = "\r\n\r\nDEVELOPER Result of " . __FUNCTION__ . '(' . $type_machine_name . ")\r\n==========\r\n";
-    $dev_output = $node_type->field_object_array;
-    $dev_result = $dev_header . print_r($dev_output, TRUE);
+function _render_header($function, $parameter_string = '', $line = 0) {
+  $file_line = '[File: ' . basename(__FILE__) . '; Line: ' . $line . ';]' . "\r\n";
+  $file_line = $line > 0 ? $file_line : '';
+  $header = 'Result of ' . $function . '(' . $parameter_string . ")";
+  // $header = 'Output from ' . $function . '(' . $parameter_string . ")"; //ALT
+  $header_length = strlen($header);
+  $underscore = '';
+  $i = 0;
+  while ($i < $header_length) {
+    $underscore .= '=';
+    $i++;
   }
-  $output = $node_type->select_string_fields;
-//select_string_fields
-  $result = $header . print_r($output, TRUE);
-  drush_print($result . $dev_result);
+  return $header . "\r\n" . $underscore . "\r\n" . $file_line;
 }
 
+function _do_field_report($type_machine_name){
+  $header = _render_header(__FUNCTION__, $type_machine_name, __LINE__);
+  $label_option_default = 'machine_abbrv';//moot?
+  $label_option = drush_get_option('label', $label_option_default);
+  // $header = 'Result of ' . __FUNCTION__ . '(' . $type_machine_name . ")\r\n==========\r\n";
+  require_once 'src/nodeTypeSQL.php';
+  // $node_type = new nodeTypeSQL($type_machine_name);
+  $node_type_sql = new nodeTypeSQL($type_machine_name);
+  $node_type_sql->label_option = $label_option;
+
+  $node_type_sql->database = $databases['default']['default']['database'];
+  $node_type_sql->composeFieldReport();
+  // $node_type_sql->gatherWeightedFieldArray();
+
+  $output = $node_type_sql->view_string;
+
+  // $result = $header . print_r($output, TRUE);
+  $result = $header . $output;
+  drush_print($result);
+}
 
 function _do_sql_view_code($type_machine_name){
   $label_option_default = 'label';

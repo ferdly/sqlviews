@@ -20,7 +20,8 @@ function _do_developer_vardump(){
   $label_option = 'machine_abbrv';
   /*</Preset $label_option>*/
   $supported_which_array = array(
-        'instantiate_field_array_DEV',
+        'instantiate_field_array_DEV',//Moot soon after 'field-report'
+        'field-report',
         'field_info_field_by_id_DEV',
         'schema_DEV',
         'FieldBundleSettings',
@@ -57,7 +58,8 @@ function _do_developer_vardump(){
       // $which = 'reference_prof';
       // $which = 'SQL';
       // $which = 'field_reference_prof';
-      $which = 'instantiate_field_array_DEV';
+      // $which = 'instantiate_field_array_DEV';
+      $which = 'field-report';
       // $which = 'field_info_field_by_id_DEV';
       // $which = 'schema_DEV';
       /* \_ Un-Comment one above for default $which */
@@ -94,6 +96,38 @@ if ($which == 'field_info_field_by_id_DEV') {
     drush_print($result);
     return;
 }
+
+if ($which == 'field-report') {
+    require_once 'src/nodeTypeSQL.php';
+    $node_type = new nodeTypeSQL($type_machine_name);
+    $node_type->label_option = $label_option;
+
+    // $new = FALSE;
+    $new = TRUE;
+
+    if ($new) {
+      $result = $node_type->composeFieldReport();
+      $result = $header . "\r\n" . $result;
+    }else{
+      $node_type->gatherFieldsArrayToNodeType();
+      $field_object_array = $node_type->field_object_array;
+      $field_report_buffer = '';
+      $crlf = "\r\n";
+      $delimiter = ',';
+      // $double_quotes = '"';
+      // \_MOOT because no values have spaces, let along apostrophes
+      foreach ($field_object_array as $index => $field_object_this) {
+        $field_report_buffer .= $field_object_this->field_report_singleton();
+      }
+
+      $result = $header . "\r\n" . $field_report_buffer;
+      // $result_array = $node_type->field_object_array;
+      // $result = $header . print_r($result_array, TRUE);
+    }
+    drush_print($result);
+    return;
+} //END if ($which == 'instantiate_field_array_DEV')
+
 if ($which == 'instantiate_field_array_DEV') {
       require_once 'src/nodeTypeSQL.php';
     $node_type = new nodeTypeSQL($type_machine_name);
@@ -105,8 +139,7 @@ if ($which == 'instantiate_field_array_DEV') {
     $result = $header . print_r($result_array, TRUE);
     drush_print($result);
     return;
-}
-
+} //END if ($which == 'instantiate_field_array_DEV')
 
   if ($which == 'field_reference_prof') {
     $bundle = 'job_application';

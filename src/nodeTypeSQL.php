@@ -48,6 +48,7 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 	public $query_string;
 	public $error_array = array();
 	/* <Utility Code> */
+	public $of_cardinality = 1;//for instantiation of cardinality in fields
 	public static $drupal_core_field_type_module_array = null;
 	public static $all_table_alias_array = null;
 	/* </Utility Code> */
@@ -56,7 +57,7 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 	public $view_string;
 	/* </Return Code/Data> */
 
-	function __construct($type_machine_name) {
+	public function __construct($type_machine_name) {
 		$this->type = $type_machine_name;
 	    if (is_null(self::$all_table_alias_array)) {
         	self::$all_table_alias_array = best_table_alias_array();
@@ -73,7 +74,7 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
     	}
 	}
 
-	function gatherNodeData() {
+	public function gatherNodeData() {
 		$label_option_supported_array = array(
 			'label',
 			'label_machine',
@@ -105,7 +106,7 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 		$field_config_instance_array = db_query('SELECT id, field_id, field_name, data FROM {field_config_instance} WHERE bundle = :bundle', array(':bundle' =>
 		'many_fields'))->fetchAll();
 		}
-	function gatherNodeTypeData() {
+	public function gatherNodeTypeData() {
 		if (empty($this->select_string_node)) {
 			$this->gatherNodeData();
 		}
@@ -133,17 +134,17 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 		$this->select_string_node = $select_string_node;
 	} //END function gatherNodeTypeData()
 
-	function gatherFieldConfigInstanceData() {
+	public function gatherFieldConfigInstanceData() {
 		#\_ Will Replace gatherFieldBundleSettings()
 		$sql = 'SELECT * FROM field_config_instance WHERE bundle = '. "'{$this->type}'";
 	} //END function gatherFieldConfigInstanceData()
 
-	function gatherFieldData() {
+	public function gatherFieldData() {
 		#\_ Will Replace gatherFieldBundleSettings()
 		$sql = 'SELECT * FROM field_config_instance WHERE bundle = '. "'{$this->type}'";
 	} //END function gatherFieldConfigInstanceData()
 
-	function gatherFieldBundleSettings(){
+	public function gatherFieldBundleSettings(){
 		if (isset($this->has_title) === false) {
 			$this->gatherNodeTypeData();
 		}
@@ -169,7 +170,7 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 		$this->validateFieldCodeRequire();
 	}
 
-	function validateFieldCodeRequire() {
+	public function validateFieldCodeRequire() {
 
 		$field_bundle_settings = $this->field_bundle_settings;
 
@@ -193,28 +194,51 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 	        // $field_array[$key]['deleted'] = $object_this->field->deleted;
 	      }
 	    } //END foreach()
-    $require_base_path = __FILE__;
-    $require_base_path = str_replace(DRUPAL_ROOT, '', $require_base_path) ;
-    $require_base_path_array = explode('/', $require_base_path) ;
-    array_pop($require_base_path_array) ;
-    array_pop($require_base_path_array) ;
-    // $require_base_path = str_replace(basename(__FILE__), '', $require_base_path) ;
-    $require_base_path = implode('/',$require_base_path_array) . '/';
-    foreach ($sqlviews_unsupported_module_array as $key => $module_name) {
-    	$file_name = $module_name . '_fieldSQL.php';
-    	$path = $module_name . '_field/src/';
-    	$full_path = DRUPAL_ROOT . $require_base_path . $path . $file_name;
-    	$module_exists = file_exists($full_path);
-    	if ($module_exists) {
-    		$this->field_bundle_settings[$key]->module_path = $full_path;
-    		require_once $full_path;
-    	}else{
-    		$this->error_array['field_module'][] = "The code to manage the field, '{$key}', could not be included.[" . $require_base_path . $path . $file_name . ']';
-    	}
-    }
+	    $require_base_path = __FILE__;
+	    $require_base_path = str_replace(DRUPAL_ROOT, '', $require_base_path) ;
+	    $require_base_path_array = explode('/', $require_base_path) ;
+	    array_pop($require_base_path_array) ;
+	    array_pop($require_base_path_array) ;
+	    // $require_base_path = str_replace(basename(__FILE__), '', $require_base_path) ;
+	    $require_base_path = implode('/',$require_base_path_array) . '/';
+	    foreach ($sqlviews_unsupported_module_array as $key => $module_name) {
+	    	$file_name = $module_name . '_fieldSQL.php';
+	    	$path = $module_name . '_field/src/';
+	    	$full_path = DRUPAL_ROOT . $require_base_path . $path . $file_name;
+	    	$module_exists = file_exists($full_path);
+	    	if ($module_exists) {
+	    		$this->field_bundle_settings[$key]->module_path = $full_path;
+	    		require_once $full_path;
+	    	}else{
+	    		$this->error_array['field_module'][] = "The code to manage the field, '{$key}', could not be included.[" . $require_base_path . $path . $file_name . ']';
+	    	}
+	    }
 	}
 
-	function gatherFieldsArrayToNodeType() {
+	public function composeFieldReport($option_array = array()){
+		if (count($this->field_object_array) == 0) {
+			$this->gatherFieldsArrayToNodeType();
+		}
+		// $this->gatherFieldsArrayToNodeType();
+
+	    $field_object_array = $this->field_object_array;
+	    $field_report_buffer = '';
+	    $crlf = "\r\n";// could become an option
+	    $delimiter = ',';// coule become an option
+	    // $double_quotes = '"';
+	    // \_MOOT because no values have spaces, let along apostrophes
+	    foreach ($field_object_array as $index => $field_object_this) {
+	      $field_report_buffer .= $field_object_this->field_report_singleton();
+	    }
+
+	    // $result_array = $node_type->field_object_array;
+	    // $result = $header . print_r($result_array, TRUE);
+	    $this->view_string = $field_report_buffer;
+
+	    return $this->view_string;
+	}
+
+	public function gatherFieldsArrayToNodeType() {
 		if(count($this->field_bundle_settings) == 0) {
 			$this->gatherFieldBundleSettings();
 		}
@@ -225,7 +249,7 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 		$this->field_object_array = fieldSQL::instantiate_fieldsFromEntityBundle($this);
 	}
 
-	function gatherWeightedFieldArray() {
+	public function gatherWeightedFieldArray() {
 		if(count($this->field_bundle_settings) == 0) {
 			$this->gatherFieldBundleSettings();
 		}
@@ -263,7 +287,7 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 		$this->field_object_array_count = count($weighted_field_array);
 	} //END function gatherWeightedFieldArray()
 
-	function gatherObjectReadyFieldArray() {
+	public function gatherObjectReadyFieldArray() {
 		if ($this->field_object_array_count < 0) {
 			$this->gatherWeightedFieldArray();
 		}
@@ -325,10 +349,10 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 			} //END if ($instance_this->field->active == 1)
 		}
 		$this->field_preobject_array = $field_preobject_array;
-		#\_ FAUX for Testing this functions REAL purpose is to explode the array and load into fieldSQL objects
+		#\_ FAUX for Testing this public functions REAL purpose is to explode the array and load into fieldSQL objects
 	} //END function gatherObjectReadyFieldArray()
 
-	function instantiateFieldObjects() {
+	public function instantiateFieldObjects() {
 		#\_ both __construct() and un_pack()
 		if ($this->field_object_array_count != count($this->field_preobject_array)) {
 			$this->gatherObjectReadyFieldArray();
@@ -373,7 +397,7 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 
 	} //END function instantiateFieldObjects()
 
-	function composeSelectStringFields_JoinStringFields() {
+	public function composeSelectStringFields_JoinStringFields() {
 		if ($this->field_object_array_count != count($this->field_object_array)) {
 			$this->instantiateFieldObjects();
 		}
@@ -404,7 +428,7 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 		$this->join_string_fields = implode("\r\n", $field_join_string_array);
 	} //END function gatherSelectStringFields()
 
-	function composeJoinString() {
+	public function composeJoinString() {
 		if (empty($this->join_string_fields)) {
 			$this->composeSelectStringFields_JoinStringFields();
 		}
@@ -416,7 +440,7 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 		$this->join_string = $join_string;
 		$this->join_string_fields = 'NNULL';
 	} //END function composeJoinString()
-	function composeSelectString() {
+	public function composeSelectString() {
 		if (empty($this->select_string_fields)) {
 			$this->composeSelectStringFields_JoinStringFields();
 		}
@@ -468,7 +492,7 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 
 	} //END function composeSelectString()
 
-	function composeQueryString() {
+	public function composeQueryString() {
 		if (empty($this->select_string)) {
 			$this->composeSelectString();
 		}
@@ -496,7 +520,7 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 		$this->join_string = 'NNULL';
 	} //END function composeQueryString()
 
-	function composeViewString() {
+	public function composeViewString() {
 		if (empty($this->query_string)) {
 			$this->composeQueryString();
 		}
@@ -519,7 +543,7 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 
 	} //END function composeViewString()
 
-	function instantiateView() {
+	public function instantiateView() {
 		if (empty($this->view_string)) {
 			$this->composeViewString();
 		}

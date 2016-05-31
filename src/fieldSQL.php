@@ -6,6 +6,7 @@ class fieldSQL /* WILL SOON extend something*/ {
 	public $index;
 	public $weight;
 	public $field_name;
+	public $field_column_name;
 	public $table_name;
 	public $label;
 	public $label_option;
@@ -15,18 +16,21 @@ class fieldSQL /* WILL SOON extend something*/ {
 	public $field_config_deleted;
 	public $field_config_instance_data;
 	public $field_config_data;
+	public $of_entity;
+	public $of_bundle;
+	public $of_cardinality;
 	public $type;
 	public $module;
 	public $active;
 	public $locked;
 	public $cardinality;
+	public $total_cardinality;
 	public $columns = array(); //Pre-Object Array
 	/* </drupal/sql direct> */
 	/* <to be UnPacked> */
 	public $field_field_object_array = array();
 	public $column_object_array = array();
 	public $table_alias;
-	public static $all_table_alias_array = array();
 	public $field_select_list_string;
 	public $field_join_string;
 	public $field_join_is_hidden = 0;
@@ -54,8 +58,9 @@ class fieldSQL /* WILL SOON extend something*/ {
 		if ($this->field_name != $field_info_array['field_name']) {
 			$this->error[] = 'FieldName MisMatch [File: ' . basename(__FILE__) . '; Line: ' . __LINE__ .';]';
 		}
-		// $weight;
+	// $weight;
 	// $this->field_name = $field_info_array['field_name'];
+	$this->field_column_name = $this->field_name . '_value';
 	$table_array = $field_info_array['storage']['details']['sql']['FIELD_LOAD_CURRENT'];
 	$table_name = key($table_array);
 	$this->table_name = $table_name;
@@ -71,13 +76,37 @@ class fieldSQL /* WILL SOON extend something*/ {
 	$this->active = $field_info_array['active'];
 	$this->locked = $field_info_array['locked'];
 	$this->cardinality = $field_info_array['cardinality'];
+	$this->total_cardinality = $this->of_cardinality * $this->cardinality;
 	$this->columns = $field_info_array['columns'];
 	$data_unserialized = unserialize($this->field_config_instance_data);
 	$this->label = $data_unserialized['label'];
 	$this->weight = $data_unserialized['widget']['weight'];
-	$this->field_config_instance_data = 'EMPTIED after UnPack in ' . basename(__FILE__) . ' on line ' . __LINE__;
+	// $this->field_config_instance_data = 'EMPTIED after UnPack in ' . basename(__FILE__) . ' on line ' . __LINE__;
 	}
-
+	public function field_report_singleton() {
+		$crlf = "|\r\n";
+		$delimiter = ",";
+		$field_field_report_buffer = '';
+		if (count($this->field_field_object_array) > 0) {
+			$field_field_object_array = $this->field_field_object_array;
+			foreach ($field_field_object_array as $index => $field_field_object_this) {
+				$field_field_report_buffer .= $field_field_object_this
+				->field_report_singleton();
+			}
+		}
+		$field_report_singleton_result = '';
+		if ($this->field_select_is_hidden == 0) {
+			$field_report_singleton_result .= "{$this->of_entity},";
+			$field_report_singleton_result .= "{$this->of_bundle},";
+			$field_report_singleton_result .= "{$this->table_name},";
+			$field_report_singleton_result .= "{$this->field_column_name},";
+			$field_report_singleton_result .= "{$this->total_cardinality}";
+			$field_report_singleton_result .= "\r\n";
+		}
+		// $field_report_singleton_result = "entity,type,table_name,{$this->field_name}|\r\n";
+		$field_report_singleton_result .= $field_field_report_buffer;
+		return $field_report_singleton_result;
+	}
 	public function instantiateColumnObjects($field_array_this = array(), $column_loop_array_overload = array()) {
 			// $column_array = $this->columns;
 			if (count($column_loop_array_overload) == 0) {
@@ -141,7 +170,10 @@ class fieldSQL /* WILL SOON extend something*/ {
 
 	public function instantiate_fieldsFromEntityBundle($entity_bundle_object){
 		$entity = $entity_bundle_object->entity;
+		$entity = $entity_bundle_object->entity;
 		$bundle = $entity_bundle_object->bundle;
+		$cardinality = $entity_bundle_object->of_cardinality + 0;
+		// $cardinality = $cardinality == 0 ? 1 : $cardinality;
 		$type = $entity_bundle_object->type; //backward compatible for node
 		$bundle = empty($bundle) ? $type : $bundle;//backward compatible for node
 		$core = nodeTypeSQL::$drupal_core_field_type_module_array;
@@ -159,12 +191,13 @@ class fieldSQL /* WILL SOON extend something*/ {
 		$field_id_array = array_map(
 			create_function('$o', 'return $o->field_id;'),
 			$field_config_instance_array);
-
-		foreach ($field_config_instance_array as $index => $fci_this) {
-			$fci_array[$fci_this->field_id]['field_id'] = $fci_this->field_id;
-			$fci_array[$fci_this->field_id]['field_name'] = $fci_this->field_name;
-			$fci_array[$fci_this->field_id]['fci_data'] = $fci_this->data;
-		}
+		/* <seems moot> disabled 20160529171800 delete no longer than 1 week out*/
+		// foreach ($field_config_instance_array as $index => $fci_this) {
+		// 	$fci_array[$fci_this->field_id]['field_id'] = $fci_this->field_id;
+		// 	$fci_array[$fci_this->field_id]['field_name'] = $fci_this->field_name;
+		// 	$fci_array[$fci_this->field_id]['fci_data'] = $fci_this->data;
+		// }
+		/* </seems moot> */
 
 		$field_config_array= db_select('field_config','fc')
             ->fields('fc',array('id','field_name','type','module'))
@@ -176,16 +209,22 @@ class fieldSQL /* WILL SOON extend something*/ {
         $i = 0;
         foreach ($field_config_array as $key => $field_config) {
         	$this_field_id = $field_config->id;
+        	$field_config->field_id = $field_config->id;
+        	$field_config->of_entity = $entity;
+        	$field_config->of_bundle = $bundle;
+        	$field_config->of_cardinality = $cardinality;
         	$field_config->label_option = $label_option;
         	$field_config->index = $i;
         	if (in_array($field_config->module, $core)) {
         		$field_config_ob = fieldSQL::instantiateFieldAndReturn($field_config);
+	        	// $field_config_ob->unpack_by_field_id();
 	    		// $return_field_object_array[$field_config->field_name] = $field_config_ob;
         	}else{
         		// $return_field_object_array[$field_config->field_name]['action'] = $field_config->module . '_fieldSQL';
         		$class_name = $field_config->module . '_fieldSQL';
         		$field_config_ob = $class_name::instantiateFieldAndReturn($field_config);
-	    		// $return_field_object_array[$field_config->field_name] = $field_config_ob;
+	        	// $field_config_ob->unpack_by_field_id();
+    		// $return_field_object_array[$field_config->field_name] = $field_config_ob;
         	}
         	$field_config_ob->field_config_instance_data = $fci_array[$this_field_id]['fci_data'];
         	$i++;

@@ -8,9 +8,12 @@ class field_collection_fieldSQL extends fieldSQL {
     public function instantiateFieldAndReturn($field_config_ob) {
         $return_field_object = new field_collection_fieldSQL($field_config_ob);
 
+        $field_info_array = field_info_field_by_id($field_config_ob->field_id);
+        $cardinality = $field_info_array['cardinality'];
         $field_collection_ob = new stdClass();
         $field_collection_ob->entity = 'field_collection_item';
         $field_collection_ob->bundle = $field_config_ob->field_name;
+        $field_collection_ob->of_cardinality = $field_config_ob->of_cardinality * $cardinality;
 
         $return_field_object->field_field_object_array = fieldSQL::instantiate_fieldsFromEntityBundle($field_collection_ob);
         $return_field_object->field_select_is_hidden = 1;
