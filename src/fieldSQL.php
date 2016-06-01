@@ -42,6 +42,7 @@ class fieldSQL /* WILL SOON extend something*/ {
 	public $field_select_is_hidden = 0;
 	/* </to be UnPacked> */
 	/* <Utility Code> */
+    public static $used_table_alias_array;
 	/* </Utility Code> */
 
 	public function __construct($field_array) {
@@ -79,6 +80,7 @@ class fieldSQL /* WILL SOON extend something*/ {
 	$this->of_foriegn_key_table = strlen($this->of_foriegn_key_table) == 0 ?
         $this->of_entity : $this->of_foriegn_key_table;
 	$this->table_alias = nodeTypeSQL::$all_table_alias_array[$this->table_name];
+    $this->unpack_table_alias();
 	// $this->label = $field_info_array[''];
 	// $this->label_option = $field_info_array[''];
 	$this->field_config_instance_id = 'moot?';//$field_info_array[''];
@@ -97,7 +99,17 @@ class fieldSQL /* WILL SOON extend something*/ {
 	$this->weight = $data_unserialized['widget']['weight'];
 	$this->field_config_instance_data = 'EMPTIED after UnPack in ' . basename(__FILE__) . ' on line ' . __LINE__;
 	}
-
+    public function unpack_table_alias() {
+        $table_alias = $this->table_alias;
+        $table_alias_new = $table_alias;
+        $i = 0;
+        while (in_array($table_alias_new, fieldSQL::$used_table_alias_array)) {
+            $i++;
+            $table_alias_new = $table_alias . '_' . $i;
+        }
+        fieldSQL::$used_table_alias_array[] = $table_alias_new;
+        $this->table_alias = $table_alias_new;
+    }
 	public function unpack_join_string(){
         // $join = 'LEFT JOIN ' . $this->table_name . ' ' . $this->table_alias;
 		$join = 'LEFT JOIN ' . $this->table_name . ' ' . $this->table_alias;
