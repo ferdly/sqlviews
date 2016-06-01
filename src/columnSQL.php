@@ -32,7 +32,108 @@ class columnSQL {
 			}
 		}
 	}
+/**
+ * Most Current OO from Local Static Method
+ *
+ *
+ */
+public function instantiate_columnsFromField($field_object) {
+	if (count($field_object->field_field_object_array) > 0) {
+		// return array('columnSQL: Not Indicated for this Field (it _has_ fields)');
+		return array();
+	}
+	$columns = $field_object->columns;
+	$supported_columns_key_array = array('value');
+	$column_object_array = array();
+	foreach ($columns as $column_key => $column_array) {
+		if (in_array($column_key, $supported_columns_key_array)) {
+			if ($field_object->field_column_name == $field_object->field_name . '_' . $column_key) {
+				$column_array = $field_object->prepareColumnArrayForColumnInstantiation();
+				$column_array['column_key'] = $column_key;
+				$column_object_this = new columnSQL($column_array);
+				$column_object_this->unpack_label();
+				$column_object_this->unpack_select_string();
+				$column_object_array[] = $column_object_this;
+			}
+		}
+	}
+	return $column_object_array;
+}
 
+	public function unpack_label($label_overload = '') {
+		$double_quote = '"';
+		$label = trim($this->label);
+		// $label = !empty($label_overload) ? $label_overload : $label;
+		$label_option = $this->label_option;
+		switch ($label_option) {
+			case 'label':
+				$label_append = $this->cardinality + 0 < 0?' [#!]':'';
+				$label_append = $this->cardinality + 0 > 1?' [#' . $this->cardinality . ']':$label_append;
+				$label .= $label_append;
+				$label .= $this->column_key == 'value'?'':'-' . ucwords(str_replace('_', ' ', $this->column_key));
+				$label = !empty($label_overload)?$label_overload:$label;
+				$label = str_replace('"', "'", $label);
+				$label = $double_quote . $label . $double_quote;
+				break;
+			case 'label_machine':
+				$label_append = $this->cardinality + 0 < 0?'_iE':'';
+				$label_append = $this->cardinality + 0 > 1?'_i' . $field_data_array['cardinality']:$label_append;
+				$label .= $label_append;
+				$label .= $this->column_key == 'value'?'':'_' . ucwords(str_replace('_', ' ', $this->column_key));
+				$label = !empty($label_overload)?$label_overload:$label;
+				$label = str_replace('"', '', $label);
+				$label = str_replace("'", '', $label);
+				$label = strtolower(str_replace(' ', '_', str_replace('-', '_', $label)));
+				break;
+			case 'machine':
+				$label = trim($this->column_name);// overloads above SWITCH
+				$label_append = $this->cardinality + 0 < 0?'_iE':'';
+				$label_append = $this->cardinality + 0 > 1?'_i' . $this->cardinality:$label_append;
+				$label .= $label_append;
+				// $label .= $this->column_key == 'value'?'':'_' . ucwords(str_replace('_', ' ', $this->column_key));
+				// $label = !empty($field_data_array['label_overload'])?$field_data_array['label_overload']:$label;
+				$label = str_replace('"', '', $label);
+				$label = str_replace("'", '', $label);
+				$label = strtolower(str_replace(' ', '_', str_replace('-', '_', $label)));
+				break;
+			case 'machine_abbrv':
+				$label = trim($this->column_name);// overloads above SWITCH
+				$label_array = explode('_', $label);
+				if ($label_array[0] == 'field') {
+					$field = array_shift($label_array);
+				}
+				$last_index = count($label_array) - 1;
+				if ($label_array[$last_index] == 'value') {
+					$value = array_pop($label_array);
+				}
+				$label = implode('_', $label_array);
+				$label_append = $this->cardinality + 0 < 0?'_iE':'';
+				$label_append = $this->cardinality + 0 > 1?'_i' . $this->cardinality:$label_append;
+				$label .= $label_append;
+				// $label .= $this->column_key == 'value'?'':'_' . ucwords(str_replace('_', ' ', $this->column_key));
+				// $label = !empty($field_data_array['label_overload'])?$field_data_array['label_overload']:$label;
+				$label = str_replace('"', '', $label);
+				$label = str_replace("'", '', $label);
+				$label = strtolower(str_replace(' ', '_', str_replace('-', '_', $label)));
+				break;
+
+			default:
+				$holder = 'no default code, default checking logic above should kick-in';
+				break;
+		}
+		$label = simple_sanatize_label($label);
+		$this->label = $label;
+
+	} //END function unpack_label()
+
+	public function unpack_select_string() {
+		$column_select_string = $this->table_alias . '.' . $this->column_name;
+		$column_select_string .= ' AS ' . $this->label;
+		$this->column_select_string = $column_select_string;
+	}
+/**
+ * END Most Current OO from Local Static Method
+ */
 	function un_pack($field_data_array) {
 		$double_quote = '"';
 		$field_data_array = is_array($field_data_array)?$field_data_array:array();

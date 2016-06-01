@@ -20,8 +20,8 @@ function _do_developer_vardump(){
   $label_option = 'machine_abbrv';
   /*</Preset $label_option>*/
   $supported_which_array = array(
-        'instantiate_field_array_DEV',//Moot soon after 'field-report'
-        'field-report',
+        'fieldObjectAsColumnParameter_DEV',
+        'field_object_array_DEV',
         'field_info_field_by_id_DEV',
         'schema_DEV',
         'FieldBundleSettings',
@@ -52,14 +52,14 @@ function _do_developer_vardump(){
   if (in_array($argument_which, $supported_which_array)) {
       $which = $argument_which;
   }else{
+      // $which = 'fieldObjectAsColumnParameter_DEV';
+      $which = 'field_object_array_DEV';
       // $which = 'FieldBundleSettings';
       // $which = 'FieldPreOb';
       // $which = 'FieldObjectArray';
       // $which = 'reference_prof';
       // $which = 'SQL';
       // $which = 'field_reference_prof';
-      // $which = 'instantiate_field_array_DEV';
-      $which = 'field-report';
       // $which = 'field_info_field_by_id_DEV';
       // $which = 'schema_DEV';
       /* \_ Un-Comment one above for default $which */
@@ -72,6 +72,55 @@ function _do_developer_vardump(){
     $header .= '=';
   }
   $header .= "\r\n";
+
+if ($which == 'fieldObjectAsColumnParameter_DEV') {
+  $label_option_default = 'machine_abbrv';//moot?
+  $label_option = drush_get_option('label', $label_option_default);
+  require_once 'src/nodeTypeSQL.php';
+  $node_type_sql = new nodeTypeSQL($type_machine_name);
+  $node_type_sql->label_option = $label_option;
+
+  $node_type_sql->database = $databases['default']['default']['database'];
+  $node_type_sql->gatherFieldsArrayToNodeType();
+  $result_array = array();
+  $field_object_array = $node_type_sql->field_object_array;
+  foreach ($field_object_array as $index => $field_object_this) {
+    // $column_instantiation_array_array[$index] =
+      // $field_object_this->prepareColumnArrayForColumnInstantiation();
+    $column_instantiation_array_array[$index] =
+      $field_object_this->gatherColumnArrayToField();
+
+  } //END foreach ($field_object_array as $index => $column_array)
+  $result_array = $column_instantiation_array_array;
+  if (count($result_array) == 0) {
+    $header .= "\r\nWhy Aren't These fieldSQL Objects:\r\n";
+    $result_array = $field_object_array;
+  }
+  $result = $header . print_r($result_array, TRUE);
+  // $result = $header . $output;
+  drush_print($result);
+  return;
+  }
+
+if ($which == 'field_object_array_DEV')
+ {
+  $header = _render_header(__FUNCTION__, $type_machine_name, __LINE__);
+  $label_option_default = 'machine_abbrv';//moot?
+  $label_option = drush_get_option('label', $label_option_default);
+  require_once 'src/nodeTypeSQL.php';
+  $node_type_sql = new nodeTypeSQL($type_machine_name);
+  $node_type_sql->label_option = $label_option;
+
+  $node_type_sql->database = $databases['default']['default']['database'];
+  $node_type_sql->gatherFieldsArrayToNodeType();
+  // $node_type_sql->gatherWeightedFieldArray();
+
+  $output = $node_type_sql->field_object_array;
+
+  $result = $header . print_r($output, TRUE);
+  // $result = $header . $output;
+  drush_print($result);  return;
+}
 
 if ($which == 'schema_DEV') {
   require_once 'src/nodeTypeSQL.php';
@@ -97,49 +146,6 @@ if ($which == 'field_info_field_by_id_DEV') {
     return;
 }
 
-if ($which == 'field-report') {
-    require_once 'src/nodeTypeSQL.php';
-    $node_type = new nodeTypeSQL($type_machine_name);
-    $node_type->label_option = $label_option;
-
-    // $new = FALSE;
-    $new = TRUE;
-
-    if ($new) {
-      $result = $node_type->composeFieldReport();
-      $result = $header . "\r\n" . $result;
-    }else{
-      $node_type->gatherFieldsArrayToNodeType();
-      $field_object_array = $node_type->field_object_array;
-      $field_report_buffer = '';
-      $crlf = "\r\n";
-      $delimiter = ',';
-      // $double_quotes = '"';
-      // \_MOOT because no values have spaces, let along apostrophes
-      foreach ($field_object_array as $index => $field_object_this) {
-        $field_report_buffer .= $field_object_this->field_report_singleton();
-      }
-
-      $result = $header . "\r\n" . $field_report_buffer;
-      // $result_array = $node_type->field_object_array;
-      // $result = $header . print_r($result_array, TRUE);
-    }
-    drush_print($result);
-    return;
-} //END if ($which == 'instantiate_field_array_DEV')
-
-if ($which == 'instantiate_field_array_DEV') {
-      require_once 'src/nodeTypeSQL.php';
-    $node_type = new nodeTypeSQL($type_machine_name);
-    $node_type->label_option = $label_option;
-    // nodeTypeSQL::$all_table_alias_array = best_table_alias_array();
-
-    $node_type->gatherFieldsArrayToNodeType();
-    $result_array = $node_type->field_object_array;
-    $result = $header . print_r($result_array, TRUE);
-    drush_print($result);
-    return;
-} //END if ($which == 'instantiate_field_array_DEV')
 
   if ($which == 'field_reference_prof') {
     $bundle = 'job_application';

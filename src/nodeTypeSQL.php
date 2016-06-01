@@ -215,6 +215,17 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 	    }
 	}
 
+	public function gatherFieldsArrayToNodeType() {
+		if(count($this->field_bundle_settings) == 0) {
+			$this->gatherFieldBundleSettings();
+		}
+		if(count($this->error_array) > 0) {
+			$this->view_string = print_r($this->error_array, TRUE);
+			return;
+		}
+		$this->field_object_array = fieldSQL::instantiate_fieldsFromEntityBundle($this);
+	}
+
 	public function composeFieldReport($option_array = array()){
 		if (count($this->field_object_array) == 0) {
 			$this->gatherFieldsArrayToNodeType();
@@ -238,16 +249,16 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 	    return $this->view_string;
 	}
 
-	public function gatherFieldsArrayToNodeType() {
-		if(count($this->field_bundle_settings) == 0) {
-			$this->gatherFieldBundleSettings();
-		}
-		if(count($this->error_array) > 0) {
-			$this->view_string = print_r($this->error_array, TRUE);
-			return;
-		}
-		$this->field_object_array = fieldSQL::instantiate_fieldsFromEntityBundle($this);
-	}
+	// public function gatherFieldsArrayToNodeType() {
+	// 	if(count($this->field_bundle_settings) == 0) {
+	// 		$this->gatherFieldBundleSettings();
+	// 	}
+	// 	if(count($this->error_array) > 0) {
+	// 		$this->view_string = print_r($this->error_array, TRUE);
+	// 		return;
+	// 	}
+	// 	$this->field_object_array = fieldSQL::instantiate_fieldsFromEntityBundle($this);
+	// }
 
 	public function gatherWeightedFieldArray() {
 		if(count($this->field_bundle_settings) == 0) {

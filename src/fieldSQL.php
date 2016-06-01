@@ -47,6 +47,13 @@ class fieldSQL /* WILL SOON extend something*/ {
 			}
 		}
 	}
+
+	/**
+	 * Most Current OO from Local Static Method
+	 *
+	 *
+	 */
+
 	public function instantiateFieldAndReturn($field_config_ob) {
 		$return_field_object = new fieldSQL($field_config_ob);
 		return $return_field_object;
@@ -81,8 +88,15 @@ class fieldSQL /* WILL SOON extend something*/ {
 	$data_unserialized = unserialize($this->field_config_instance_data);
 	$this->label = $data_unserialized['label'];
 	$this->weight = $data_unserialized['widget']['weight'];
-	// $this->field_config_instance_data = 'EMPTIED after UnPack in ' . basename(__FILE__) . ' on line ' . __LINE__;
+	$this->field_config_instance_data = 'EMPTIED after UnPack in ' . basename(__FILE__) . ' on line ' . __LINE__;
 	}
+
+	public function unpack_join_string(){
+		$join = 'LEFT JOIN ' . $this->table_name . ' ' . $this->table_alias;
+		$on = 'ON ' . nodeTypeSQL::$all_table_alias_array[$this->of_entity] . '.nid' . ' = ' . $this->table_alias . '.entity_id';
+		$this->field_join_string = $join . "\r\n" . $on;
+	}
+
 	public function field_report_singleton() {
 		$crlf = "|\r\n";
 		$delimiter = ",";
@@ -107,6 +121,48 @@ class fieldSQL /* WILL SOON extend something*/ {
 		$field_report_singleton_result .= $field_field_report_buffer;
 		return $field_report_singleton_result;
 	}
+	public function prepareColumnArrayForColumnInstantiation() {
+		$column_to_field_mapper_array = array();
+		foreach ($this as $field_key => $field_attribute) {
+		  $render = FALSE;
+          $render = isset($field_attribute) ? TRUE : $render;
+          $render = $field_attribute === 0 ? TRUE : $render;
+          $render = is_array($field_attribute) && count($field_attribute) == 0 ? FALSE : $render;
+          $render = $field_attribute == 'moot?' ? FALSE : $render;
+          $do_render_array = array('index');
+          $render = in_array($field_key, $do_render_array) ? TRUE : $render;
+          $do_not_render_array = array('columns','field_field_object_array','field_config_instance_data','column_object_array');
+          $render = in_array($field_key, $do_not_render_array) ? FALSE : $render;
+          if ($render) {
+            $field_prefix = substr($field_key, 0, 6) == 'field_' ? TRUE : FALSE;
+            if ($field_prefix) {
+              $column_key = 'column_' . substr($field_key, 6);
+              if (substr($column_key, 0, 13) == 'column_column') {
+                $column_key = substr($column_key, 7);
+              }
+            }else{
+              $column_key = $field_key;
+            } //END if ($field_prefix)
+            $column_to_field_mapper_array[$column_key] = $field_key;
+          } //END if ($render)
+      } //END foreach ($column_array as $field_key => $field_attribute)
+      $column_array_for_column_instantiation = array();
+      foreach ($column_to_field_mapper_array as $column_key => $field_key) {
+      	$column_array_for_column_instantiation[$column_key] = $this->$field_key;
+      }
+      return $column_array_for_column_instantiation;
+	}
+    public function gatherColumnArrayToField() {
+        $this->column_object_array =
+        	columnSQL::instantiate_columnsFromField($this);
+        return $this->column_object_array;
+    }
+
+/**
+ * END Most Current OO from Local Static Method
+ */
+
+
 	public function instantiateColumnObjects($field_array_this = array(), $column_loop_array_overload = array()) {
 			// $column_array = $this->columns;
 			if (count($column_loop_array_overload) == 0) {
@@ -191,13 +247,13 @@ class fieldSQL /* WILL SOON extend something*/ {
 		$field_id_array = array_map(
 			create_function('$o', 'return $o->field_id;'),
 			$field_config_instance_array);
-		/* <seems moot> disabled 20160529171800 delete no longer than 1 week out*/
-		// foreach ($field_config_instance_array as $index => $fci_this) {
-		// 	$fci_array[$fci_this->field_id]['field_id'] = $fci_this->field_id;
-		// 	$fci_array[$fci_this->field_id]['field_name'] = $fci_this->field_name;
-		// 	$fci_array[$fci_this->field_id]['fci_data'] = $fci_this->data;
-		// }
-		/* </seems moot> */
+		/* <Critical>  to '$field_config_ob->field_config_instance_data' below*/
+		foreach ($field_config_instance_array as $index => $fci_this) {
+			$fci_array[$fci_this->field_id]['field_id'] = $fci_this->field_id;
+			$fci_array[$fci_this->field_id]['field_name'] = $fci_this->field_name;
+			$fci_array[$fci_this->field_id]['fci_data'] = $fci_this->data;
+		}
+		/* </Critical>*/
 
 		$field_config_array= db_select('field_config','fc')
             ->fields('fc',array('id','field_name','type','module'))
@@ -229,6 +285,8 @@ class fieldSQL /* WILL SOON extend something*/ {
         	$field_config_ob->field_config_instance_data = $fci_array[$this_field_id]['fci_data'];
         	$i++;
         	$field_config_ob->unpack_by_field_id();
+        	$field_config_ob->unpack_join_string();
+        	$field_config_ob->gatherColumnArrayToField();
     		$return_field_object_array[$field_config->field_name] = $field_config_ob;
 
         }
@@ -241,7 +299,8 @@ class fieldSQL /* WILL SOON extend something*/ {
 			});
 
 		return $result_array;
-	}
+	} //END function instantiate_fieldsFromEntityBundle($entity_bundle_object)
+
 	public function gatherColumnLoopArray_FieldCollection(){
 		$column_loop_array = $this->columns;
 		return $column_loop_array;

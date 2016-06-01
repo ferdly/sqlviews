@@ -233,22 +233,18 @@ function _render_header($function, $parameter_string = '', $line = 0) {
 }
 
 function _do_field_report($type_machine_name){
-  $header = _render_header(__FUNCTION__, $type_machine_name, __LINE__);
+  $line = 0; //__LINE__;
+  $header = _render_header(__FUNCTION__, $type_machine_name, $line);
   $label_option_default = 'machine_abbrv';//moot?
-  $label_option = drush_get_option('label', $label_option_default);
-  // $header = 'Result of ' . __FUNCTION__ . '(' . $type_machine_name . ")\r\n==========\r\n";
   require_once 'src/nodeTypeSQL.php';
-  // $node_type = new nodeTypeSQL($type_machine_name);
   $node_type_sql = new nodeTypeSQL($type_machine_name);
   $node_type_sql->label_option = $label_option;
 
   $node_type_sql->database = $databases['default']['default']['database'];
   $node_type_sql->composeFieldReport();
-  // $node_type_sql->gatherWeightedFieldArray();
 
   $output = $node_type_sql->view_string;
 
-  // $result = $header . print_r($output, TRUE);
   $result = $header . $output;
   drush_print($result);
 }
