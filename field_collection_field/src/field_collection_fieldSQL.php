@@ -5,6 +5,14 @@ class field_collection_fieldSQL extends fieldSQL {
     public function __construct($field_array) {
         parent::__construct($field_array);
     }
+
+
+    /**
+     * Most Current OO from Local Static Method
+     *
+     *
+     */
+
     public function instantiateFieldAndReturn($field_config_ob) {
         $return_field_object = new field_collection_fieldSQL($field_config_ob);
 
@@ -13,6 +21,8 @@ class field_collection_fieldSQL extends fieldSQL {
         $field_collection_ob = new stdClass();
         $field_collection_ob->entity = 'field_collection_item';
         $field_collection_ob->bundle = $field_config_ob->field_name;
+        $field_collection_ob->foriegn_key_table = 'field_data_'.$field_config_ob->field_name;
+        $field_collection_ob->entity_table_foriegnkey = $field_config_ob->field_name . '_value';
         $field_collection_ob->of_cardinality = $field_config_ob->of_cardinality * $cardinality;
 
         $return_field_object->field_field_object_array = fieldSQL::instantiate_fieldsFromEntityBundle($field_collection_ob);
@@ -20,6 +30,18 @@ class field_collection_fieldSQL extends fieldSQL {
 
         return $return_field_object;
     }
+
+    public function zunpack_join_string(){
+        $join = 'LEFT JOIN ' . $this->table_name . ' ' . $this->table_alias;
+        $on = 'ON ' . nodeTypeSQL::$all_table_alias_array[$this->of_entity] . '.' . $this->of_bundle . '_value' . ' = ' . $this->table_alias . '.entity_id';
+        $this->field_join_string = $join . "\r\n" . $on;
+    }
+
+    /**
+     * END Most Current OO from Local Static Method
+     */
+
+
     public function zunpack_by_field_id() {
         $field_id = $this->id;
         $this->active = 1;

@@ -16,7 +16,7 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 	public $entity = 'node';
 	public $entity_table_name = 'node';
 	public $entity_table_alias;
-	public $entity_table_foriegnkey;
+	public $entity_table_foriegnkey = 'nid';
 	public $entity_type_table_name = 'node_type';
 	public $type; //node table -- machine name
 	public $title; //node table

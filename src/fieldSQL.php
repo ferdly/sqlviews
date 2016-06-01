@@ -10,6 +10,9 @@ class fieldSQL /* WILL SOON extend something*/ {
 	public $table_name;
 	public $label;
 	public $label_option;
+    public $table_alias;
+    public $field_select_list_string;
+    public $field_join_string;
 	public $field_config_instance_id;
 	public $field_config_id;
 	public $field_config_instance_deleted;
@@ -17,7 +20,9 @@ class fieldSQL /* WILL SOON extend something*/ {
 	public $field_config_instance_data;
 	public $field_config_data;
 	public $of_entity;
-	public $of_bundle;
+    public $of_bundle;
+    public $of_foriegn_key_table;
+	public $of_foriegn_key;
 	public $of_cardinality;
 	public $type;
 	public $module;
@@ -30,9 +35,9 @@ class fieldSQL /* WILL SOON extend something*/ {
 	/* <to be UnPacked> */
 	public $field_field_object_array = array();
 	public $column_object_array = array();
-	public $table_alias;
-	public $field_select_list_string;
-	public $field_join_string;
+	// public $table_alias;
+	// public $field_select_list_string;
+	// public $field_join_string;
 	public $field_join_is_hidden = 0;
 	public $field_select_is_hidden = 0;
 	/* </to be UnPacked> */
@@ -70,7 +75,9 @@ class fieldSQL /* WILL SOON extend something*/ {
 	$this->field_column_name = $this->field_name . '_value';
 	$table_array = $field_info_array['storage']['details']['sql']['FIELD_LOAD_CURRENT'];
 	$table_name = key($table_array);
-	$this->table_name = $table_name;
+    $this->table_name = $table_name;
+	$this->of_foriegn_key_table = strlen($this->of_foriegn_key_table) == 0 ?
+        $this->of_entity : $this->of_foriegn_key_table;
 	$this->table_alias = nodeTypeSQL::$all_table_alias_array[$this->table_name];
 	// $this->label = $field_info_array[''];
 	// $this->label_option = $field_info_array[''];
@@ -92,10 +99,50 @@ class fieldSQL /* WILL SOON extend something*/ {
 	}
 
 	public function unpack_join_string(){
+        // $join = 'LEFT JOIN ' . $this->table_name . ' ' . $this->table_alias;
 		$join = 'LEFT JOIN ' . $this->table_name . ' ' . $this->table_alias;
-		$on = 'ON ' . nodeTypeSQL::$all_table_alias_array[$this->of_entity] . '.nid' . ' = ' . $this->table_alias . '.entity_id';
+        // $on = 'ON ' . nodeTypeSQL::$all_table_alias_array[$this->of_entity] . '.' . $this->of_foriegn_key . ' = ' . $this->table_alias . '.entity_id';
+		$on = 'ON ' . nodeTypeSQL::$all_table_alias_array[$this->of_foriegn_key_table] . '.' . $this->of_foriegn_key . ' = ' . $this->table_alias . '.entity_id';
 		$this->field_join_string = $join . "\r\n" . $on;
 	}
+
+    public function gatherSelect_this($i = 0) {
+        $select_array_this = array();
+        if (count($this->column_object_array) == 0) {
+            $select = "/* NNULL */";
+            $select_array_this[$i] = $select;
+            foreach ($this->field_field_object_array as $index => $field_object_this) {
+                $result_array = $field_object_this->gatherSelect_this();
+                $select_array_this = array_merge($select_array_this,$result_array);
+            }
+        }else{
+            foreach ($this->column_object_array as $index => $column_this) {
+                $select = $column_this->column_select_string;
+                $select_array_this[$i] = $select;
+                $i++;
+            }
+        }
+        return $select_array_this;
+    } //END public function gatherSelect_this($i = 0)
+
+    public function gatherJoin_this($i = 0) {
+        $join_array_this = array();
+        if (count($this->column_object_array) == 0) {
+            $join = $this->field_join_string;
+            $join_array_this[$i] = $join;
+            foreach ($this->field_field_object_array as $index => $field_object_this) {
+                $result_array = $field_object_this->gatherJoin_this();
+                $join_array_this = array_merge($join_array_this,$result_array);
+            }
+        }else{
+            foreach ($this->column_object_array as $index => $column_this) {
+                $join = $column_this->column_join_string;
+                $join_array_this[$i] = $join;
+                $i++;
+            }
+        }
+        return $join_array_this;
+    } //END public function gatherSelect_this($i = 0)
 
 	public function field_report_singleton() {
 		$crlf = "|\r\n";
@@ -157,6 +204,88 @@ class fieldSQL /* WILL SOON extend something*/ {
         	columnSQL::instantiate_columnsFromField($this);
         return $this->column_object_array;
     }
+
+    public function instantiate_fieldsFromEntityBundle($entity_bundle_object){
+        $entity = $entity_bundle_object->entity;
+        $foriegn_key_table = $entity_bundle_object->foriegn_key_table;//save for 'somthing?'
+        // $foriegn_key_table = strlen($foriegn_key_table) == 0 ? $entity_bundle_object->table_name : $foriegn_key_table;
+        $bundle = $entity_bundle_object->bundle;
+        $foriegn_key = $entity_bundle_object->entity_table_foriegnkey;
+        $cardinality = $entity_bundle_object->of_cardinality + 0;
+        // $cardinality = $cardinality == 0 ? 1 : $cardinality;
+        $type = $entity_bundle_object->type; //backward compatible for node
+        $bundle = empty($bundle) ? $type : $bundle;//backward compatible for node
+        $core = nodeTypeSQL::$drupal_core_field_type_module_array;
+        $label_option = $entity_bundle_object->label_option;
+        $field_config_instance_array= db_select('field_config_instance','fci')
+            ->fields('fci',array('field_id','data'))
+            // ->addField('fci', 'field_id')
+            // ->addField('fci', 'data', 'fci_data')
+            ->condition('entity_type', $entity)
+            ->condition('bundle', $bundle)
+            ->condition('deleted', 0)
+            ->execute()
+            ->fetchAll();
+
+        $field_id_array = array_map(
+            create_function('$o', 'return $o->field_id;'),
+            $field_config_instance_array);
+        /* <Critical>  to '$field_config_ob->field_config_instance_data' below*/
+        foreach ($field_config_instance_array as $index => $fci_this) {
+            $fci_array[$fci_this->field_id]['field_id'] = $fci_this->field_id;
+            $fci_array[$fci_this->field_id]['field_name'] = $fci_this->field_name;
+            $fci_array[$fci_this->field_id]['fci_data'] = $fci_this->data;
+        }
+        /* </Critical>*/
+
+        $field_config_array= db_select('field_config','fc')
+            ->fields('fc',array('id','field_name','type','module'))
+            ->condition('id', $field_id_array,'IN')
+            ->condition('active', 1)
+            ->condition('deleted', 0)
+            ->execute()
+            ->fetchAll();
+        $i = 0;
+        foreach ($field_config_array as $key => $field_config) {
+            $this_field_id = $field_config->id;
+            $field_config->field_id = $field_config->id;
+            $field_config->of_entity = $entity;
+            $field_config->of_bundle = $bundle;
+            $field_config->of_foriegn_key_table = $foriegn_key_table;
+            $field_config->of_foriegn_key = $foriegn_key;
+            $field_config->of_cardinality = $cardinality;
+            $field_config->label_option = $label_option;
+            $field_config->index = $i;
+            if (in_array($field_config->module, $core)) {
+                $field_config_ob = fieldSQL::instantiateFieldAndReturn($field_config);
+                // $field_config_ob->unpack_by_field_id();
+                // $return_field_object_array[$field_config->field_name] = $field_config_ob;
+            }else{
+                // $return_field_object_array[$field_config->field_name]['action'] = $field_config->module . '_fieldSQL';
+                $class_name = $field_config->module . '_fieldSQL';
+                $field_config_ob = $class_name::instantiateFieldAndReturn($field_config);
+                // $field_config_ob->unpack_by_field_id();
+            // $return_field_object_array[$field_config->field_name] = $field_config_ob;
+            }
+            $field_config_ob->field_config_instance_data = $fci_array[$this_field_id]['fci_data'];
+            $i++;
+            $field_config_ob->unpack_by_field_id();
+            $field_config_ob->unpack_join_string();
+            $field_config_ob->gatherColumnArrayToField();
+            $return_field_object_array[$field_config->field_name] = $field_config_ob;
+
+        }
+
+        $result_array = $return_field_object_array;
+            usort($result_array, function($a, $b)
+            {
+                // return strcmp($a->weight, $b->weight);
+                return $a->weight > $b->weight;
+            });
+
+        return $result_array;
+    } //END function instantiate_fieldsFromEntityBundle($entity_bundle_object)
+
 
 /**
  * END Most Current OO from Local Static Method
@@ -224,82 +353,6 @@ class fieldSQL /* WILL SOON extend something*/ {
 	return $column_loop_array;
 	}
 
-	public function instantiate_fieldsFromEntityBundle($entity_bundle_object){
-		$entity = $entity_bundle_object->entity;
-		$entity = $entity_bundle_object->entity;
-		$bundle = $entity_bundle_object->bundle;
-		$cardinality = $entity_bundle_object->of_cardinality + 0;
-		// $cardinality = $cardinality == 0 ? 1 : $cardinality;
-		$type = $entity_bundle_object->type; //backward compatible for node
-		$bundle = empty($bundle) ? $type : $bundle;//backward compatible for node
-		$core = nodeTypeSQL::$drupal_core_field_type_module_array;
-		$label_option = $entity_bundle_object->label_option;
-		$field_config_instance_array= db_select('field_config_instance','fci')
-            ->fields('fci',array('field_id','data'))
-            // ->addField('fci', 'field_id')
-            // ->addField('fci', 'data', 'fci_data')
-            ->condition('entity_type', $entity)
-            ->condition('bundle', $bundle)
-            ->condition('deleted', 0)
-            ->execute()
-            ->fetchAll();
-
-		$field_id_array = array_map(
-			create_function('$o', 'return $o->field_id;'),
-			$field_config_instance_array);
-		/* <Critical>  to '$field_config_ob->field_config_instance_data' below*/
-		foreach ($field_config_instance_array as $index => $fci_this) {
-			$fci_array[$fci_this->field_id]['field_id'] = $fci_this->field_id;
-			$fci_array[$fci_this->field_id]['field_name'] = $fci_this->field_name;
-			$fci_array[$fci_this->field_id]['fci_data'] = $fci_this->data;
-		}
-		/* </Critical>*/
-
-		$field_config_array= db_select('field_config','fc')
-            ->fields('fc',array('id','field_name','type','module'))
-            ->condition('id', $field_id_array,'IN')
-            ->condition('active', 1)
-            ->condition('deleted', 0)
-            ->execute()
-            ->fetchAll();
-        $i = 0;
-        foreach ($field_config_array as $key => $field_config) {
-        	$this_field_id = $field_config->id;
-        	$field_config->field_id = $field_config->id;
-        	$field_config->of_entity = $entity;
-        	$field_config->of_bundle = $bundle;
-        	$field_config->of_cardinality = $cardinality;
-        	$field_config->label_option = $label_option;
-        	$field_config->index = $i;
-        	if (in_array($field_config->module, $core)) {
-        		$field_config_ob = fieldSQL::instantiateFieldAndReturn($field_config);
-	        	// $field_config_ob->unpack_by_field_id();
-	    		// $return_field_object_array[$field_config->field_name] = $field_config_ob;
-        	}else{
-        		// $return_field_object_array[$field_config->field_name]['action'] = $field_config->module . '_fieldSQL';
-        		$class_name = $field_config->module . '_fieldSQL';
-        		$field_config_ob = $class_name::instantiateFieldAndReturn($field_config);
-	        	// $field_config_ob->unpack_by_field_id();
-    		// $return_field_object_array[$field_config->field_name] = $field_config_ob;
-        	}
-        	$field_config_ob->field_config_instance_data = $fci_array[$this_field_id]['fci_data'];
-        	$i++;
-        	$field_config_ob->unpack_by_field_id();
-        	$field_config_ob->unpack_join_string();
-        	$field_config_ob->gatherColumnArrayToField();
-    		$return_field_object_array[$field_config->field_name] = $field_config_ob;
-
-        }
-
-       	$result_array = $return_field_object_array;
-       		usort($result_array, function($a, $b)
-			{
-    			// return strcmp($a->weight, $b->weight);
-    			return $a->weight > $b->weight;
-			});
-
-		return $result_array;
-	} //END function instantiate_fieldsFromEntityBundle($entity_bundle_object)
 
 	public function gatherColumnLoopArray_FieldCollection(){
 		$column_loop_array = $this->columns;
