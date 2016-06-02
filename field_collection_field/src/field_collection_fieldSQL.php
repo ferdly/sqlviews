@@ -49,7 +49,7 @@ class field_collection_fieldSQL extends fieldSQL {
     //     $this->field_join_string = "\r\nUNPACKED_JOIN_STRING_FOR_" . $this->field_name;
     // }
 
-    function instantiateColumnObjects($field_array_this = array()) {
+    function Z_instantiateColumnObjects($field_array_this = array()) {
         $bundle = $field_array_this['field_name'];
         $field_config_instance_array =
         db_query('SELECT id, field_id, field_name, data, deleted FROM {field_config_instance} WHERE bundle = :bundle',
