@@ -40,6 +40,19 @@ function sqlviews_drush_command() {
       'view-name' => 'is option',
     ),
   );
+  $items['sql-view-reports'] = array(
+    'aliases' => array(
+      'sqlv-rpt',
+      ),
+    'arguments' => array(
+      'report' => 'is argument',
+      'bundle' => 'is argument',
+    ),
+    'options' => array(
+      'context' => 'is option',
+      'dev' => 'is option',
+    ),
+  );
 
 /**
   * $items Append & Overload below
@@ -111,6 +124,11 @@ function drush_sqlviews_sql_view_code($which_type = FALSE) {
   _do_sql_view_code($which_type);
 } //END function drush_node_tablelist($which_list = FALSE)
 
+function drush_sqlviews_sql_view_reports() {
+  require_once 'reports_sqlviews_drush.inc';
+  _do_reports_sqlviews_drush();
+} //END function drush_node_tablelist($which_list = FALSE)
+
 function _which_nodetype_arguments($which = 'array'){
   $which_arguments = array();
   $node_types_array = node_type_get_types();
@@ -142,7 +160,7 @@ function _which_nodetype_arguments($which = 'array'){
       if ($correct_args_count == 0) {
         $string = $zero;
       }else{
-        $string = $non_zero . $grammar . $list . '. (Or supply no example and select from prompted values.)';
+        $string = $non_zero . $grammar . $list . '. (Or supply none and select from prompted values.)';
       }
       return $string;
       break;
