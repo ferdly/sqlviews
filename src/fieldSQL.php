@@ -305,7 +305,7 @@ class fieldSQL /* WILL SOON extend something*/ {
  */
 
 
-	public function instantiateColumnObjects($field_array_this = array(), $column_loop_array_overload = array()) {
+	public function Z_instantiateColumnObjects($field_array_this = array(), $column_loop_array_overload = array()) {
 			// $column_array = $this->columns;
 			if (count($column_loop_array_overload) == 0) {
 				$column_loop_array = $this->columns;
@@ -346,7 +346,7 @@ class fieldSQL /* WILL SOON extend something*/ {
 
 	}
 
-	public function gatherColumnLoopArray_AddressField(){
+	public function Z_gatherColumnLoopArray_AddressField(){
 	$column_loop_array = array(
 		'first_name' => 1,
 		 'last_name' => 2,
@@ -367,12 +367,12 @@ class fieldSQL /* WILL SOON extend something*/ {
 	}
 
 
-	public function gatherColumnLoopArray_FieldCollection(){
+	public function Z_gatherColumnLoopArray_FieldCollection(){
 		$column_loop_array = $this->columns;
 		return $column_loop_array;
 	}
 
-	public function instantiateColumnObjects_loop($column_loop_array){
+	public function Z_instantiateColumnObjects_loop($column_loop_array){
 		$column_array = $this->columns;
 		foreach ($column_loop_array as $column_key => $column_array_this) {
 			$column_object_this = new columnSQL($column_array[$column_key]);
@@ -382,7 +382,7 @@ class fieldSQL /* WILL SOON extend something*/ {
 		}
 	}
 
-	public function un_pack($node_data_array) {
+	public function Z_un_pack($node_data_array) {
 		$this->table_alias = 'ta' . $this->index;
 		$space_string = ' ';
 		$crlf_string = "\r\n"; //figure out globally
@@ -416,7 +416,7 @@ class fieldSQL /* WILL SOON extend something*/ {
 		$this->field_select_list_string = implode("\r\n,", $column_select_string_array);
 	} //END function un_pack()
 
-	public function un_pack_JoinString(&$field_data_array,&$node_data_array ) {
+	public function Z_un_pack_JoinString(&$field_data_array,&$node_data_array ) {
 		$space_string = ' ';
 		$crlf_string = "\r\n"; //figure out globally
 		$field_join_string_scrap = $this->field_join_string;
