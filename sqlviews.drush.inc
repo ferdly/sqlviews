@@ -35,13 +35,9 @@ function sqlviews_drush_command() {
     'aliases' => array(
       'sqlv',
       ),
-    'arguments' => array(
-      'list' => 'is argument',
-      'groupby' => 'is argument',
-      'cube' => 'is argument',
-    ),
     'options' => array(
       'label' => 'is option',
+      'view-name' => 'is option',
     ),
   );
 
@@ -255,11 +251,15 @@ function _do_sql_view_code($type_machine_name){
   // $label_option_default = 'machine';
   // $label_option_default = 'machine_abbrv';
   $label_option = drush_get_option('label', $label_option_default);
+  $view_name_option = drush_get_option('view-name', '');
   $header = 'Result of ' . __FUNCTION__ . '(' . $type_machine_name . ")\r\n==========\r\n";
   require_once 'src/nodeTypeSQL.php';
   // $node_type = new nodeTypeSQL($type_machine_name);
   $node_type_sql = new nodeTypeSQL($type_machine_name);
   $node_type_sql->label_option = $label_option;
+  if (strlen($view_name_option) > 0) {
+    $node_type_sql->view_name = $view_name_option;
+  }
 
   $node_type_sql->database = $databases['default']['default']['database'];
   // $node_type_sql->composeViewString();
