@@ -20,6 +20,8 @@ function _do_developer_vardump(){
   $label_option = 'machine_abbrv';
   /*</Preset $label_option>*/
   $supported_which_array = array(
+        'composeSQL_Query_DEV',
+        'composeSQL_View_DEV',
         'fieldObjectAsColumnParameter_DEV',
         'field_object_array_DEV',
         'field_info_field_by_id_DEV',
@@ -53,7 +55,9 @@ function _do_developer_vardump(){
   if (in_array($argument_which, $supported_which_array)) {
       $which = $argument_which;
   }else{
-      $which = 'new_select_join_array_collection_DEV';
+      $which = 'composeSQL_Query_DEV';
+      // $which = 'composeSQL_Query_DEV';
+      // $which = 'new_select_join_array_collection_DEV';
       // $which = 'fieldObjectAsColumnParameter_DEV';
       // $which = 'field_object_array_DEV';
       // $which = 'nodeTypeSQL_DEV';
@@ -75,6 +79,34 @@ function _do_developer_vardump(){
     $header .= '=';
   }
   $header .= "\r\n";
+
+if ($which == 'composeSQL_Query_DEV') {
+  $label_option_default = 'machine_abbrv';//moot?
+  $label_option = drush_get_option('label', $label_option_default);
+  require_once 'src/nodeTypeSQL.php';
+  $node_type_sql = new nodeTypeSQL($type_machine_name);
+  $node_type_sql->label_option = $label_option;
+  nodeTypeSQL::$static_label_option = $label_option;
+  $output = $node_type_sql->composeSQL_Query();
+  // $output = nodeTypeSQL::$static_label_option;
+  $result = $header . $output;
+  drush_print($result);
+  return;
+} //END if ($which == 'composeSQL_Query_DEV')
+
+if ($which == 'composeSQL_View_DEV') {
+  $label_option_default = 'machine_abbrv';//moot?
+  $label_option = drush_get_option('label', $label_option_default);
+  require_once 'src/nodeTypeSQL.php';
+  $node_type_sql = new nodeTypeSQL($type_machine_name);
+  $node_type_sql->label_option = $label_option;
+  nodeTypeSQL::$static_label_option = $label_option;
+  $output = $node_type_sql->composeSQL_View();
+  // $output = nodeTypeSQL::$static_label_option;
+  $result = $header . $output;
+  drush_print($result);
+  return;
+} //END if ($which == 'composeSQL_Query_DEV')
 
 if ($which == 'new_select_join_array_collection_DEV') {
   $test = FALSE;

@@ -63,8 +63,11 @@ public function instantiate_columnsFromField($field_object) {
 	public function unpack_label($label_overload = '') {
 		$double_quote = '"';
 		$label = trim($this->label);
-		// $label = !empty($label_overload) ? $label_overload : $label;
+		$label = !empty($label_overload) ? $label_overload : $label;
 		$label_option = $this->label_option;
+		// $label_option = nodeTypeSQL::$static_label_option;
+		// $label = nodeTypeSQL::$static_label_option;
+		// $label = nodeTypeSQL::$static_label_option;
 		switch ($label_option) {
 			case 'label':
 				$label_append = $this->cardinality + 0 < 0?' [#!]':'';
@@ -115,13 +118,13 @@ public function instantiate_columnsFromField($field_object) {
 				$label = str_replace('"', '', $label);
 				$label = str_replace("'", '', $label);
 				$label = strtolower(str_replace(' ', '_', str_replace('-', '_', $label)));
-				break;
+ 				break;
 
 			default:
 				$holder = 'no default code, default checking logic above should kick-in';
 				break;
 		}
-		$label = simple_sanatize_label($label);
+		// $label = simple_sanatize_label($label);
 		$this->label = $label;
 
 	} //END function unpack_label()

@@ -23,6 +23,7 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 	public $has_title; //node_type table
 	public $title_label; //node_type table
 	public $label_option;
+	public static $static_label_option;
 	public $type_name; //node_type table -- human readable name
 	/* </from Tables> */
 	/* <from Serialized Data> */
@@ -54,6 +55,7 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 	/* </Utility Code> */
 
 	/* <Return Code/Data> */
+	public $view_name;
 	public $view_string;
 	/* </Return Code/Data> */
 
@@ -87,6 +89,7 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 		// $label_option_default = 'machine_abbrv';
 		// dpm($this->label_option, 'form_label_option');
 		$label_option = $this->label_option;
+		self::$static_label_option = $this->label_option;
 		$label_option = empty($label_option) ? $label_option_default : $label_option;
 		$label_option = in_array($label_option, $label_option_supported_array) ? $label_option : $label_option_default;
 		$this->label_option = $label_option;
@@ -169,6 +172,11 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 		$this->field_bundle_settings = $fields;
 		$this->validateFieldCodeRequire();
 	}
+	/**
+	 * Most Current OO from Local Static Method
+	 *
+	 *
+	 */
 
 	public function validateFieldCodeRequire() {
 
@@ -223,6 +231,8 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 			$this->view_string = print_r($this->error_array, TRUE);
 			return;
 		}
+		// require_once 'fieldSQL.php';
+		fieldSQL::$used_table_alias_array = array();
 		$this->field_object_array = fieldSQL::instantiate_fieldsFromEntityBundle($this);
 	}
 
@@ -230,7 +240,6 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 		if (count($this->field_object_array) == 0) {
 			$this->gatherFieldsArrayToNodeType();
 		}
-		// $this->gatherFieldsArrayToNodeType();
 
 	    $field_object_array = $this->field_object_array;
 	    $field_report_buffer = '';
@@ -249,16 +258,100 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 	    return $this->view_string;
 	}
 
-	// public function gatherFieldsArrayToNodeType() {
-	// 	if(count($this->field_bundle_settings) == 0) {
-	// 		$this->gatherFieldBundleSettings();
-	// 	}
-	// 	if(count($this->error_array) > 0) {
-	// 		$this->view_string = print_r($this->error_array, TRUE);
-	// 		return;
-	// 	}
-	// 	$this->field_object_array = fieldSQL::instantiate_fieldsFromEntityBundle($this);
-	// }
+	public function composeSQL_SelectAndJoin() {
+		if (count($this->field_object_array) == 0) {
+			$this->gatherFieldsArrayToNodeType();
+		}
+		$field_object_array = $this->field_object_array;
+		$select_array = array();
+		$join_array = array();
+		$i = 0;
+		foreach ($field_object_array as $index => $field_object_this) {
+			$select_result_array = $field_object_this->gatherSelect_this();
+			$select_array = array_merge($select_array,$select_result_array);
+			$join_result_array = $field_object_this->gatherJoin_this();
+			$join_array = array_merge($join_array,$join_result_array);
+		}
+		$this->select_string = "\r\n, " . implode("\r\n, ", $select_array);
+		$this->join_string = implode("\r\n", $join_array);
+
+	} //END public function composeSQL_Query()
+
+	public function composeSQL_Query() {
+		if (strlen($this->select_string) == 0) {
+			$this->composeSQL_SelectAndJoin();
+		}
+		if (strlen($this->join_string) == 0) {
+			#\_ should be moot, either both or neither
+			$this->composeSQL_SelectAndJoin();
+		}
+
+		$space_string = ' ';
+		$crlf_string = "\r\n"; // figure this out globally
+		$query_string = '';
+		$query_string .= 'SELECT' . $space_string . $crlf_string;
+		$query_string .= 'n.title AS ' . $this->title_label . $this->select_string;
+		$query_string .= $this->select_string;
+		// $query_string .= $crlf_string
+  		$between = <<<CODEREH
+,n.nid as nid
+,n.vid as vid
+,FROM_UNIXTIME(n.created,'%b %e, %Y %l:%i:%s %p') as created
+,FROM_UNIXTIME(n.changed,'%b %e, %Y %l:%i:%s %p') as changed
+,u.name AS author
+
+FROM node n
+JOIN users u
+ON u.uid = n.uid
+
+CODEREH;
+
+		$query_string .= $between;
+		$query_string .= $this->join_string;
+
+	  $after = <<<CODEREH
+
+
+WHERE n.type = '{$this->type}'
+GROUP BY n.nid
+;
+CODEREH;
+
+		$query_string .= $after;
+		$query_string .= ''; // no ORDER BY
+		$this->query_string = $query_string;
+
+		return $this->query_string;
+	} //END public function composeSQL_Query()
+
+	public function composeSQL_View() {
+		if (strlen($this->query_string) == 0) {
+			$this->composeSQL_Query();
+		}
+
+		if (strlen($this->view_name) == 0) {
+			$view_name = $this->type . '_' . strtoupper($this->entity) . '_VIEW';
+			$view_name = 'sqlVIEW_' . $this->type . '_' . strtoupper($this->entity);
+			$this->view_name = $view_name;
+		}
+		$space_string = ' ';
+		$crlf_string = "\r\n"; // figure this out globally
+		$view_string = '';
+		$view_string .= $crlf_string . 'CREATE OR REPLACE VIEW' . $space_string;
+		$view_string .= $this->view_name . $space_string . 'AS';
+		$view_string .= $space_string . $crlf_string . $crlf_string . $this->query_string;
+		$view_string .= $space_string . $crlf_string;// . ';';
+		$view_string .= $space_string . $crlf_string . "/*END {$this->view_name} */";
+
+		$this->view_string = $view_string;
+
+
+		return $this->view_string;
+	} //END public function composeSQL_View()
+
+	/**
+	 * END Most Current OO from Local Static Method
+	 */
 
 	public function gatherWeightedFieldArray() {
 		if(count($this->field_bundle_settings) == 0) {

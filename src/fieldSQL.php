@@ -99,6 +99,7 @@ class fieldSQL /* WILL SOON extend something*/ {
 	$this->weight = $data_unserialized['widget']['weight'];
 	$this->field_config_instance_data = 'EMPTIED after UnPack in ' . basename(__FILE__) . ' on line ' . __LINE__;
 	}
+
     public function unpack_table_alias() {
         $table_alias = $this->table_alias;
         $table_alias_new = $table_alias;
@@ -121,8 +122,8 @@ class fieldSQL /* WILL SOON extend something*/ {
     public function gatherSelect_this($i = 0) {
         $select_array_this = array();
         if (count($this->column_object_array) == 0) {
-            $select = "/* NNULL */";
-            $select_array_this[$i] = $select;
+            // $select = 'NNULL';
+            // $select_array_this[$i] = $select;
             foreach ($this->field_field_object_array as $index => $field_object_this) {
                 $result_array = $field_object_this->gatherSelect_this();
                 $select_array_this = array_merge($select_array_this,$result_array);
