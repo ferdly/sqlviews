@@ -262,8 +262,8 @@ function _do_sql_view_code($type_machine_name){
   $node_type_sql->label_option = $label_option;
 
   $node_type_sql->database = $databases['default']['default']['database'];
-  $node_type_sql->composeViewString();
-  // $node_type_sql->gatherWeightedFieldArray();
+  // $node_type_sql->composeViewString();
+  $node_type_sql->composeSQL_View();
 
   $output = $node_type_sql->view_string;
 

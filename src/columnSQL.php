@@ -137,7 +137,7 @@ public function instantiate_columnsFromField($field_object) {
 /**
  * END Most Current OO from Local Static Method
  */
-	function un_pack($field_data_array) {
+	function Z_un_pack($field_data_array) {
 		$double_quote = '"';
 		$field_data_array = is_array($field_data_array)?$field_data_array:array();
 		$this->overloadLogic($field_data_array);
@@ -165,7 +165,7 @@ public function instantiate_columnsFromField($field_object) {
 
 	} //END function un_pack()
 
-	function un_pack_label(&$field_data_array) {
+	function Z_un_pack_label(&$field_data_array) {
 		// $label_overload = $field_data_array['label_overload'];
 		$double_quote = '"';
 		$label = trim($field_data_array['label']);
@@ -231,7 +231,7 @@ public function instantiate_columnsFromField($field_object) {
 		$this->label = $label;
 	}
 
-	function overloadLogic (&$field_data_array) {
+	function Z_overloadLogic (&$field_data_array) {
 		$type = $field_data_array['type'];
 		$supported_type_array = array(
 			'addressfield',
@@ -259,12 +259,12 @@ public function instantiate_columnsFromField($field_object) {
 		return;
 	}
 
-	function overloadLogic_Body (&$field_data_array) {
+	function Z_overloadLogic_Body (&$field_data_array) {
 		//'LEFT(' . $z . ', 25)'
 		return;
 	}
 
-	function overloadLogic_AddressField (&$field_data_array) {
+	function Z_overloadLogic_AddressField (&$field_data_array) {
 		$toskip_column_key_array = array('country','sub_administrative_area','dependent_locality','sub_premise','name_line','data',);
 		#\_ This MUST become aware of Settings and Country
 		if (in_array($this->column_key, $toskip_column_key_array) === true) {
@@ -307,7 +307,7 @@ public function instantiate_columnsFromField($field_object) {
 
 	} //END function overloadLogic_AddressField (&$field_data_array)
 
-	function overloadLogic_FieldCollection (&$field_data_array) {
+	function Z_overloadLogic_FieldCollection (&$field_data_array) {
 		$field_data_array['label'] .= '_fcz';
 		return;
 	}
