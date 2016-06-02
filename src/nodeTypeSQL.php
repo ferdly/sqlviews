@@ -272,7 +272,7 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 			$join_result_array = $field_object_this->gatherJoin_this();
 			$join_array = array_merge($join_array,$join_result_array);
 		}
-		$this->select_string = "\r\n, " . implode("\r\n, ", $select_array);
+		$this->select_string = "\r\n," . implode("\r\n,", $select_array);
 		$this->join_string = implode("\r\n", $join_array);
 
 	} //END public function composeSQL_Query()
@@ -294,6 +294,7 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 		$query_string .= $this->select_string;
 		// $query_string .= $crlf_string
   		$between = <<<CODEREH
+
 ,n.nid as nid
 ,n.vid as vid
 ,FROM_UNIXTIME(n.created,'%b %e, %Y %l:%i:%s %p') as created
