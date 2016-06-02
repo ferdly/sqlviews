@@ -353,7 +353,7 @@ CODEREH;
 	 * END Most Current OO from Local Static Method
 	 */
 
-	public function gatherWeightedFieldArray() {
+	public function Z_gatherWeightedFieldArray() {
 		if(count($this->field_bundle_settings) == 0) {
 			$this->gatherFieldBundleSettings();
 		}
@@ -391,7 +391,7 @@ CODEREH;
 		$this->field_object_array_count = count($weighted_field_array);
 	} //END function gatherWeightedFieldArray()
 
-	public function gatherObjectReadyFieldArray() {
+	public function Z_gatherObjectReadyFieldArray() {
 		if ($this->field_object_array_count < 0) {
 			$this->gatherWeightedFieldArray();
 		}
@@ -456,7 +456,7 @@ CODEREH;
 		#\_ FAUX for Testing this public functions REAL purpose is to explode the array and load into fieldSQL objects
 	} //END function gatherObjectReadyFieldArray()
 
-	public function instantiateFieldObjects() {
+	public function Z_instantiateFieldObjects() {
 		#\_ both __construct() and un_pack()
 		if ($this->field_object_array_count != count($this->field_preobject_array)) {
 			$this->gatherObjectReadyFieldArray();
@@ -501,7 +501,7 @@ CODEREH;
 
 	} //END function instantiateFieldObjects()
 
-	public function composeSelectStringFields_JoinStringFields() {
+	public function Z_composeSelectStringFields_JoinStringFields() {
 		if ($this->field_object_array_count != count($this->field_object_array)) {
 			$this->instantiateFieldObjects();
 		}
@@ -532,7 +532,7 @@ CODEREH;
 		$this->join_string_fields = implode("\r\n", $field_join_string_array);
 	} //END function gatherSelectStringFields()
 
-	public function composeJoinString() {
+	public function Z_composeJoinString() {
 		if (empty($this->join_string_fields)) {
 			$this->composeSelectStringFields_JoinStringFields();
 		}
@@ -544,7 +544,7 @@ CODEREH;
 		$this->join_string = $join_string;
 		$this->join_string_fields = 'NNULL';
 	} //END function composeJoinString()
-	public function composeSelectString() {
+	public function Z_composeSelectString() {
 		if (empty($this->select_string_fields)) {
 			$this->composeSelectStringFields_JoinStringFields();
 		}
@@ -596,7 +596,7 @@ CODEREH;
 
 	} //END function composeSelectString()
 
-	public function composeQueryString() {
+	public function Z_composeQueryString() {
 		if (empty($this->select_string)) {
 			$this->composeSelectString();
 		}
@@ -624,7 +624,7 @@ CODEREH;
 		$this->join_string = 'NNULL';
 	} //END function composeQueryString()
 
-	public function composeViewString() {
+	public function Z_composeViewString() {
 		if (empty($this->query_string)) {
 			$this->composeQueryString();
 		}
@@ -659,7 +659,7 @@ CODEREH;
 
 } //END Class
 
-function gather_field_table_data($field_name, $prefix = 'field_data_', $site = 'doggydaycare') {
+function Z_gather_field_table_data($field_name, $prefix = 'field_data_', $site = 'doggydaycare') {
 	if (empty($field_name)) {
 		return false;
 	}
