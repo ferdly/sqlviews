@@ -14,7 +14,7 @@ function _do_reports_sqlviews_drush(){
 
   $supported_report_array = array(
         'fieldObjectAsColumnParameter_DEV',
-        'field_object_array_DEV',
+        'field_object_array',
         'field_info_field_by_id_DEV',
         'nodeTypeSQL_DEV',
         'schema_DEV',
@@ -81,14 +81,14 @@ function _do_reports_sqlviews_drush(){
   $header .= "\r\n";
 
   if ($report == 'fieldObjectAsColumnParameter_DEV') {
-    drush_print($header);
-    drush_print('$report: ' . $report . '; $bundle: ' . $argument_bundle . "; \r\n[Line: " . __LINE__ . '; File: ' . basename(__FILE__) . ";]\r\n");
-    return;
+    // drush_print($header);
+    // drush_print('$report: ' . $report . '; $bundle: ' . $argument_bundle . "; \r\n[Line: " . __LINE__ . '; File: ' . basename(__FILE__) . ";]\r\n");
+    // return;
 
     $label_option_default = 'machine_abbrv';//moot?
     $label_option = drush_get_option('label', $label_option_default);
     require_once 'src/nodeTypeSQL.php';
-    $node_type_sql = new nodeTypeSQL($type_machine_name);
+    $node_type_sql = new nodeTypeSQL($bundle);
     $node_type_sql->label_option = $label_option;
 
     $node_type_sql->database = $databases['default']['default']['database'];
@@ -96,10 +96,10 @@ function _do_reports_sqlviews_drush(){
     $result_array = array();
     $field_object_array = $node_type_sql->field_object_array;
     foreach ($field_object_array as $index => $field_object_this) {
-      // $column_instantiation_array_array[$index] =
-        // $field_object_this->prepareColumnArrayForColumnInstantiation();
       $column_instantiation_array_array[$index] =
-        $field_object_this->gatherColumnArrayToField();
+        $field_object_this->prepareColumnArrayForColumnInstantiation();
+      // $column_instantiation_array_array[$index] =
+      //   $field_object_this->gatherColumnArrayToField();
 
     } //END foreach ($field_object_array as $index => $column_array)
     $result_array = $column_instantiation_array_array;
@@ -111,43 +111,9 @@ function _do_reports_sqlviews_drush(){
     // $result = $header . $output;
     drush_print($result);
     return;
-  } //END if ($which == 'fieldObjectAsColumnParameter_DEV')
+  } //END if ($report == 'fieldObjectAsColumnParameter_DEV')
 
 
-  if ($report == 'field_object_array_DEV'){
-    drush_print($header);
-    drush_print('$report: ' . $report . '; $bundle: ' . $argument_bundle . "; \r\n[Line: " . __LINE__ . '; File: ' . basename(__FILE__) . ";]\r\n");
-    return;
-
-    $header = _render_header(__FUNCTION__, $type_machine_name, __LINE__);
-    $label_option_default = 'machine_abbrv';//moot?
-    $label_option = drush_get_option('label', $label_option_default);
-    require_once 'src/nodeTypeSQL.php';
-    $node_type_sql = new nodeTypeSQL($type_machine_name);
-    $node_type_sql->label_option = $label_option;
-
-    $node_type_sql->database = $databases['default']['default']['database'];
-    $node_type_sql->gatherFieldsArrayToNodeType();
-    // $node_type_sql->gatherWeightedFieldArray();
-
-    $pre_output = $node_type_sql->field_object_array;
-    $output_fieldname_array = array();
-    // $output_fieldname_array = array('body');
-    // $output_fieldname_array = array('field_reference_prof');
-    $output = array();
-    foreach ($pre_output as $index => $field_object_this) {
-      if (count($output_fieldname_array) == 0) {
-        $output[$index] = $field_object_this;
-      }
-      elseif (in_array($field_object_this->field_name, $output_fieldname_array)) {
-        $output[$index] = $field_object_this;
-      }
-    }
-
-    $result = $header . print_r($output, TRUE);
-    // $result = $header . $output;
-    drush_print($result);  return;
-  } //END if ($report == 'field_object_array_DEV')
 
 
   if ($report == 'field_info_field_by_id_DEV') {
@@ -196,7 +162,7 @@ function _do_reports_sqlviews_drush(){
     // $result = $header . $output;
     drush_print($result);
     return;
-  } //END if ($which == 'nodeTypeSQL_DEV')
+  } //END if ($report == 'nodeTypeSQL_DEV')
 
 
   if ($report == 'schema_DEV') {
@@ -249,274 +215,40 @@ function _do_reports_sqlviews_drush(){
     $result = $header . print_r($field_array, TRUE);
     drush_print($result);
     return;
-  } //END if ($which == 'FieldBundleSettings')
+  } //END if ($report == 'FieldBundleSettings')
 
 
-if ($which == 'composeSQL_Query_DEV') {
-  $label_option_default = 'machine_abbrv';//moot?
-  $label_option = drush_get_option('label', $label_option_default);
-  require_once 'src/nodeTypeSQL.php';
-  $node_type_sql = new nodeTypeSQL($type_machine_name);
-  $node_type_sql->label_option = $label_option;
-  nodeTypeSQL::$static_label_option = $label_option;
-  $output = $node_type_sql->composeSQL_Query();
-  // $output = nodeTypeSQL::$static_label_option;
-  $result = $header . $output;
-  drush_print($result);
-  return;
-} //END if ($which == 'composeSQL_Query_DEV')
 
-if ($which == 'composeSQL_View_DEV') {
-  $label_option_default = 'machine_abbrv';//moot?
-  $label_option = drush_get_option('label', $label_option_default);
-  require_once 'src/nodeTypeSQL.php';
-  $node_type_sql = new nodeTypeSQL($type_machine_name);
-  $node_type_sql->label_option = $label_option;
-  nodeTypeSQL::$static_label_option = $label_option;
-  $output = $node_type_sql->composeSQL_View();
-  // $output = nodeTypeSQL::$static_label_option;
-  $result = $header . $output;
-  drush_print($result);
-  return;
-} //END if ($which == 'composeSQL_Query_DEV')
 
-if ($which == 'new_select_join_array_collection_DEV') {
-  $test = FALSE;
-  if ($test) {
-    $result_array = array('feather','marcy','chester','marais');
-    $result_other = array('feather','marcy',);
-    // $result_array['cats'] = array('petunia');
-    // $result_other['dogs'] = array('feather','marcy',);
-    // $result_other['cats'] = array('petunia','algonquin','chester');
-    // // array_push($result_array, $result_other);
-    $result_one = print_r($result_array);
-    $result_two = print_r($result_other);
-    $result_array = array_merge($result_array, $result_other);
-    // $result_array['dogs'] = array_merge($result_array['dogs'], $result_other['dogs']);
-    // $result_array['cats'] = array_merge($result_array['cats'], $result_other['cats']);
-    $result_three = print_r($result_array);
-    // // $result = $header . print_r($result_array, TRUE);
-    $result = $header . $result_one . $result_two . $result_three;
-    // // $result = $header . $output;
-    drush_print($result);
-    return;
-  }
-  $label_option_default = 'machine_abbrv';//moot?
-  $label_option = drush_get_option('label', $label_option_default);
-  require_once 'src/nodeTypeSQL.php';
-  $node_type_sql = new nodeTypeSQL($type_machine_name);
-  $node_type_sql->label_option = $label_option;
-
-  $node_type_sql->database = $databases['default']['default']['database'];
-  $node_type_sql->gatherFieldsArrayToNodeType();
-
-  $field_object_array = $node_type_sql->field_object_array;
-  // $select_array = array('chester');
-  $select_array = array();
-  $join_array = array();
-  $i = 0;
-  foreach ($field_object_array as $index => $field_object_this) {
-
-    $select_result_array = $field_object_this->gatherSelect_this();
-    $select_array = array_merge($select_array,$select_result_array);
-    $join_result_array = $field_object_this->gatherJoin_this();
-    $join_array = array_merge($join_array,$join_result_array);
-    if ($i == -1) {
-       break;
-     }
-     $i++;
-  }
-  $select_string = "\r\n, " . implode("\r\n, ", $select_array);
-  $join_string = implode("\r\n", $join_array);
-  // $result = $header . print_r($select_array, TRUE) . print_r($join_array, TRUE);
-  $result = $header . $select_string . "\r\n\r\n" . $join_string;
-  // $result = $header . $output;
-  drush_print($result);
-  return;
-} //END if ($which == 'new_select_join_array_collection_DEV';) {
-
-  if ($which == 'field_reference_prof') {
-    $bundle = 'job_application';
-    // $field_config_instance_array =
-    // db_query('SELECT field_id FROM {field_config_instance} WHERE bundle = :bundle AND deleted = :deleted',
-    //     array(
-    //       ':bundle' =>$bundle,
-    //       ':deleted' => 0,
-    //     ))->fetchAll();
-$field_config_instance_object_array = db_select('field_config_instance','fci')
-    ->fields('fci',array('field_id'))
-    ->condition('bundle',$bundle)
-    ->execute()
-    ->fetchAll();
-    $field_id_array = array_map(
-      create_function('$o', 'return $o->field_id;'),
-      $field_config_instance_object_array);
-    $result_array = $field_id_array;
-    // foreach ($field_config_instance_array as $index => $row) {
-      // $row->data = (object) unserialize($row->data);
-      // $field_config_this =
-          // db_query('SELECT * FROM {field_config} WHERE id = :field_id',
-              // array(':field_id' =>
-              // $row->field_id))->fetchObject();
-      // $field_config_this->data = (object) unserialize($field_config_this->data);
-      // unset($field_config_this->data);
-      // $fields[$row->field_name]['instance'] = $row;
-      // $fields[$row->field_name]['field'] = $field_config_this;
-      // $columns_this = gather_field_table_data($row->field_name);
-      // $fields[$row->field_name]['columns'] = $columns_this;
-      // $fields[$row->field_name] = (object) $fields[$row->field_name];
-    // }
-
-    // $result = $header . print_r($field_config_instance_array, TRUE);
-    // $result = $header . print_r($result_array, TRUE);
-    $result = $header . print_r($result_array, TRUE);
-    drush_print($result);
-    return;
-  }
-
-  if ($which == 'FieldPreOb') {
-
-    $node_type = new nodeTypeSQL($type_machine_name);
-    $node_type->label_option = $label_option;
-    $node_type->gatherObjectReadyFieldArray();
-    $field_preobject_array = $node_type->field_preobject_array;
-    $output_full = $field_preobject_array;
-
-    $field_name_array = array('field_app_references');
-    foreach ($field_preobject_array as $key => $field_array) {
-      if (in_array($key, $field_name_array)) {
-        $output[$key] = $field_array;
-      }
-    }
-    $output_abbrv = $field_array;
-
-    $result = $header;
-    // $result .= "output_abbrv:\r\n=============\r\n" . print_r($output_abbrv, TRUE);
-    $result .= "output_full:\r\n============\r\n" . print_r($output_full, TRUE);
-    drush_print($result);
-    return;
-  } //END if ($which == 'FieldPreOb')
-
-  if ($which == 'FieldObjectArray') {
-
-    $node_type = new nodeTypeSQL($type_machine_name);
-    $node_type->label_option = $label_option;
-    $node_type->instantiateFieldObjects();
-    $output_full = $node_type->field_object_array;
-    // $output_full = $node_type->field_object_array->column_object_array;
-
-    $output_abbrv = array();
-    foreach ($node_type->field_object_array as $index => $field_object_this) {
-      if ($field_object_this->field_name != 'body') {
-        $field_join_string = empty($field_object_this->field_join_string) ? 'EEMPTY' : $field_object_this->field_join_string;
-        $output_abbrv[$field_object_this->field_name]['field_join_string'] = $field_join_string;
-        $output_abbrv[$field_object_this->field_name]['column_object_array'] = $field_object_this->column_object_array;
-      }
-    }
-
-    $result = $header;
-    // $result .= "output_abbrv:\r\n=============\r\n" . print_r($output_abbrv, TRUE);
-    $result .= "output_full:\r\n============\r\n" . print_r($output_full, TRUE);
-    drush_print($result);
-    return;
-  } //END if ($which == 'FieldObjectArray')
-
-  if ($which == 'reference_prof') {
-    drush_print('$which: ' . $which . ' [' . __LINE__ . ']');
-    return;
-    $bundle = 'field_reference_prof';//$field_array_this['field_name'];
-    $field_config_instance_array =
-        db_query('SELECT id, field_id, field_name, data, deleted FROM {field_config_instance
-          WHERE bundle = :bundle',
-            array(':bundle' =>
-            $bundle))->fetchAll();
-    $output = $field_config_instance_array;
-    $result = $header . print_r($output, TRUE);
-    drush_print($result);
-    return;
-
-  } //END if ($which == 'reference_prof')
-
-  if ($which == 'LEFTOVER') {
-    $before = <<<CODEREH
-  SELECT
-  n.title AS title
-  ,
-CODEREH;
-    $between = <<<CODEREH
-
-  ,n.nid as nid
-  ,n.vid as vid
-  ,FROM_UNIXTIME(n.created,'%b %e, %Y %l:%i:%s %p') as created
-  ,FROM_UNIXTIME(n.changed,'%b %e, %Y %l:%i:%s %p') as changed
-  ,u.name AS author
-
-  FROM node n
-  JOIN users u
-  ON u.uid = n.uid
-
-CODEREH;
-    $after = <<<CODEREH
-
-  WHERE n.type = 'project_app_gp'
-  GROUP BY n.nid
-  ;
-CODEREH;
-
-    require_once 'src/nodeTypeSQL.php';
-
-    $type_machine_name = 'project_app_gp';
-    $node_type = new nodeTypeSQL($type_machine_name);
-    $node_type->label_option = $label_option;
-
-    // $node_type->gatherFieldBundleSettings();
-    // $output = $node_type->field_bundle_settings;
-
-    // $node_type->gatherWeightedFieldArray();
-    // $output = $node_type->weighted_field_array;
-
-    // $node_type->gatherObjectReadyFieldArray();
-    $node_type->composeSelectStringFields_JoinStringFields();
-    // $instances = $node_type->field_bundle_settings;
-    // // $output = $node_type->field_bundle_settings;
-    // $weighted_field_array = $node_type->weighted_field_array;
-    // // $output = $node_type->weighted_field_array;
-
-    // foreach ($weighted_field_array as $fieldname_this => $weighted_field_this){
-    //     $instance_this = $instances[$fieldname_this];
-    //     if ($instance_this->field->active == 1) {
-    //       $output[$fieldname_this] = $instance_this;
-    //     }
-    // }
-    // $result = $header . print_r($output, TRUE);
-    // drush_print($result);
-    // return;
-
-    $field_name_array = array('field_app_references');
-    // $output = $node_type->field_object_array;//[$field_name];
-
-      foreach ($node_type->field_object_array as $index => $field_object_this) {
-        if (1 == 2 && $field_object_this->field_name == $field_name) {
-          $column_object_array_count = count($field_object_this->column_object_array) + 0;
-          $columns_count = is_array($field_object_this->columns)?count($field_object_this->columns) + 0:7;
-        }
-        // if ($columns_count + $column_object_array_count != 0) {
-        if (in_array($field_object_this->field_name, $field_name_array)) {
-          $field_select_string_array[] = $field_object_this->field_select_list_string;
-          $field_join_string_array[] = $field_object_this->field_join_string;
-        }
-      }
-      $select_string_fields = implode("\r\n,", $field_select_string_array);
-      $join_string_fields = implode("\r\n", $field_join_string_array);
-      $output = $before . $select_string_fields . $between . $join_string_fields . $after;
-    // $result = $header . print_r($select_string_fields, TRUE) . "\r\n\r\n" . print_r($join_string_fields, TRUE);
+  // $path = 'reports/' . $report . '_report.inc';
+  $path_info = __FILE__;
+  $basename = basename(__FILE__);
+  // $path_info = str_replace($basename, '', $path_info);
+  $path_info = dirname(__FILE__);
+  // $path = $path_info . 'README.md';
+  $path = $path_info . '/reports/' . $report . '_report.inc';
+  $file_exists = file_exists($path);
+  $unsupported_path = '';
+  if ($file_exists) {
+    require $path;
+    #\_ $output is ALWAYS the result, do any print_r() in the include
     $result = $header . $output;
     drush_print($result);
-  } //END if ($which == 'LEFTOVER')
+    return;
+  }else{
+    $unsupported_path = "; \$UNsupported_path: {$path}";
+    // $path_info = dirname(__FILE__);
+    // drush_print($path_info);
+  }
+
+
+
+
+
 
   drush_print($header);
   drush_print("Unsupported Report!\r\n");
-  drush_print('$report: ' . $report . '; $bundle: ' . $argument_bundle . "; \r\n[Line: " . __LINE__ . '; File: ' . basename(__FILE__) . ";]\r\n");
+  drush_print('$report: ' . $report . '; $bundle: ' . $argument_bundle . $unsupported_path . "; \r\n[Line: " . __LINE__ . '; File: ' . basename(__FILE__) . ";]\r\n");
   return;
 
 }
