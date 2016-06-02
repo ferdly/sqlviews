@@ -3,9 +3,12 @@
 class fieldSQL /* WILL SOON extend something*/ {
 	/* <drupal/sql direct> */
 	#\_ some may be vestigial ($index), but keep until no longer needed
+    public $field_name;
+    public $field_id;
+    public $id;
 	public $index;
 	public $weight;
-	public $field_name;
+	// public $field_name;
 	public $field_column_name;
 	public $table_name;
 	public $label;
@@ -299,7 +302,24 @@ class fieldSQL /* WILL SOON extend something*/ {
         return $result_array;
     } //END function instantiate_fieldsFromEntityBundle($entity_bundle_object)
 
-
+    public function gatherFieldObjectArrayRecursively($field_object_array = array()) {
+        $return_array = array();
+        $return_array_this = array();
+        foreach ($field_object_array as $index => $field_object_this) {
+            if (count($field_object_this->field_field_object_array) > 0) {
+                $children_field_object_array = self::gatherFieldObjectArrayRecursively($field_object_this->field_field_object_array);
+                $field_object_this->field_field_object_count = count($field_object_this->field_field_object_array);
+            }else{
+               $children_field_object_array = array();
+                $field_object_this->field_field_object_count = -9;
+            }
+            unset($field_object_this->field_field_object_array);
+            $single_object_array = array($field_object_this);
+            $return_array_this = array_merge($single_object_array, $children_field_object_array);
+            $return_array = array_merge($return_array, $return_array_this);
+        }
+        return $return_array;
+    }
 /**
  * END Most Current OO from Local Static Method
  */
