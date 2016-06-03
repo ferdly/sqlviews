@@ -1,4 +1,6 @@
 <?php
+  $header_string = "Custom Report Title for '" . $report_string . "'";
+  $header_sub = "The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. ";
     $ouptut_query_option_array = array(2=>'Output Results',1=>'Output Query');
     $ouptut_query_option = drush_choice($ouptut_query_option_array, dt('ZWhich Bundle (Content Type) would you like to Report on?'));
     if ($ouptut_query_option == '0') {

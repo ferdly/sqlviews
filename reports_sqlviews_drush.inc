@@ -72,15 +72,22 @@ function _do_reports_sqlviews_drush(){
   $dev_param = substr($report, -4) == '_DEV' ? " \r\n[as DEV expression]" : $dev_param;
   $report_string = ucwords(str_replace('_', ' ', str_replace('_DEV', '', $report)));
   $bundle_header_string = strlen($bundle) > 0 ? "' on Bundle: '" . $bundle_string . "'" : '';
+  /**
+   * Header Local so that name-spacing of function names don't collide
+   * * Hmmm... maybe if I create a drush module (Gold Rush) that has a
+   * * library I can use them elsewhere
+   */
+
   // $header = 'Result of ' . __FUNCTION__ . '(' . $report . $dev_param . ')';
-  $header = "Report: '" . $report_string . $bundle_header_string;
-  $header_len = strlen($header);
+  $header_string = "Report: '" . $report_string . $bundle_header_string;
+  $header_len = strlen($header_string);
+  $header = $header_string . "\r\n";
   $header .= $dev_param;
-  $header .= "\r\n";
+  $header_bar = '';
   for ($i=0; $i < $header_len; $i++) {
-    $header .= '=';
+    $header_bar .= '=';
   }
-  $header .= "\r\n";
+  $header .= $header_bar . "\r\n";
 
   if ($report == 'fieldObjectAsColumnParameter_DEV') {
     // drush_print($header);
@@ -234,8 +241,27 @@ function _do_reports_sqlviews_drush(){
   if ($file_exists) {
     require $path;
     #\_ $output is ALWAYS the result, do any print_r() in the include
-    $result = $header . $output;
-    drush_print($result);
+    // $result = $header . $output;
+    // drush_print($result);
+    $header_len = strlen($header_string);
+    $header_string .= $dev_param;
+    $header_string . "\r\n";
+    $header_bar = '';
+    for ($i=0; $i < $header_len; $i++) {
+      $header_bar .= '=';
+    }
+
+    drush_print($header_string);
+    drush_print($header_bar);
+    // drush_print("\r\n");
+    if (strlen($header_sub) > 0) {
+      $header_sub = bradlowryWrapStringOnLenghtWords($header_sub, $header_len);
+      drush_print($header_sub);
+      // drush_print("\r\n");
+      drush_print($header_bar);
+      // drush_print("\r\n");
+    }
+    drush_print($output);
     return;
   }else{
     $unsupported_path = "; \$UNsupported_path: {$path}";
@@ -253,4 +279,36 @@ function _do_reports_sqlviews_drush(){
   drush_print('$report: ' . $report . '; $bundle: ' . $argument_bundle . $unsupported_path . "; \r\n[Line: " . __LINE__ . '; File: ' . basename(__FILE__) . ";]\r\n");
   return;
 
+}
+
+function bradlowryWrapStringOnLenghtWords($string, $length){
+  $word_array = explode(' ', $string);
+  $return_string = '';
+  $line_this = '';
+  $crlf = 'zCRLFz';
+  // $crlf = "\r\n";
+  foreach ($word_array as $index => $word) {
+    if (strlen($word) > $length) {
+      if (strlen($line_this) > 0) {
+        $return_string .= $line_this . $crlf;
+      }
+      $return_string .= $word . $crlf; // should be moot, OOAAOC
+      $line_this = '';
+    }
+    elseif (strlen($line_this) + strlen($word) > $length) {
+      $return_string .= $line_this . $crlf;
+      $line_this = '';
+    }
+    if (strlen($word) <= $length) {
+      $line_this .= $word . ' ';
+    }
+
+  }
+  $return_string = trim($return_string);
+  $string_length = strlen($return_string) - 6;
+  if (substr($return_string, -6) == 'zCRLFz') {
+    $return_string = substr($return_string, 0, $string_length);
+  }
+  $return_string = str_replace('zCRLFz', "\r\n", $return_string);
+  return $return_string;
 }
