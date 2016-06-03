@@ -21,11 +21,13 @@ function _do_reports_sqlviews_drush(){
         'schema_DEV',
         'FieldBundleSettings_DEV',
         'field_config_instance_array__db_select',
+        'field_config_array__db_select',
 
     );
   $prompt_for_bundle_report_array = array(
         'field_object_array',
         'field_config_instance_array__db_select',
+        'field_config_array__db_select',
     );
 
   if ($argument_report == 'ZXZ' || $argument_report == 'which') {
