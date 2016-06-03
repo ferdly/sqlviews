@@ -9,6 +9,7 @@ function _do_reports_sqlviews_drush(){
   $dev = drush_get_option('dev', 0);
   $dev = $dev == 1 ? TRUE : FALSE;
 
+  $abort_string = 'sqlViews Report Mechanism Cancelled!';//at least as default
   $argument_report = $context['drush']['arguments'][0];
   $argument_report = empty($argument_report) ? 'ZXZ' : $argument_report;
 
@@ -19,14 +20,20 @@ function _do_reports_sqlviews_drush(){
         'nodeTypeSQL_DEV',
         'schema_DEV',
         'FieldBundleSettings_DEV',
+        'field_config_instance_array__db_select',
 
     );
+  $prompt_for_bundle_report_array = array(
+        'field_object_array',
+        'field_config_instance_array__db_select',
+    );
+
   if ($argument_report == 'ZXZ' || $argument_report == 'which') {
     $arguments = array_combine($supported_report_array, $supported_report_array);
     $argument_report = drush_choice($arguments, dt("Which Report would you like to run? \r\n('DEV' indicates unformated vardump at this time)"));
     if ($argument_report == '0') {
-        drush_user_abort('sqlViews Report Mechanism Cancelled!');
-        return;
+        drush_user_abort($abort_string);
+        die();
     }
     }
   if (!in_array($argument_report, $supported_report_array)) {
@@ -45,33 +52,28 @@ function _do_reports_sqlviews_drush(){
     return drush_set_error(dt('"@argument_report" is not a supported sqlViews Report. ',
       array('@argument_report' => $argument_report)));
   }
-    $argument_bundle = $context['drush']['arguments'][1];
-    $argument_bundle = empty($argument_bundle) ? 'ZXZ' : $argument_bundle;
-    $supported_bundle_array = _which_nodetype_arguments(); //use custom function to encapsulate
-    if ($argument_bundle == 'ZXZ') {
-        $argument_bundle = drush_choice($supported_bundle_array, dt('Which Bundle (Content Type) would you like to Report on?'));
-    }
-
-  $correct_args = array_keys($supported_bundle_array);
-  if (!in_array($argument_bundle, $correct_args)) {
-    if ($argument_bundle == '0') {
-      drush_user_abort('sqlViews Report Mechanism Cancelled!');
-      return;
-    }
-    $string = _which_nodetype_arguments('string');
-    return drush_set_error(dt('"@bundle" is not a valid Bundle (Content Type). ',
-      array('@bundle' => $argument_bundle)) . $string);
-  }
-  $bundle = $argument_bundle;
-  $bundle_string = $supported_bundle_array[$bundle];
+    // $argument_bundle = $context['drush']['arguments'][1];
+    // $argument_bundle = empty($argument_bundle) ? 'ZXZ' : $argument_bundle;
+    if (in_array($report, $prompt_for_bundle_report_array)) {
+      $supported_bundle_array = _which_nodetype_arguments();
+      #\_ use custom function to encapsulate
+      $argument_bundle = drush_choice($supported_bundle_array, dt('Which Bundle (Content Type) would you like to Report on?'));
+      if ($argument_bundle == '0') {
+        drush_user_abort($abort_string);
+        die();
+      }
+    $bundle = $argument_bundle;
+    $bundle_string = $supported_bundle_array[$bundle];
+   } //END if (in_array($report, $prompt_for_bundle_report_array))
 
   // $dev_param = $dev ? ', dev' : ''
 
   $dev_param = $dev ? " \r\n[as DEV expression]" : '';
   $dev_param = substr($report, -4) == '_DEV' ? " \r\n[as DEV expression]" : $dev_param;
   $report_string = ucwords(str_replace('_', ' ', str_replace('_DEV', '', $report)));
+  $bundle_header_string = strlen($bundle) > 0 ? "' on Bundle: '" . $bundle_string . "'" : '';
   // $header = 'Result of ' . __FUNCTION__ . '(' . $report . $dev_param . ')';
-  $header = "Report: '" . $report_string . "' on Bundle: '" . $bundle_string . "'";
+  $header = "Report: '" . $report_string . $bundle_header_string;
   $header_len = strlen($header);
   $header .= $dev_param;
   $header .= "\r\n";
