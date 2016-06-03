@@ -15,6 +15,7 @@ function sqlviews_drush_command() {
       'which' => 'is argument',
     ),
     'options' => array(
+      'headers' => 'is option',
       'context' => 'is option',
       'dev' => 'is option',
     ),
@@ -247,6 +248,13 @@ function _render_header($function, $parameter_string = '', $line = 0) {
 }
 
 function _do_field_report($type_machine_name){
+  $print = drush_get_option('context', 0);
+  $print = $print == 1 ? TRUE : FALSE;
+  // $print = TRUE;
+  $context = _render_drush_context_sqlviews($print);
+  $headers = drush_get_option('headers', 0);
+  $headers = $headers == 1 ? TRUE : FALSE;
+
   $line = 0; //__LINE__;
   $header = _render_header(__FUNCTION__, $type_machine_name, $line);
   $label_option_default = 'machine_abbrv';//moot?
@@ -256,8 +264,10 @@ function _do_field_report($type_machine_name){
 
   $node_type_sql->database = $databases['default']['default']['database'];
   $node_type_sql->composeFieldReport();
+  $headers_string = $headers ? "entity,bundle,table_name,field_name,cardinality\r\n" : '';;
 
   $output = $node_type_sql->view_string;
+  $output = $headers_string . $output;
 
   $result = $header . $output;
   drush_print($result);
