@@ -44,6 +44,7 @@ function sqlviews_drush_command() {
   $items['sql-view-reports'] = array(
     'aliases' => array(
       'sqlv-rpt',
+      'sqlv-rpts',
       ),
     'arguments' => array(
       'report' => 'is argument',
