@@ -4,6 +4,7 @@ class field_collection_fieldSQL extends fieldSQL {
 
     public function __construct($field_array) {
         parent::__construct($field_array);
+        $this->field_select_is_hidden = 1;
     }
 
 
