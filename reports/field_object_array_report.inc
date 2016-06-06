@@ -1,5 +1,18 @@
 <?php
 
+
+    $header_string = "Custom Report Title for '" . $report_string . "'";
+    $header_sub = "Puzzel me this, Bat Man: Joker quietly faced six eyed villian gawker! Puzzel me this, Bat Man: Joker quietly faced six eyed villian gawker! Puzzel me this, Bat Man: Joker quietly faced six eyed villian gawker! Puzzel me this, Bat Man: Joker quietly faced six eyed villian gawker! Puzzel me this, Bat Man: Joker quietly faced six eyed villian gawker! ";
+
+    $output_option_array = array(3=>'Output Abbrviated Results',2=>'Output Full Results',1=>'CSV Field Report');
+    $output_option = drush_choice($output_option_array, dt('Which Output Option would you like rendered?'));
+    if ($output_option == '0') {
+      $output = drush_user_abort($abort_string);
+      die();
+    }
+    $output_csv = $output_option == 1 ? TRUE : FALSE;
+    $output_abbrv = $output_option == 3 ? TRUE : FALSE;
+
     $label_option_default = 'machine_abbrv';//moot?
     $label_option = drush_get_option('label', $label_option_default);
     $path = dirname(dirname(__FILE__));
@@ -62,7 +75,7 @@
       'field_join_is_hidden',
       'field_select_is_hidden',
       ); #\_ ALL Above, uncomment to remove
-    // $output_limit_attribute_array = array('weight');
+    $output_limit_attribute_array = $output_abbrv ? $output_limit_attribute_array : array();
     $output_array = array();
     foreach ($pre_output as $index => $field_object_this) {
       $limit = FALSE;
@@ -93,4 +106,23 @@
         $output_array[$index] = $field_object_this;
       }
     }
-$output = print_r($output_array, TRUE);
+
+  if ($output_csv) {
+    $eol = "\r\n";
+    $delim = ',';
+    $csv_string = '';
+    $csv_row = 'entity,bundle,table_name,field_column_name,cardinality';
+    $csv_string .= $csv_row . $eol;
+    foreach ($output_array as $key => $value) {
+      $csv_row = '';
+      $csv_row .= $value->of_entity . $delim;
+      $csv_row .= $value->of_bundle . $delim;
+      $csv_row .= $value->table_name . $delim;
+      $csv_row .= $value->field_column_name . $delim;
+      $csv_row .= $value->cardinality;// . $delim;
+      $csv_string .= $csv_row . $eol;
+    }
+    $output = $csv_string;
+  }else{
+    $output = print_r($output_array, TRUE);
+  }

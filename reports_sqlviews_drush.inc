@@ -13,17 +13,42 @@ function _do_reports_sqlviews_drush(){
   $argument_report = $context['drush']['arguments'][0];
   $argument_report = empty($argument_report) ? 'ZXZ' : $argument_report;
 
+/**
+ * Report Names
+ * * this array has no effect on the code
+ * * it merely renders the strings that
+ * * represent the Report Names that the User can select from
+ * * this array and the Report Keys array below must be in parallel
+ */
+  $supported_report_name_array = array(
+    'Field Object by Bundle (Content Type)',
+    'field_config_instance_array__db_select',
+    'field_config_array__db_select',
+    'fieldObjectAsColumnParameter_DEV',
+    'field_info_field_by_id_DEV',
+    'nodeTypeSQL_DEV',
+    'schema_DEV',
+    'FieldBundleSettings_DEV',
+  );
+/**
+ * Reports (Keys)
+ * * this array has is crucial to the code
+ * * it is the string that the include() call will use
+ * * it should have some correlation to the Name (above)
+ * * but is not critical to its function
+ * * this array and the Report Name array above must be in parallel
+ */
   $supported_report_array = array(
-        'fieldObjectAsColumnParameter_DEV',
-        'field_object_array',
-        'field_info_field_by_id_DEV',
-        'nodeTypeSQL_DEV',
-        'schema_DEV',
-        'FieldBundleSettings_DEV',
-        'field_config_instance_array__db_select',
-        'field_config_array__db_select',
+    'field_object_array',
+    'field_config_instance_array__db_select',
+    'field_config_array__db_select',
+    'fieldObjectAsColumnParameter_DEV',
+    'field_info_field_by_id_DEV',
+    'nodeTypeSQL_DEV',
+    'schema_DEV',
+    'FieldBundleSettings_DEV',
+  );
 
-    );
   $prompt_for_bundle_report_array = array(
         'field_object_array',
         'field_config_instance_array__db_select',
@@ -31,13 +56,15 @@ function _do_reports_sqlviews_drush(){
     );
 
   if ($argument_report == 'ZXZ' || $argument_report == 'which') {
-    $arguments = array_combine($supported_report_array, $supported_report_array);
+    $arguments = array_combine($supported_report_array, $supported_report_name_array);
     $argument_report = drush_choice($arguments, dt("Which Report would you like to run? \r\n('DEV' indicates unformated vardump at this time)"));
     if ($argument_report == '0') {
         drush_user_abort($abort_string);
         die();
     }
-    }
+  }
+  // drush_print('$argument_report: ' . $argument_report);
+  // die();
   if (!in_array($argument_report, $supported_report_array)) {
       $report_key = $argument_report;
       if (ctype_digit($report_key)) {
