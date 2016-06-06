@@ -78,6 +78,7 @@
         $table_array = $data['storage']['details']['sql']['FIELD_LOAD_CURRENT'];
         $table_name = is_array($table_array) ? key($table_array) : '';
         $column_name = @$table_array[$table_name]['value'];
+        $output_array[$i]['field_name'] = $config_this->field_name;
         $output_array[$i]['entity'] = $entity;
         $output_array[$i]['bundle'] = $bundle;
         $output_array[$i]['table_name'] = $table_name;
@@ -104,11 +105,12 @@ if ($output_csv) {
     $csv_string .= $csv_row . $eol;
     foreach ($output_array as $index => $value) {
       $csv_row = '';
+      $field_name = $value['field_name'];
       $csv_row .= $value['entity'] . $delim;
       $csv_row .= $value['bundle'] . $delim;
-      $table_name = strlen($value['table_name']) == 0 ? 'PENDING' : $value['table_name'];
+      $table_name = strlen($value['table_name']) == 0 ? 'UNKNOWN_TABLE_'. $field_name : $value['table_name'];
       $csv_row .= $table_name . $delim;
-      $column_name = strlen($value['column_name']) == 0 ? 'PENDING' : $value['column_name'];
+      $column_name = strlen($value['column_name']) == 0 ? 'UNKNOWN_COLUMN_' . $field_name : $value['column_name'];
       $csv_row .= $column_name . $delim;
       $csv_row .= $value['cardinality'];// . $delim;
       $csv_string .= $csv_row . $eol;
