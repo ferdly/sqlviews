@@ -1,14 +1,16 @@
 <?php
   $header_string = "Custom Report Title for '" . $report_string . "'";
   $header_sub = "The five boxing wizards jump quickly. The five boxing wizards jump quickly. The five boxing wizards jump quickly. The five boxing wizards jump quickly. The five boxing wizards jump quickly. The five boxing wizards jump quickly. The five boxing wizards jump quickly. The five boxing wizards jump quickly. The five boxing wizards jump quickly. The five boxing wizards jump quickly. The five boxing wizards jump quickly. The five boxing wizards jump quickly. The five boxing wizards jump quickly. ";
-    $ouptut_query_option_array = array(3=>'Output Abbrviated Results',2=>'Output Full Results',1=>'Output Query');
+    $ouptut_query_option_array = array(3=>'Output Abbrviated Results',2=>'Output Full Results',1=>'Output Query',4=>'CSV Field Report');
     $ouptut_query_option = drush_choice($ouptut_query_option_array, dt('ZWhich Bundle (Content Type) would you like to Report on?'));
     if ($ouptut_query_option == '0') {
       $output = drush_user_abort($abort_string);
       die();
     }
     $output_query = $ouptut_query_option == 1 ? TRUE : FALSE;
+    $output_full = $ouptut_query_option == 2 ? TRUE : FALSE;
     $output_abbrv = $ouptut_query_option == 3 ? TRUE : FALSE;
+    $output_csv = $ouptut_query_option == 4 ? TRUE : FALSE;
     $entity = 'node';
     // $bundle = 'project_app_gp';
     // $bundle = 'project_app_ts';
@@ -71,10 +73,11 @@
     foreach ($field_config_array as $index => $config_this) {
       $data =  unserialize($config_this->data);
       // $fci_data =  unserialize($fci_array[$config_this->id]['fci_data']);
-      if ($output_abbrv) {
+      if (!$output_full) {
         #\_ entity,bundle,table_name,column_name(was field_name),cardinality
-        $table_name = key($data['storage']['details']['sql']['FIELD_LOAD_CURRENT']);
-        $column_name = $data['storage']['details']['sql']['FIELD_LOAD_CURRENT'][$table_name]['value'];
+        $table_array = $data['storage']['details']['sql']['FIELD_LOAD_CURRENT'];
+        $table_name = is_array($table_array) ? key($table_array) : '';
+        $column_name = @$table_array[$table_name]['value'];
         $output_array[$i]['entity'] = $entity;
         $output_array[$i]['bundle'] = $bundle;
         $output_array[$i]['table_name'] = $table_name;
@@ -89,9 +92,30 @@
       $i++;
     } //END foreach ($field_config_array as $index => $config_this)
 
-    if (!$output_abbrv) {
+    if ($output_full) {
         $output_array = $field_config_array;
       }
 
-
+if ($output_csv) {
+    $eol = "\r\n";
+    $delim = ',';
+    $csv_string = '';
+    $csv_row = 'entity,bundle,table_name,field_column_name,cardinality';
+    $csv_string .= $csv_row . $eol;
+    foreach ($output_array as $index => $value) {
+      $csv_row = '';
+      $csv_row .= $value['entity'] . $delim;
+      $csv_row .= $value['bundle'] . $delim;
+      $table_name = strlen($value['table_name']) == 0 ? 'PENDING' : $value['table_name'];
+      $csv_row .= $table_name . $delim;
+      $column_name = strlen($value['column_name']) == 0 ? 'PENDING' : $value['column_name'];
+      $csv_row .= $column_name . $delim;
+      $csv_row .= $value['cardinality'];// . $delim;
+      $csv_string .= $csv_row . $eol;
+    }
+    $output = $csv_string;
+  // $output = 'CSV Output is Pending.';
+  // $output = print_r($output_array, TRUE);
+}else{
   $output = print_r($output_array, TRUE);
+}
