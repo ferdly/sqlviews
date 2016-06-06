@@ -16,6 +16,8 @@ class date_fieldSQL extends fieldSQL {
      */
     public function instantiateFieldAndReturn($field_config_ob) {
         $return_field_object = new date_fieldSQL($field_config_ob);
+        // $return_field_object->field_config_data = $return_field_object->data;
+        // $return_field_object->data = NULL;
         // // $value_one = fieldSQL::instantiateFieldAndReturn($field_config_ob);
         // $value_one = new date_fieldSQL($field_config_ob);
         // $value_one->field_select_is_hidden = 0;
@@ -31,6 +33,18 @@ class date_fieldSQL extends fieldSQL {
         // $return_field_object->field_field_object_array[] = $value_two;
         return $return_field_object;
     }
+
+    public function Z_unpack_by_field_id() {
+        $field_config_data = unserialize($this->field_config_data);
+        $todate = $field_config_data['settings']['todate'];
+        $todate = isset($todate) ? $todate : 'nnull';
+        $this->todate = $todate;
+        if ($todate == 'nnull') {
+            $this->render_column_array = array('value');
+        }
+        parent::unpack_by_field_id();
+    }
+
     public function Z_instantiateColumnObjects($field_array_this = array()) {
         $column_loop_array_overload = array(
             'value' => 1,

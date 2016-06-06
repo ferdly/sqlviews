@@ -66,6 +66,8 @@ class fieldSQL /* WILL SOON extend something*/ {
 
 	public function instantiateFieldAndReturn($field_config_ob) {
 		$return_field_object = new fieldSQL($field_config_ob);
+        $return_field_object->field_config_data = $return_field_object->data;
+        $return_field_object->data = NULL;
 		return $return_field_object;
 	}
 
@@ -107,7 +109,8 @@ class fieldSQL /* WILL SOON extend something*/ {
 	$data_unserialized = unserialize($this->field_config_instance_data);
 	$this->label = $data_unserialized['label'];
 	$this->weight = $data_unserialized['widget']['weight'];
-	$this->field_config_instance_data = 'EMPTIED after UnPack in ' . basename(__FILE__) . ' on line ' . __LINE__;
+    $this->field_config_instance_data = 'EMPTIED after UnPack in ' . basename(__FILE__) . ' on line ' . __LINE__;
+	// $this->field_config_data = 'EMPTIED after UnPack in ' . basename(__FILE__) . ' on line ' . __LINE__;
 	}
 
     public function unpack_table_alias() {
@@ -291,6 +294,7 @@ class fieldSQL /* WILL SOON extend something*/ {
             // $return_field_object_array[$field_config->field_name] = $field_config_ob;
             }
             $field_config_ob->field_config_instance_data = $fci_array[$this_field_id]['fci_data'];
+            // $field_config_ob->field_config_data = $field_config->data;
             $i++;
             $field_config_ob->unpack_by_field_id();
             $field_config_ob->unpack_join_string();
