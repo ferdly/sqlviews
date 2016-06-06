@@ -14,7 +14,7 @@ class date_fieldSQL extends fieldSQL {
      *
      */
     public function instantiateFieldAndReturn($field_config_ob) {
-        $return_field_object = new fieldSQL($field_config_ob);
+        $return_field_object = new date_fieldSQL($field_config_ob);
         $value_one = fieldSQL::instantiateFieldAndReturn($field_config_ob);
         // $value_one = fieldSQL::instantiate_fieldsFromEntityBundle($field_config_ob);
         $field_config_ob->field_name .= '2';
