@@ -4,6 +4,7 @@ class markup_fieldSQL extends fieldSQL {
 
     public function __construct($field_array) {
         parent::__construct($field_array);
+        $this->render_column_array = array();
         $this->field_join_is_hidden = 1;
         $this->field_select_is_hidden = 1;
     }

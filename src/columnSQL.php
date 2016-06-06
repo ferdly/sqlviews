@@ -43,7 +43,8 @@ public function instantiate_columnsFromField($field_object) {
 		return array();
 	}
 	$columns = $field_object->columns;
-	$supported_columns_key_array = array('value');
+	// $supported_columns_key_array = array('value');
+	$supported_columns_key_array = $field_object->render_column_array;
 	$column_object_array = array();
 	foreach ($columns as $column_key => $column_array) {
 		if (in_array($column_key, $supported_columns_key_array)) {

@@ -34,6 +34,7 @@ class fieldSQL /* WILL SOON extend something*/ {
 	public $cardinality;
 	public $total_cardinality;
 	public $columns = array(); //Pre-Object Array
+    public $render_column_array = array('value');
 	/* </drupal/sql direct> */
 	/* <to be UnPacked> */
 	public $field_field_object_array = array();
@@ -76,7 +77,13 @@ class fieldSQL /* WILL SOON extend something*/ {
 		}
 	// $weight;
 	// $this->field_name = $field_info_array['field_name'];
-	$this->field_column_name = $this->field_name . '_value';
+    $render_column_count = count($this->render_column_array);
+    $this->field_select_is_hidden = $render_column_count != 1 ? 1 : 0;
+    $this->field_join_is_hidden = $render_column_count == 0 ? 1 : 0;
+    $column_name_append = $render_column_count == 1 ? '_' . $this->render_column_array[0] : '_none';
+    $column_name_append = $render_column_count > 1 ? '_many' : $column_name_append;
+    // $this->field_column_name = $this->field_name . '_value';
+	$this->field_column_name = $this->field_name . $column_name_append;
 	$table_array = $field_info_array['storage']['details']['sql']['FIELD_LOAD_CURRENT'];
 	$table_name = key($table_array);
     $this->table_name = $table_name;

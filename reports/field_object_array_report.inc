@@ -120,6 +120,13 @@
       $csv_row .= $value->table_name . $delim;
       $csv_row .= $value->field_column_name . $delim;
       $csv_row .= $value->cardinality;// . $delim;
+      if ($value->field_select_is_hidden) {
+        $csv_row = "/* " . $csv_row . " */";
+      }
+      // BELOW MADE MOOT BY ABOVE, LEAVE UNTIL 20161201 JUST INCASE
+      // if ($value->field_select_is_hidden * $value->field_join_is_hidden) {
+      //   $csv_row = "/* " . $csv_row . " */";
+      // }
       $csv_string .= $csv_row . $eol;
     }
     $output = $csv_string;
