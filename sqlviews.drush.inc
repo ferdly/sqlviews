@@ -265,10 +265,15 @@ function _do_field_report($type_machine_name){
 
   $node_type_sql->database = $databases['default']['default']['database'];
   $node_type_sql->composeFieldReport();
-  $headers_string = $headers ? "entity,bundle,table_name,field_name,cardinality\r\n" : '';;
 
-  $output = $node_type_sql->view_string;
-  $output = $headers_string . $output;
+  $error_string = $node_type_sql->renderErrorArray();
+  if ($error_string !== FALSE) {
+    $output = $error_string;
+  }else{
+    $headers_string = $headers ? "entity,bundle,table_name,field_name,cardinality\r\n" : '';;
+    $output = $node_type_sql->view_string;
+    $output = $headers_string . $output;
+  }
 
   $result = $header . $output;
   drush_print($result);

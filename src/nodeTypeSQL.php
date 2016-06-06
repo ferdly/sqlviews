@@ -209,6 +209,7 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 	    array_pop($require_base_path_array) ;
 	    // $require_base_path = str_replace(basename(__FILE__), '', $require_base_path) ;
 	    $require_base_path = implode('/',$require_base_path_array) . '/';
+	    $i = 0;
 	    foreach ($sqlviews_unsupported_module_array as $key => $module_name) {
 	    	$file_name = $module_name . '_fieldSQL.php';
 	    	$path = $module_name . '_field/src/';
@@ -218,7 +219,9 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 	    		$this->field_bundle_settings[$key]->module_path = $full_path;
 	    		require_once $full_path;
 	    	}else{
-	    		$this->error_array['field_module'][] = "The code to manage the field, '{$key}', could not be included.[" . $require_base_path . $path . $file_name . ']';
+	    		$this->error_array['field_module'][$i]['error_string_dev'] = "The code to manage the field, '{$key}', could not be included.[" . $require_base_path . $path . $file_name . ']';
+	    		$this->error_array['field_module'][$i]['error_string'] = "The code to manage the field, '{$key}', could not be included.";
+	    		$i++;
 	    	}
 	    }
 	}
@@ -349,6 +352,24 @@ CODEREH;
 
 		return $this->view_string;
 	} //END public function composeSQL_View()
+
+	public function renderErrorArray() {
+		if (count($this->error_array) > 0) {
+			// $output = 'There was an error ' . __FUNCTION__;
+			// return $output;
+			$output = 'The following errors were encountered:';
+			// $output .= print_r($this->error_array, TRUE);
+			foreach ($this->error_array as $key => $error_type_array) {
+			$output .= "\r\n - $key";
+				foreach ($error_type_array as $type => $error_string_array) {
+					$output .= "\r\n  -- {$error_string_array['error_string']}";
+				}
+			}
+			return $output;
+		}else{
+			return FALSE;
+		}
+	}
 
 	/**
 	 * END Most Current OO from Local Static Method
