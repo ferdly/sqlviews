@@ -25,10 +25,10 @@
     // $node_type_sql->gatherWeightedFieldArray();
 
 
-    // $pre_output = $node_type_sql->field_object_array;
+    // $field_obect_array = $node_type_sql->field_object_array;
 
-    $pre_output = fieldSQL::gatherFieldObjectArrayRecursively($node_type_sql->field_object_array);
-    // $result = $header . print_r($pre_output, TRUE);
+    $field_obect_array = fieldSQL::gatherFieldObjectArrayRecursively($node_type_sql->field_object_array);
+    // $result = $header . print_r($field_obect_array, TRUE);
     // // $result = $header . $output;
     // drush_print($result);
     // return;
@@ -77,7 +77,7 @@
       ); #\_ ALL Above, uncomment to remove
     $output_limit_attribute_array = $output_abbrv ? $output_limit_attribute_array : array();
     $output_array = array();
-    foreach ($pre_output as $index => $field_object_this) {
+    foreach ($field_obect_array as $index => $field_object_this) {
       $limit = FALSE;
       if (count($output_fieldname_array) == 0) {
         // $output_array[$index] = $field_object_this;
@@ -121,13 +121,36 @@
       $csv_row .= $value->field_column_name . $delim;
       $csv_row .= $value->cardinality;// . $delim;
       if ($value->field_select_is_hidden) {
-        $csv_row = "/* " . $csv_row . " */";
+        // $csv_row = "/* " . $csv_row . " */" . $eol;
+        $csv_row = '';
+      }else{
+        $csv_row = $csv_row . $eol;
       }
+      if (count($value->column_object_array)) {
+        $csv_string .= $csv_row;
+        $column_object_array = $value->column_object_array;
+        foreach ($column_object_array as $index => $column_object_this) {
+          $csv_row = '';
+          $csv_row .= $value->of_entity . $delim;
+          $csv_row .= $value->of_bundle . $delim;
+          $csv_row .= $value->table_name . $delim;
+          $csv_row .= $column_object_this->column_name . $delim;
+          $csv_row .= $column_object_this->total_cardinality;// . $delim;
+          if ($column_object_this->column_select_is_hidden) {
+            // $csv_row = "/* " . $csv_row . 'C' . " */" . $eol;
+            $csv_row = '';
+          }else{
+            $csv_row = $csv_row . $eol;
+          }
+          $csv_string .= $csv_row;
+        } //END foreach ($column_object_array as $index => $column_object_this)
+      }else{
+        $csv_string .= $csv_row;
+      } //END if (count($value->column_object_array))
       // BELOW MADE MOOT BY ABOVE, LEAVE UNTIL 20161201 JUST INCASE
       // if ($value->field_select_is_hidden * $value->field_join_is_hidden) {
       //   $csv_row = "/* " . $csv_row . " */";
       // }
-      $csv_string .= $csv_row . $eol;
     }
     $output = $csv_string;
   }else{
