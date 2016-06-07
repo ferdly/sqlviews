@@ -21,7 +21,8 @@ function _do_reports_sqlviews_drush(){
  * * this array and the Report Keys array below must be in parallel
  */
   $supported_report_name_array = array(
-    'Field Object by Bundle (Content Type)',
+    'Field Objects by Bundle (Content Type)',
+    'Column Objects by Bundle (Content Type)',
     'field_config_instance_array__db_select',
     'field_config_array__db_select',
     'field_object_as_column_parameter',
@@ -40,6 +41,7 @@ function _do_reports_sqlviews_drush(){
  */
   $supported_report_array = array(
     'field_object_array',
+    'column_object_array',
     'field_config_instance_array__db_select',
     'field_config_array__db_select',
     'field_object_as_column_parameter',
@@ -51,6 +53,7 @@ function _do_reports_sqlviews_drush(){
 
   $prompt_for_bundle_report_array = array(
     'field_object_array',
+    'column_object_array',
     'field_config_instance_array__db_select',
     'field_config_array__db_select',
     'field_object_as_column_parameter',
