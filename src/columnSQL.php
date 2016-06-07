@@ -141,6 +141,23 @@ public function instantiate_columnsFromField($field_object) {
 		$column_select_string .= ' AS ' . $this->label;
 		$this->column_select_string = $column_select_string;
 	}
+
+	public function field_report_singleton($column_singleton_first_three_columns = 'defualt_entity,default_bundle,default_tablename,') {
+		if ($this->column_select_is_hidden == 1) {
+			return "/*Column Select Is Hidden*/\r\n";
+		}
+		if ($this->column_join_is_hidden == 0) {
+			return "/*Column Join Is Not Hidden*/\r\n";
+		}
+		$field_report_singleton_result = $column_singleton_first_three_columns;
+		// $field_report_singleton_result .= "Holder for {$this->column_name} Field Report Single Row";
+		$field_report_singleton_result .= "{$this->column_name},";
+		$field_report_singleton_result .= "{$this->total_cardinality}";
+		$field_report_singleton_result .= "\r\n";
+
+		return $field_report_singleton_result;
+	}
+
 /**
  * END Most Current OO from Local Static Method
  */

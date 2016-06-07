@@ -188,15 +188,28 @@ class fieldSQL /* WILL SOON extend something*/ {
 			}
 		}
 		$field_report_singleton_result = '';
+        $field_report_singleton_result .= "{$this->of_entity},";
+        $field_report_singleton_result .= "{$this->of_bundle},";
+        $field_report_singleton_result .= "{$this->table_name},";
+        $column_singleton_first_three_columns = $field_report_singleton_result;
 		if ($this->field_select_is_hidden == 0) {
-			$field_report_singleton_result .= "{$this->of_entity},";
-			$field_report_singleton_result .= "{$this->of_bundle},";
-			$field_report_singleton_result .= "{$this->table_name},";
+            #\_ this should be Excedingly Rare
 			$field_report_singleton_result .= "{$this->field_column_name},";
 			$field_report_singleton_result .= "{$this->total_cardinality}";
 			$field_report_singleton_result .= "\r\n";
-		}
+		}else{
+            $field_report_singleton_result = '';
+        }
+        $column_field_report_buffer = '';
+        if (count($this->column_object_array) > 0) {
+            $column_object_array = $this->column_object_array;
+            foreach ($column_object_array as $index => $column_object_this) {
+                $column_field_report_buffer .= $column_object_this
+                ->field_report_singleton($column_singleton_first_three_columns);
+            }
+        }
 		// $field_report_singleton_result = "entity,type,table_name,{$this->field_name}|\r\n";
+        $field_report_singleton_result .= $column_field_report_buffer;
 		$field_report_singleton_result .= $field_field_report_buffer;
 		return $field_report_singleton_result;
 	}
@@ -210,7 +223,14 @@ class fieldSQL /* WILL SOON extend something*/ {
           $render = $field_attribute == 'moot?' ? FALSE : $render;
           $do_render_array = array('index');
           $render = in_array($field_key, $do_render_array) ? TRUE : $render;
-          $do_not_render_array = array('columns','field_field_object_array','field_config_instance_data','column_object_array');
+          $do_not_render_array = array(
+            'columns',
+            'field_field_object_array',
+            'field_config_instance_data',
+            'column_object_array',
+            'field_join_is_hidden',
+            'field_select_is_hidden',
+            );
           $render = in_array($field_key, $do_not_render_array) ? FALSE : $render;
           if ($render) {
             $field_prefix = substr($field_key, 0, 6) == 'field_' ? TRUE : FALSE;
