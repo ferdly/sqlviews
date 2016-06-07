@@ -24,7 +24,7 @@ function _do_reports_sqlviews_drush(){
     'Field Object by Bundle (Content Type)',
     'field_config_instance_array__db_select',
     'field_config_array__db_select',
-    'fieldObjectAsColumnParameter_DEV',
+    'field_object_as_column_parameter',
     'field_info_field_by_id_DEV',
     'nodeTypeSQL_DEV',
     'schema_DEV',
@@ -42,7 +42,7 @@ function _do_reports_sqlviews_drush(){
     'field_object_array',
     'field_config_instance_array__db_select',
     'field_config_array__db_select',
-    'fieldObjectAsColumnParameter_DEV',
+    'field_object_as_column_parameter',
     'field_info_field_by_id_DEV',
     'nodeTypeSQL_DEV',
     'schema_DEV',
@@ -50,9 +50,10 @@ function _do_reports_sqlviews_drush(){
   );
 
   $prompt_for_bundle_report_array = array(
-        'field_object_array',
-        'field_config_instance_array__db_select',
-        'field_config_array__db_select',
+    'field_object_array',
+    'field_config_instance_array__db_select',
+    'field_config_array__db_select',
+    'field_object_as_column_parameter',
     );
 
   if ($argument_report == 'ZXZ' || $argument_report == 'which') {
