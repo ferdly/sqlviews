@@ -31,24 +31,12 @@
     $label_option = drush_get_option('label', $label_option_default);
     $path = dirname(dirname(__FILE__));
     require_once $path . '/src/nodeTypeSQL.php';
+    // require_once 'src/nodeTypeSQL.php';
     $node_type_sql = new nodeTypeSQL($bundle);
     $node_type_sql->label_option = $label_option;
 
     $node_type_sql->database = $databases['default']['default']['database'];
     $node_type_sql->gatherFieldsArrayToNodeType();
-    $result_array = array();
-    $field_object_array = $node_type_sql->field_object_array;
-    // $output = print_r($field_object_array, TRUE);
-    $output = '';
-    foreach ($field_object_array as $index => $field_object_this) {
-      $column_instantiation_array_this =
-        $field_object_this->prepareColumnArrayForColumnInstantiation();
-      // $column_instantiation_array_this =
-      //   $field_object_this->gatherColumnArrayToField();
-      $column_instantiation_array_array[$index] =
-        $column_instantiation_array_this;
-      // $output .= print_r($field_object_this);// .  print_r($column_instantiation_array_this);
-      // return;
-    } //END foreach ($field_object_array as $index => $column_array)
-    $result_array = $column_instantiation_array_array;
+    $result_array = $node_type_sql;
+
     $output = print_r($result_array, TRUE);

@@ -132,41 +132,6 @@ function Z_do_reports_sqlviews_drush(){
       return;
   } //END if ($report == 'field_info_field_by_id_DEV')
 
-
-  if ($report == 'nodeTypeSQL_DEV') {
-    drush_print($header);
-    drush_print('$r1eport: ' . $report . '; $bundle: ' . $argument_bundle . "; \r\n[Line: " . __LINE__ . '; File: ' . basename(__FILE__) . ";]\r\n");
-    return;
-
-    $label_option_default = 'machine_abbrv';//moot?
-    $label_option = drush_get_option('label', $label_option_default);
-    require_once 'src/nodeTypeSQL.php';
-    $node_type_sql = new nodeTypeSQL($type_machine_name);
-    $node_type_sql->label_option = $label_option;
-
-    $node_type_sql->database = $databases['default']['default']['database'];
-    $node_type_sql->gatherFieldsArrayToNodeType();
-    $result_array = $node_type_sql;
-    // $field_object_array = $node_type_sql->field_object_array;
-    // foreach ($field_object_array as $index => $field_object_this) {
-    //   // $column_instantiation_array_array[$index] =
-    //     // $field_object_this->prepareColumnArrayForColumnInstantiation();
-    //   $column_instantiation_array_array[$index] =
-    //     $field_object_this->gatherColumnArrayToField();
-
-    // } //END foreach ($field_object_array as $index => $column_array)
-    // $result_array = $column_instantiation_array_array;
-    // if (count($result_array) == 0) {
-    //   $header .= "\r\nWhy Aren't These fieldSQL Objects:\r\n";
-    //   $result_array = $field_object_array;
-    // }
-    $result = $header . print_r($result_array, TRUE);
-    // $result = $header . $output;
-    drush_print($result);
-    return;
-  } //END if ($which == 'nodeTypeSQL_DEV')
-
-
   if ($report == 'schema_DEV') {
     drush_print($header);
     drush_print('$report: ' . $report . '; $bundle: ' . $argument_bundle . "; \r\n[Line: " . __LINE__ . '; File: ' . basename(__FILE__) . ";]\r\n");
