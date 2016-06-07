@@ -305,14 +305,15 @@ class fieldSQL /* WILL SOON extend something*/ {
             $field_config_ob->unpack_by_field_id();
             $field_config_ob->unpack_join_string();
             $field_config_ob->gatherColumnArrayToField();
+
             /**
              * @circleback ALWAYS use Field Join, ALWAYS user Column Select
              * * \_ unless overloaded (like Field Collection)
              *
              */
-            $column_object_count = count($$field_config_ob->column_object_array);
-            $field_config_ob->field_select_is_hidden = $column_object_count != 1 ? 1 : 0;
-            $field_config_ob->field_join_is_hidden = $column_object_count == 0 ? 1 : 0;
+            // $column_object_count = count($$field_config_ob->column_object_array);
+            // $field_config_ob->field_select_is_hidden = $column_object_count != 1 ? 1 : 0;
+            // $field_config_ob->field_join_is_hidden = $column_object_count == 0 ? 1 : 0;
 
             $return_field_object_array[$field_config->field_name] = $field_config_ob;
 
