@@ -23,6 +23,8 @@ class columnSQL {
 	public $column_select_string;
 	public $column_join_string;
 	/* </to be UnPacked> */
+	public $column_join_is_hidden = 1;
+	public $column_select_is_hidden = 0;
 
 	function __construct($column_array) {
 		if (is_array($column_array)) {
@@ -48,14 +50,18 @@ public function instantiate_columnsFromField($field_object) {
 	$column_object_array = array();
 	foreach ($columns as $column_key => $column_array) {
 		if (in_array($column_key, $supported_columns_key_array)) {
-			if ($field_object->field_column_name == $field_object->field_name . '_' . $column_key) {
-				$column_array = $field_object->prepareColumnArrayForColumnInstantiation();
-				$column_array['column_key'] = $column_key;
-				$column_object_this = new columnSQL($column_array);
-				$column_object_this->unpack_label();
-				$column_object_this->unpack_select_string();
-				$column_object_array[] = $column_object_this;
+			if ($field_object->field_column_name != $field_object->field_name . '_' . $column_key) {
+				/**
+				 * @circleback maybe remove the IF, just rewrite regardless
+				 */
+				$field_object->field_column_name = $field_object->field_name . '_' . $column_key;
 			}
+			$column_array = $field_object->prepareColumnArrayForColumnInstantiation();
+			$column_array['column_key'] = $column_key;
+			$column_object_this = new columnSQL($column_array);
+			$column_object_this->unpack_label();
+			$column_object_this->unpack_select_string();
+			$column_object_array[] = $column_object_this;
 		}
 	}
 	return $column_object_array;

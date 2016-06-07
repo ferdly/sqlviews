@@ -43,7 +43,7 @@ class fieldSQL /* WILL SOON extend something*/ {
 	// public $field_select_list_string;
 	// public $field_join_string;
 	public $field_join_is_hidden = 0;
-	public $field_select_is_hidden = 0;
+	public $field_select_is_hidden = 1;
 	/* </to be UnPacked> */
 	/* <Utility Code> */
     public static $used_table_alias_array;
@@ -79,9 +79,15 @@ class fieldSQL /* WILL SOON extend something*/ {
 		}
 	// $weight;
 	// $this->field_name = $field_info_array['field_name'];
-    $render_column_count = count($this->render_column_array);
-    $this->field_select_is_hidden = $render_column_count != 1 ? 1 : 0;
-    $this->field_join_is_hidden = $render_column_count == 0 ? 1 : 0;
+
+    /**
+     * @circleback ALWAYS use Field Join, ALWAYS user Column Select
+     * * \_ unless overloaded (like Field Collection)
+     *
+     */
+    // $render_column_count = count($this->render_column_array);
+    // $this->field_select_is_hidden = $render_column_count != 1 ? 1 : 0;
+    // $this->field_join_is_hidden = $render_column_count == 0 ? 1 : 0;
     $column_name_append = $render_column_count == 1 ? '_' . $this->render_column_array[0] : '_none';
     $column_name_append = $render_column_count > 1 ? '_many' : $column_name_append;
     // $this->field_column_name = $this->field_name . '_value';
@@ -299,6 +305,15 @@ class fieldSQL /* WILL SOON extend something*/ {
             $field_config_ob->unpack_by_field_id();
             $field_config_ob->unpack_join_string();
             $field_config_ob->gatherColumnArrayToField();
+            /**
+             * @circleback ALWAYS use Field Join, ALWAYS user Column Select
+             * * \_ unless overloaded (like Field Collection)
+             *
+             */
+            $column_object_count = count($$field_config_ob->column_object_array);
+            $field_config_ob->field_select_is_hidden = $column_object_count != 1 ? 1 : 0;
+            $field_config_ob->field_join_is_hidden = $column_object_count == 0 ? 1 : 0;
+
             $return_field_object_array[$field_config->field_name] = $field_config_ob;
 
         }
