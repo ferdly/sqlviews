@@ -93,11 +93,12 @@ class fieldSQL /* WILL SOON extend something*/ {
     // $this->field_column_name = $this->field_name . '_value';
 	$this->field_column_name = $this->field_name . $column_name_append;
 	$table_array = $field_info_array['storage']['details']['sql']['FIELD_LOAD_CURRENT'];
-	$table_name = key($table_array);
+	$table_name = is_array($table_array) ? key($table_array) : 'UNKNOWN_TABLENAME';
     $this->table_name = $table_name;
 	$this->of_foriegn_key_table = strlen($this->of_foriegn_key_table) == 0 ?
         $this->of_entity : $this->of_foriegn_key_table;
-	$this->table_alias = nodeTypeSQL::$all_table_alias_array[$this->table_name];
+    $table_alias = nodeTypeSQL::$all_table_alias_array[$this->table_name];
+	$this->table_alias = strlen($table_alias) > 0 ? $table_alias : 'ZXZ';
     $this->unpack_table_alias();
 	// $this->label = $field_info_array[''];
 	// $this->label_option = $field_info_array[''];
