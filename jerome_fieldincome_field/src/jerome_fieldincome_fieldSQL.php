@@ -4,6 +4,7 @@ class jerome_fieldincome_fieldSQL extends fieldSQL {
 
     public function __construct($field_array) {
         parent::__construct($field_array);
+        $this->render_column_array = array('jerome_fieldincome');
     }
 
     public function instantiateFieldAndReturn($field_config_ob) {
