@@ -152,16 +152,20 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 			$this->gatherNodeTypeData();
 		}
 		$field_config_instance_array =
-		db_query('SELECT id, field_id, field_name, data, deleted FROM {field_config_instance} WHERE bundle = :bundle',
+		db_query('SELECT id, field_id, field_name, data, deleted FROM {field_config_instance} WHERE bundle = :bundle AND deleted = :not_deleted',
 			array(':bundle' =>
-			$this->type))->fetchAll();
+			$this->type,
+			':not_deleted' =>
+			0))->fetchAll();
 			// 'many_fields'))->fetchAll();
 		foreach ($field_config_instance_array as $index => $row) {
 			$row->data = (object) unserialize($row->data);
 				$field_config_this =
-				db_query('SELECT * FROM {field_config} WHERE id = :field_id',
+				db_query('SELECT * FROM {field_config} WHERE id = :field_id AND deleted = :not_deleted',
 					array(':field_id' =>
-					$row->field_id))->fetchObject();
+					$row->field_id,
+					':not_deleted' =>
+					0))->fetchObject();
 				$field_config_this->data = (object) unserialize($field_config_this->data);
 				$fields[$row->field_name]['instance'] = $row;
 				$fields[$row->field_name]['field'] = $field_config_this;
