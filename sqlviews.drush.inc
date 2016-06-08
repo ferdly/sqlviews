@@ -256,6 +256,9 @@ function _do_field_report($type_machine_name){
   $headers = drush_get_option('headers', 0);
   $headers = $headers == 1 ? TRUE : FALSE;
 
+  $dev = drush_get_option('dev', 0);
+  $dev = $dev == 1 ? TRUE : FALSE;
+
   $line = 0; //__LINE__;
   $header = _render_header(__FUNCTION__, $type_machine_name, $line);
   $label_option_default = 'machine_abbrv';//moot?
@@ -266,7 +269,7 @@ function _do_field_report($type_machine_name){
   $node_type_sql->database = $databases['default']['default']['database'];
   $node_type_sql->composeFieldReport();
 
-  $error_string = $node_type_sql->renderErrorArray();
+  $error_string = $node_type_sql->renderErrorArray($dev);
   if ($error_string !== FALSE) {
     $output = $error_string;
   }else{

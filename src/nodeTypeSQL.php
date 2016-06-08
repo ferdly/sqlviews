@@ -353,16 +353,26 @@ CODEREH;
 		return $this->view_string;
 	} //END public function composeSQL_View()
 
-	public function renderErrorArray() {
+	public function renderErrorArray($dev = FALSE) {
+		$dev = $dev === TRUE ? TRUE : FALSE;
 		if (count($this->error_array) > 0) {
 			// $output = 'There was an error ' . __FUNCTION__;
 			// return $output;
 			$output = 'The following errors were encountered:';
 			// $output .= print_r($this->error_array, TRUE);
 			foreach ($this->error_array as $key => $error_type_array) {
+				if ($dev) {
+					# code...
+				}else{
+
+				}
 			$output .= "\r\n - $key";
 				foreach ($error_type_array as $type => $error_string_array) {
-					$output .= "\r\n  -- {$error_string_array['error_string']}";
+					if ($dev) {
+						$output .= "\r\n  -- {$error_string_array['error_string_dev']}";
+					}else{
+						$output .= "\r\n  -- {$error_string_array['error_string']}";
+					}
 				}
 			}
 			return $output;
