@@ -43,7 +43,8 @@ class fieldSQL /* WILL SOON extend something*/ {
 	// public $field_select_list_string;
 	// public $field_join_string;
 	public $field_join_is_hidden = 0;
-	public $field_select_is_hidden = 1;
+    public $field_select_is_hidden = 1;
+	public $field_custom_config_is_limited = 0;
 	/* </to be UnPacked> */
 	/* <Utility Code> */
     public static $used_table_alias_array;
@@ -115,7 +116,8 @@ class fieldSQL /* WILL SOON extend something*/ {
 	$this->columns = $field_info_array['columns'];
 	$data_unserialized = unserialize($this->field_config_instance_data);
 	$this->label = $data_unserialized['label'];
-	$this->weight = $data_unserialized['widget']['weight'];
+    $this->weight = $data_unserialized['widget']['weight'];
+	$this->unpack_field_is_limited();
     $this->field_config_instance_data = 'EMPTIED after UnPack in ' . basename(__FILE__) . ' on line ' . __LINE__;
 	// $this->field_config_data = 'EMPTIED after UnPack in ' . basename(__FILE__) . ' on line ' . __LINE__;
 	}
@@ -138,6 +140,33 @@ class fieldSQL /* WILL SOON extend something*/ {
 		$on = 'ON ' . nodeTypeSQL::$all_table_alias_array[$this->of_foriegn_key_table] . '.' . $this->of_foriegn_key . ' = ' . $this->table_alias . '.entity_id';
 		$this->field_join_string = $join . "\r\n" . $on;
 	}
+
+    public function unpack_field_is_limited(){
+        // No attempt to Reconcile Conflicts
+        $tables_included = nodeTypeSQL::$limit_byinclusion_field_tablename_array;
+        $tables_excluded = nodeTypeSQL::$limit_byexclusion_field_tablename_array;
+        $fields_included = nodeTypeSQL::$limit_byinclusion_field_fieldname_array;
+        $fields_excluded = nodeTypeSQL::$limit_byexclusion_field_fieldname_array;
+        $table_is_excluded = in_array($this->table_name, $tables_excluded);
+        $table_is_included = count($tables_included) == 0 ? TRUE : FALSE;
+        $any_is_included = count($tables_included) + count($fields_included) == 0 ? TRUE : FALSE;
+        $table_is_included = in_array($this->table_name, $tables_included) ? TRUE : $any_is_included;
+        // $field_is_excluded = in_array($this->field_name, $fields_excluded);
+        $field_is_excluded = in_array($this->field_column_name, $fields_excluded);
+        $field_is_included = count($fields_included) == 0 ? TRUE : FALSE;
+        // $field_is_included = in_array($this->field_name, $fields_included) ? TRUE : $any_is_included;
+        $field_is_included = in_array($this->field_column_name, $fields_included) ? TRUE : $any_is_included;
+
+        $is_limited = 1;
+        $is_limited = $table_is_included ? 0 : $is_limited;
+        $is_limited = $field_is_included ? 0 : $is_limited;
+        $is_limited = $table_is_excluded ? 1 : $is_limited;
+        $is_limited = $field_is_excluded ? 1 : $is_limited;
+        // $is_limited = $field_is_included ? 0 : 1;
+        // $is_limited = 0;
+        $this->field_custom_config_is_limited = $is_limited;
+        return $this->field_custom_config_is_limited;
+    }
 
     public function gatherSelect_this($i = 0) {
         $select_array_this = array();
@@ -212,6 +241,8 @@ class fieldSQL /* WILL SOON extend something*/ {
 		// $field_report_singleton_result = "entity,type,table_name,{$this->field_name}|\r\n";
         $field_report_singleton_result .= $column_field_report_buffer;
 		$field_report_singleton_result .= $field_field_report_buffer;
+        $limited = strlen($field_report_singleton_result) == 0 ? '' : "/*FIELD LIMITED [{$this->field_custom_config_is_limited}]\r\n" . $field_report_singleton_result  . "*/\r\n";
+        $field_report_singleton_result = $this->field_custom_config_is_limited == 1 ? $limited : $field_report_singleton_result;
 		return $field_report_singleton_result;
 	}
 	public function prepareColumnArrayForColumnInstantiation() {

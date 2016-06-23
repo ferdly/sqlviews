@@ -52,6 +52,15 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 	public $of_cardinality = 1;//for instantiation of cardinality in fields
 	public static $drupal_core_field_type_module_array = null;
 	public static $all_table_alias_array = null;
+	public static $limit_byinclusion_field_tablename_array = null;
+	public static $limit_byexclusion_field_tablename_array = null;
+	public static $limit_byinclusion_field_fieldname_array = null;
+	public static $limit_byexclusion_field_fieldname_array = null;
+	public static $limit_byinclusion_column_tablename_array = null;
+	public static $limit_byexclusion_column_tablename_array = null;
+	public static $limit_byinclusion_column_columnname_array = null;
+	public static $limit_byexclusion_column_columnname_array = null;
+	public static $limit_by_bundle_segment;
 	/* </Utility Code> */
 
 	/* <Return Code/Data> */
@@ -59,8 +68,9 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 	public $view_string;
 	/* </Return Code/Data> */
 
-	public function __construct($type_machine_name) {
+	public function __construct($type_machine_name, $limit_by_bundle_segment = NULL) {
 		$this->type = $type_machine_name;
+		$this->limit_by_bundle_segment = $limit_by_bundle_segment;
 	    if (is_null(self::$all_table_alias_array)) {
         	self::$all_table_alias_array = best_table_alias_array();
     	}
@@ -74,6 +84,7 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 	        'file',
 	    	);
     	}
+    	require_once 'nodetype_custom_config.inc';
 	}
 
 	public function gatherNodeData() {

@@ -74,6 +74,7 @@
       'column_object_array',
       // 'field_join_is_hidden',
       // 'field_select_is_hidden',
+      // 'field_custom_config_is_limited',
       ); #\_ ALL Above, uncomment to remove
     $output_limit_attribute_array = $output_abbrv ? $output_limit_attribute_array : array();
     $output_array = array();

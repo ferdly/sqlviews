@@ -25,6 +25,7 @@ class columnSQL {
 	/* </to be UnPacked> */
 	public $column_join_is_hidden = 1;
 	public $column_select_is_hidden = 0;
+	public $column_custom_config_is_limited = 0;
 
 	function __construct($column_array) {
 		if (is_array($column_array)) {
@@ -61,6 +62,7 @@ public function instantiate_columnsFromField($field_object) {
 			$column_object_this = new columnSQL($column_array);
 			$column_object_this->unpack_label();
 			$column_object_this->unpack_select_string();
+			$column_object_this->unpack_column_is_limited();
 			$column_object_array[] = $column_object_this;
 		}
 	}
@@ -141,6 +143,29 @@ public function instantiate_columnsFromField($field_object) {
 		$column_select_string .= ' AS ' . $this->label;
 		$this->column_select_string = $column_select_string;
 	}
+    public function unpack_column_is_limited(){
+        // No attempt to Reconcile Conflicts
+        $tables_included = nodeTypeSQL::$limit_byinclusion_column_tablename_array;
+        $tables_excluded = nodeTypeSQL::$limit_byexclusion_column_tablename_array;
+        $columns_included = nodeTypeSQL::$limit_byinclusion_column_columnname_array;
+        $columns_excluded = nodeTypeSQL::$limit_byexclusion_column_columnname_array;
+        $table_is_excluded = in_array($this->table_name, $tables_excluded);
+        $table_is_included = count($tables_included) == 0 ? TRUE : FALSE;
+        $any_is_included = count($tables_included) + count($columns_included) == 0 ? TRUE : FALSE;
+        $table_is_included = in_array($this->table_name, $tables_included) ? TRUE : $any_is_included;
+        $column_is_excluded = in_array($this->column_name, $columns_excluded);
+        $column_is_included = count($columns_included) == 0 ? TRUE : FALSE;
+        $column_is_included = in_array($this->column_name, $columns_included) ? TRUE : $any_is_included;
+
+        $is_limited = 1;
+        $is_limited = $table_is_included ? 0 : $is_limited;
+        $is_limited = $column_is_included ? 0 : $is_limited;
+        $is_limited = $table_is_excluded ? 1 : $is_limited;
+        $is_limited = $column_is_excluded ? 1 : $is_limited;
+        // $is_limited = 0;
+    	$this->column_custom_config_is_limited = $is_limited;
+        return $this->column_custom_config_is_limited;
+    }
 
 	public function field_report_singleton($column_singleton_first_three_columns = 'defualt_entity,default_bundle,default_tablename,') {
 		if ($this->column_select_is_hidden == 1) {
@@ -153,7 +178,9 @@ public function instantiate_columnsFromField($field_object) {
 		// $field_report_singleton_result .= "Holder for {$this->column_name} Field Report Single Row";
 		$field_report_singleton_result .= "{$this->column_name},";
 		$field_report_singleton_result .= "{$this->total_cardinality}";
+		$limited = "/*COLUMN LIMITED: " .$field_report_singleton_result . "*/\r\n";
 		$field_report_singleton_result .= "\r\n";
+		$field_report_singleton_result = $this->column_custom_config_is_limited == 1 ? $limited : $field_report_singleton_result;
 
 		return $field_report_singleton_result;
 	}

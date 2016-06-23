@@ -15,6 +15,21 @@ function sqlviews_drush_command() {
       'which' => 'is argument',
     ),
     'options' => array(
+      'bundle-segment' => 'is_option',
+      'headers' => 'is option',
+      'context' => 'is option',
+      'dev' => 'is option',
+    ),
+  );
+  $items['custom_config-report'] = array(
+    'aliases' => array(
+      'cc-rpt',
+      ),
+    'arguments' => array(
+      'which' => 'is argument',
+    ),
+    'options' => array(
+      'bundle-segment' => 'is_option',
       'headers' => 'is option',
       'context' => 'is option',
       'dev' => 'is option',
@@ -99,7 +114,32 @@ function drush_sqlviews_field_report($which_type = FALSE) {
   // drush_print($which_type);
   // return;
   _do_field_report($which_type);
-} //END function drush_node_tablelist($which_list = FALSE)
+} //END function drush_sqlviews_field_report($which_type = FALSE)
+
+function drush_sqlviews_custom_config_report($which_type = FALSE) {
+//drush_mymodule_custom_save_node
+  // Check for existence of argument
+    $arguments = _which_nodetype_arguments(); //use custom function to encapsulate
+    if (!$which_type) {
+        $which_type = drush_choice($arguments, dt('Which Example would you like to interact with using \'PHP-Coder\'?'));
+    }
+
+  // Check for correct argument
+  $correct_args = array_keys($arguments);
+  if (!in_array($which_type, $correct_args)) {
+    if ($which_type == '0') {
+      drush_user_abort('Buh-Bye! sqlViews Gather Node!');
+      return;
+    }
+    $string = _which_type_arguments('string');
+    return drush_set_error(dt('"@type" is not a valid example. ',
+      array('@type' => $example)) . $string);
+  }
+
+  // drush_print($which_type);
+  // return;
+  _do_custom_config_report($which_type);
+} //END function drush_sqlviews_custom_config_report($which_type = FALSE)
 
 function drush_sqlviews_sql_view_code($which_type = FALSE) {
 //drush_mymodule_custom_save_node
@@ -255,6 +295,8 @@ function _do_field_report($type_machine_name){
   $context = _render_drush_context_sqlviews($print);
   $headers = drush_get_option('headers', 0);
   $headers = $headers == 1 ? TRUE : FALSE;
+  $bundle_segment = drush_get_option('bundle-segment', FALSE);
+  $bundle_segment = $bundle_segment === TRUE ? '1' : $bundle_segment;
 
   $dev = drush_get_option('dev', 0);
   $dev = $dev == 1 ? TRUE : FALSE;
@@ -263,8 +305,11 @@ function _do_field_report($type_machine_name){
   $header = _render_header(__FUNCTION__, $type_machine_name, $line);
   $label_option_default = 'machine_abbrv';//moot?
   require_once 'src/nodeTypeSQL.php';
-  $node_type_sql = new nodeTypeSQL($type_machine_name);
+  $limit_by_bundle_segment = $bundle_segment !== FALSE ? $bundle_segment : NULL;
+  $node_type_sql = new nodeTypeSQL($type_machine_name, $limit_by_bundle_segment);
   $node_type_sql->label_option = $label_option;
+  drush_print("Bundle-Segment: " . $bundle_segment);
+  drush_print("THIS->Bundle-Segment: " . $node_type_sql->limit_by_bundle_segment);
 
   $node_type_sql->database = $databases['default']['default']['database'];
   $node_type_sql->composeFieldReport();
@@ -276,6 +321,198 @@ function _do_field_report($type_machine_name){
     $headers_string = $headers ? "entity,bundle,table_name,field_name,cardinality\r\n" : '';;
     $output = $node_type_sql->view_string;
     $output = $headers_string . $output;
+  }
+
+  $result = $header . $output;
+  drush_print($result);
+}
+
+function _do_custom_config_report($type_machine_name, $option_array = array()){
+  $print = drush_get_option('context', 0);
+  $print = $print == 1 ? TRUE : FALSE;
+  // $print = TRUE;
+  $context = _render_drush_context_sqlviews($print);
+  $bundle_segment = drush_get_option('bundle-segment', FALSE);
+  $bundle_segment = $bundle_segment === TRUE ? '1' : $bundle_segment;
+  // $headers = $headers == 1 ? TRUE : FALSE;
+
+  $dev = drush_get_option('dev', 0);
+  $dev = $dev == 1 ? TRUE : FALSE;
+
+  $line = 0; //__LINE__;
+  $header = _render_header(__FUNCTION__, $type_machine_name, $line);
+  $label_option_default = 'machine_abbrv';//moot?
+  require_once 'src/nodeTypeSQL.php';
+  $limit_by_bundle_segment = $bundle_segment !== FALSE ? $bundle_segment : NULL;
+  $node_type_sql = new nodeTypeSQL($type_machine_name, $limit_by_bundle_segment);
+  // drush_print("Bundle-Segment: " . $bundle_segment);
+  drush_print("THIS->Bundle-Segment: " . $node_type_sql->limit_by_bundle_segment);
+  $node_type_sql->label_option = $label_option;
+
+  $node_type_sql->database = $databases['default']['default']['database'];
+  // $node_type_sql->composeFieldReport();
+  $report_string = '';
+  /*<Just Brute Force> (for now) */
+  $is_null_string = 'NNULL';
+  $is_empty_array_string = 'EEMPTY_AARRAY';
+  /*<NEXT> First*/
+  $kind = 'field_tablename';
+  $by = 'by_inclusion';
+  $this_static_array = nodeTypeSQL::$limit_byinclusion_field_tablename_array;
+  $isset = isset($this_static_array);
+  $is_array = is_array($this_static_array);
+  $count = count($this_static_array);
+  $is_null = !$is_array && !$isset;
+  $is_empty_array = $is_array && $count == 0;
+  if ($is_array) {
+      $list = implode(',', $this_static_array);
+  }else{
+    $list = '';
+  }
+  $final = $list;
+  $final = $is_empty_array ? $is_empty_array_string : $final;
+  $final = $is_null ? $is_null_string : $final;
+  $limit[$kind][$by] = $final;
+  /*<NEXT> Second*/
+  $kind = 'field_tablename';
+  $by = 'by_exclusion';
+  $this_static_array = nodeTypeSQL::$limit_byexclusion_field_tablename_array;
+  $isset = isset($this_static_array);
+  $is_array = is_array($this_static_array);
+  $count = count($this_static_array);
+  $is_null = !$is_array && !$isset;
+  $is_empty_array = $is_array && $count == 0;
+  if ($is_array) {
+      $list = implode(',', $this_static_array);
+  }else{
+    $list = '';
+  }
+  $final = $list;
+  $final = $is_empty_array ? $is_empty_array_string : $final;
+  $final = $is_null ? $is_null_string : $final;
+  $limit[$kind][$by] = $final;
+  /*<NEXT>*/
+  $kind = 'field_fieldname';
+  $by = 'by_inclusion';
+  $this_static_array = nodeTypeSQL::$limit_byinclusion_field_fieldname_array;
+  $isset = isset($this_static_array);
+  $is_array = is_array($this_static_array);
+  $count = count($this_static_array);
+  $is_null = !$is_array && !$isset;
+  $is_empty_array = $is_array && $count == 0;
+  if ($is_array) {
+      $list = implode(',', $this_static_array);
+  }else{
+    $list = '';
+  }
+  $final = $list;
+  $final = $is_empty_array ? $is_empty_array_string : $final;
+  $final = $is_null ? $is_null_string : $final;
+  $limit[$kind][$by] = $final;
+  /*<NEXT>*/
+  $kind = 'field_fieldname';
+  $by = 'by_exclusion';
+  $this_static_array = nodeTypeSQL::$limit_byexclusion_field_fieldname_array;
+  $isset = isset($this_static_array);
+  $is_array = is_array($this_static_array);
+  $count = count($this_static_array);
+  $is_null = !$is_array && !$isset;
+  $is_empty_array = $is_array && $count == 0;
+  if ($is_array) {
+      $list = implode(',', $this_static_array);
+  }else{
+    $list = '';
+  }
+  $final = $list;
+  $final = $is_empty_array ? $is_empty_array_string : $final;
+  $final = $is_null ? $is_null_string : $final;
+  $limit[$kind][$by] = $final;
+  /*<NEXT>*/
+  $kind = 'column_tablename';
+  $by = 'by_inclusion';
+  $this_static_array = nodeTypeSQL::$limit_byinclusion_column_tablename_array;
+  $isset = isset($this_static_array);
+  $is_array = is_array($this_static_array);
+  $count = count($this_static_array);
+  $is_null = !$is_array && !$isset;
+  $is_empty_array = $is_array && $count == 0;
+  if ($is_array) {
+      $list = implode(',', $this_static_array);
+  }else{
+    $list = '';
+  }
+  $final = $list;
+  $final = $is_empty_array ? $is_empty_array_string : $final;
+  $final = $is_null ? $is_null_string : $final;
+  $limit[$kind][$by] = $final;
+  /*<NEXT>*/
+  $kind = 'column_tablename';
+  $by = 'by_exclusion';
+  $this_static_array = nodeTypeSQL::$limit_byexclusion_column_tablename_array;
+  $isset = isset($this_static_array);
+  $is_array = is_array($this_static_array);
+  $count = count($this_static_array);
+  $is_null = !$is_array && !$isset;
+  $is_empty_array = $is_array && $count == 0;
+  if ($is_array) {
+      $list = implode(',', $this_static_array);
+  }else{
+    $list = '';
+  }
+  $final = $list;
+  $final = $is_empty_array ? $is_empty_array_string : $final;
+  $final = $is_null ? $is_null_string : $final;
+  $limit[$kind][$by] = $final;
+  /*<NEXT>*/
+  $kind = 'column_columnname';
+  $by = 'by_inclusion';
+  $this_static_array = nodeTypeSQL::$limit_byinclusion_column_columnname_array;
+  $isset = isset($this_static_array);
+  $is_array = is_array($this_static_array);
+  $count = count($this_static_array);
+  $is_null = !$is_array && !$isset;
+  $is_empty_array = $is_array && $count == 0;
+  if ($is_array) {
+      $list = implode(',', $this_static_array);
+  }else{
+    $list = '';
+  }
+  $final = $list;
+  $final = $is_empty_array ? $is_empty_array_string : $final;
+  $final = $is_null ? $is_null_string : $final;
+  $limit[$kind][$by] = $final;
+  /*<NEXT>*/
+  $kind = 'column_columnname';
+  $by = 'by_exclusion';
+  $this_static_array = nodeTypeSQL::$limit_byexclusion_column_columnname_array;
+  $isset = isset($this_static_array);
+  $is_array = is_array($this_static_array);
+  $count = count($this_static_array);
+  $is_null = !$is_array && !$isset;
+  $is_empty_array = $is_array && $count == 0;
+  if ($is_array) {
+      $list = implode(',', $this_static_array);
+  }else{
+    $list = '';
+  }
+  $final = $list;
+  $final = $is_empty_array ? $is_empty_array_string : $final;
+  $final = $is_null ? $is_null_string : $final;
+  $limit[$kind][$by] = $final;
+  /*<Just Brute Force> (for now) */
+  foreach ($limit as $kind => $by_array) {
+    foreach ($by_array as $by_key => $limit_list) {
+      $report_string .= 'Limit ' . str_replace('_', ' ', $kind . ' ' . $by_key) . ": \r\n";
+      $report_string .= $limit_list . "\r\n\r\n";
+    }
+  }
+
+  $error_string = FALSE;//$node_type_sql->renderErrorArray($dev);
+  if ($error_string !== FALSE) {
+    $output = $error_string;
+  }else{
+    $output = $report_string;
+    // $output = $headers_string . $output;
   }
 
   $result = $header . $output;

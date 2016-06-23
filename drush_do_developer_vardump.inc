@@ -46,7 +46,7 @@ function _do_developer_vardump(){
       // $which = 'cleared out see reports for archived devv too';
       /* \_ Un-Comment one above for default $which */
   }
-
+  $which = 'project_app_gp';
   $header = 'Result of ' . __FUNCTION__ . '(' . $which . ')';
   $header_len = strlen($header);
   $header .= "\r\n";
@@ -54,7 +54,83 @@ function _do_developer_vardump(){
     $header .= '=';
   }
   $header .= "\r\n";
+
+  $bundle = $which;
+  $path = dirname(__FILE__);
+  require_once $path . '/src/nodeTypeSQL.php';
+  $node_type_sql = new nodeTypeSQL($bundle);
+  $node_type_sql->label_option = $label_option;
+
+  $node_type_sql->database = $databases['default']['default']['database'];
+  $node_type_sql->composeFieldReport();
+
+  $now_array = getdate();
+  drush_print('Seconds: ' . print_r($now_array[seconds], TRUE));
+  $index =$now_array[seconds] % 10;//1,3,4,5,7,9
+
+  $field_this = $node_type_sql->field_object_array[$index];
+  drush_print('$field_this: ' . print_r($field_this, TRUE));
+  // $field_column_name = 'field_app_org_sponsor_value';
+  $field_column_name = $field_this->field_column_name;
+  // $table_name = 'field_data_field_app_org_sponsor';
+  $table_name = $field_this->table_name;
+  $is_limited_orig = $field_this->field_custom_config_is_limited;
+  $is_limited_orig_string = $is_limited_orig ? '$is_limited_orig: TTRUE' : '$is_limited_orig: FFALSE';
+
+  $is_limited_direct = $field_this->unpack_field_is_limited();
+  /**
+   * is_limited Method fieldSQL.php
+   */
+        $tables_included = nodeTypeSQL::$limit_byinclusion_field_tablename_array;
+        $tables_excluded = nodeTypeSQL::$limit_byexclusion_field_tablename_array;
+        $fields_included = nodeTypeSQL::$limit_byinclusion_field_fieldname_array;
+        $fields_excluded = nodeTypeSQL::$limit_byexclusion_field_fieldname_array;
+        $table_is_excluded = in_array($table_name, $tables_excluded);
+        $table_is_included = count($tables_included) == 0 ? TRUE : FALSE;
+        $any_is_included = count($tables_included) + count($fields_included) == 0 ? TRUE : FALSE;
+        $table_is_included = in_array($table_name, $tables_included) ? TRUE : $any_is_included;
+        // $field_is_excluded = in_array($this->field_name, $fields_excluded);
+        $field_is_excluded = in_array($field_column_name, $fields_excluded);
+        $field_is_included = count($fields_included) == 0 ? TRUE : FALSE;
+        // $field_is_included = in_array($this->field_name, $fields_included) ? TRUE : $any_is_included;
+        $field_is_included = in_array($field_column_name, $fields_included) ? TRUE : $any_is_included;
+
+        $is_limited = 1;
+        $is_limited = $table_is_included ? 0 : $is_limited;
+        $is_limited = $field_is_included ? 0 : $is_limited;
+        $is_limited = $table_is_excluded ? 1 : $is_limited;
+        $is_limited = $field_is_excluded ? 1 : $is_limited;
+        $any_is_included_string = $any_is_included ? '$any_is_included: TTRUE' : '$any_is_included: FFALSE';
+        $table_is_included_string = $table_is_included ? '$table_is_included: TTRUE' : '$table_is_included: FFALSE';
+        $field_is_included_string = $field_is_included ? '$field_is_included: TTRUE' : '$field_is_included: FFALSE';
+        $table_is_excluded_string = $table_is_excluded ? '$table_is_excluded: TTRUE' : '$table_is_excluded: FFALSE';
+        $field_is_excluded_string = $field_is_excluded ? '$field_is_excluded: TTRUE' : '$field_is_excluded: FFALSE';
+        $is_limited_string = $is_limited !== 0 ? '$is_limited: TTRUE' : '$is_limited: FFALSE';
+        $is_limited_direct_string = $is_limited_direct !== 0 ? '$is_limited_direct: TTRUE' : '$is_limited_direct: FFALSE';
+        // $is_limited = $field_is_included ? 0 : 1;
+        // $is_limited = 0;
+  /**
+   * is_limited Method fieldSQL.php
+   */
+
+
+  $output = 'limit_byinclusion_field_fieldname_array: ' . print_r($fields_included, TRUE);
+
+
   $result = $header . $output;
+  drush_print($result);
+  drush_print('$index: ' . $index . ' [FFALSE for: 1,3,4,5,7,9]');
+  drush_print('$table_name: ' . $table_name);
+  drush_print('$field_column_name: ' . $field_column_name);
+  drush_print($any_is_included_string);
+  drush_print($table_is_included_string);
+  drush_print($field_is_included_string);
+  drush_print($table_is_excluded_string);
+  drush_print($field_is_excluded_string);
+  drush_print($is_limited_string . '[' . $is_limited . ']');
+  drush_print($is_limited_orig_string . '[' . $is_limited_orig . ']');
+  drush_print($is_limited_direct_string . '[' . $is_limited_direct . ']');
+  return;
 
 
   drush_print($header);
