@@ -295,6 +295,8 @@ function _do_field_report($type_machine_name){
   $context = _render_drush_context_sqlviews($print);
   $headers = drush_get_option('headers', 0);
   $headers = $headers == 1 ? TRUE : FALSE;
+  $dev = drush_get_option('dev', 0);
+  $dev = $dev == 1 ? TRUE : FALSE;
   $bundle_segment = drush_get_option('bundle-segment', FALSE);
   $bundle_segment = $bundle_segment === TRUE ? '1' : $bundle_segment;
 
@@ -307,6 +309,9 @@ function _do_field_report($type_machine_name){
   require_once 'src/nodeTypeSQL.php';
   $limit_by_bundle_segment = $bundle_segment !== FALSE ? $bundle_segment : NULL;
   $node_type_sql = new nodeTypeSQL($type_machine_name, $limit_by_bundle_segment);
+  if ($dev) {
+    nodeTypeSQL::$devv = $dev;
+  }
   $node_type_sql->label_option = $label_option;
   drush_print("Bundle-Segment: " . $bundle_segment);
   drush_print("THIS->Bundle-Segment: " . $node_type_sql->limit_by_bundle_segment);

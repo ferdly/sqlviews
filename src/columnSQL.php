@@ -179,6 +179,7 @@ public function instantiate_columnsFromField($field_object) {
 		$field_report_singleton_result .= "{$this->column_name},";
 		$field_report_singleton_result .= "{$this->total_cardinality}";
 		$limited = "/*COLUMN LIMITED: " .$field_report_singleton_result . "*/\r\n";
+        $limited = nodeTypeSQL::$devv === TRUE ? $limited : '';
 		$field_report_singleton_result .= "\r\n";
 		$field_report_singleton_result = $this->column_custom_config_is_limited == 1 ? $limited : $field_report_singleton_result;
 

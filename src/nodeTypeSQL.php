@@ -61,6 +61,7 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 	public static $limit_byinclusion_column_columnname_array = null;
 	public static $limit_byexclusion_column_columnname_array = null;
 	public static $limit_by_bundle_segment;
+	public static $devv = FALSE;
 	/* </Utility Code> */
 
 	/* <Return Code/Data> */

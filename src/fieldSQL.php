@@ -242,6 +242,7 @@ class fieldSQL /* WILL SOON extend something*/ {
         $field_report_singleton_result .= $column_field_report_buffer;
 		$field_report_singleton_result .= $field_field_report_buffer;
         $limited = strlen($field_report_singleton_result) == 0 ? '' : "/*FIELD LIMITED [{$this->field_custom_config_is_limited}]\r\n" . $field_report_singleton_result  . "*/\r\n";
+        $limited = nodeTypeSQL::$devv === TRUE ? $limited : '';
         $field_report_singleton_result = $this->field_custom_config_is_limited == 1 ? $limited : $field_report_singleton_result;
 		return $field_report_singleton_result;
 	}

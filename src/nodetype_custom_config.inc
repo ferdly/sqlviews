@@ -14,12 +14,11 @@ $type = $this->type;
 $limit_by_bundle_segment = trim($this->limit_by_bundle_segment);
 
 if ($this->type == 'project_app_gp') {
-    self::$limit_byinclusion_field_fieldname_array = array('field_app_org_sponsor_value','field_app_spn_street_value','field_app_spn_street2_value','field_app_spn_city_value','field_app_spn_state_value','field_app_spn_zip_value');
     switch ($limit_by_bundle_segment) {
-        case 'TST1':
-            self::$limit_byinclusion_field_fieldname_array = array('field_app_org_sponsor_value','field_app_spn_street_value','field_app_spn_street2_value','field_app_spn_city_value','field_app_spn_state_value','field_app_spn_zip_value');
+        case 'SPN':
+            self::$limit_byinclusion_field_tablename_array = array('field_data_field_app_org_sponsor','field_data_field_app_org_sponsor_aka','field_data_field_app_spn_street','field_data_field_app_spn_street2','field_data_field_app_spn_city','field_data_field_app_spn_state','field_data_field_app_spn_zip','field_data_field_app_spn_county','field_data_field_app_spn_borough','field_data_field_app_spn_legal','field_data_field_app_spn_phone','field_data_field_app_spn_email','field_data_field_app_spn_fax','field_data_field_app_spn_website','field_data_field_app_spn_ein','field_data_field_app_spn_founded','field_data_field_app_spn_exempt','field_data_field_spn_mission_a','field_data_field_spn_mission_b','field_data_field_spn_mission_c','field_data_field_spn_mission_d');
             break;
-        default:
+    default:
             $holder = 'no action';
             break;
     }
