@@ -18,6 +18,7 @@ function sqlviews_drush_command() {
       'bundle-segment' => 'is_option',
       'headers' => 'is option',
       'context' => 'is option',
+      'count' => 'is option',
       'dev' => 'is option',
     ),
   );

@@ -244,6 +244,7 @@ class fieldSQL /* WILL SOON extend something*/ {
         $limited = strlen($field_report_singleton_result) == 0 ? '' : "/*FIELD LIMITED [{$this->field_custom_config_is_limited}]\r\n" . $field_report_singleton_result  . "*/\r\n";
         $limited = nodeTypeSQL::$devv === TRUE ? $limited : '';
         $field_report_singleton_result = $this->field_custom_config_is_limited == 1 ? $limited : $field_report_singleton_result;
+        nodeTypeSQL::$count += 1;
 		return $field_report_singleton_result;
 	}
 	public function prepareColumnArrayForColumnInstantiation() {
