@@ -12,11 +12,16 @@ self::$limit_byexclusion_column_columnname_array = array();
 
 $type = $this->type;
 $limit_by_bundle_segment = trim($this->limit_by_bundle_segment);
-
 if ($this->type == 'project_app_gp') {
     switch ($limit_by_bundle_segment) {
+        case 'SPN_CF':
+            self::$limit_byinclusion_field_fieldname_array = array('field_app_spn_contact');
+            break;
         case 'SPN':
             self::$limit_byinclusion_field_tablename_array = array('field_data_field_app_org_sponsor','field_data_field_app_org_sponsor_aka','field_data_field_app_spn_street','field_data_field_app_spn_street2','field_data_field_app_spn_city','field_data_field_app_spn_state','field_data_field_app_spn_zip','field_data_field_app_spn_county','field_data_field_app_spn_borough','field_data_field_app_spn_legal','field_data_field_app_spn_phone','field_data_field_app_spn_email','field_data_field_app_spn_fax','field_data_field_app_spn_website','field_data_field_app_spn_ein','field_data_field_app_spn_founded','field_data_field_app_spn_exempt','field_data_field_spn_mission_a','field_data_field_spn_mission_b','field_data_field_spn_mission_c','field_data_field_spn_mission_d');
+            break;
+        case 'SPN_C':
+            self::$limit_byinclusion_column_tablename_array = array('field_data_field_contact_type','field_data_field_contact_name','field_data_field_phone','field_data_field_title','field_data_field_email');
             break;
         case 'SPN3':
             self::$limit_byinclusion_field_tablename_array = array('field_data_field_app_spn_city','field_data_field_app_spn_state','field_data_field_app_spn_zip');
