@@ -57,6 +57,15 @@ class fieldSQL /* WILL SOON extend something*/ {
 				$this->$key = $value;
 			}
 		}
+        // $render_column_array default: 'value'
+        // is sufficient for: 'number','text','list',
+
+        // $render_column_array default: 'value'
+        // MAY BE sufficient for: 'taxonomy','image',
+
+        if ($this->module == 'file') {
+            $this->render_column_array = array('fid','display','description');
+        }
 	}
 
 	/**
