@@ -61,6 +61,7 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 	public static $limit_byinclusion_column_columnname_array = null;
 	public static $limit_byexclusion_column_columnname_array = null;
 	public static $limit_by_bundle_segment;
+	public static $count = FALSE;
 	public static $devv = FALSE;
 	/* </Utility Code> */
 
@@ -95,9 +96,9 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 			'machine',
 			'machine_abbrv',
 			);
-		$label_option_default = 'label';
+		// $label_option_default = 'label';
 		// $label_option_default = 'label_machine';
-		// $label_option_default = 'machine';
+		$label_option_default = 'machine';
 		// $label_option_default = 'machine_abbrv';
 		// dpm($this->label_option, 'form_label_option');
 		$label_option = $this->label_option;
@@ -288,11 +289,21 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 		foreach ($field_object_array as $index => $field_object_this) {
 			$select_result_array = $field_object_this->gatherSelect_this();
 			$select_array = array_merge($select_array,$select_result_array);
+			$select_array = array_filter($select_array, function($v){return trim($v) !== '';});
+			$select_array_unique = array_unique($select_array);
+			if ($select_array !== $select_array_unique ) {
+				$this->select_string = print_r($field_object_this, TRUE);
+				return;
+			}
 			$join_result_array = $field_object_this->gatherJoin_this();
 			$join_array = array_merge($join_array,$join_result_array);
 		}
+		$select_array = array_filter($select_array, function($v){return trim($v) !== '';});
 		$this->select_string = "\r\n," . implode("\r\n,", $select_array);
-		$this->join_string = implode("\r\n", $join_array);
+		$join_array = array_filter($join_array, function($v){return trim($v) !== '';});
+		$join_string = implode("\r\n", $join_array);
+		// $join_string = $b = array_filter($a, function($v){return $v !== 0;});
+		$this->join_string = $join_string;
 
 	} //END public function composeSQL_Query()
 
@@ -309,7 +320,7 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 		$crlf_string = "\r\n"; // figure this out globally
 		$query_string = '';
 		$query_string .= 'SELECT' . $space_string . $crlf_string;
-		$query_string .= 'n.title AS ' . $this->title_label . $this->select_string;
+		$query_string .= 'n.title AS ' . $this->title_label;
 		$query_string .= $this->select_string;
 		// $query_string .= $crlf_string
   		$between = <<<CODEREH

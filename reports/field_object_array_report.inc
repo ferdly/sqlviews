@@ -13,11 +13,23 @@
     $output_csv = $output_option == 1 ? TRUE : FALSE;
     $output_abbrv = $output_option == 3 ? TRUE : FALSE;
 
+  $bundle_segment = drush_get_option('bundle-segment', FALSE);
+  $bundle_segment = $bundle_segment === TRUE ? '1' : $bundle_segment;
+  $dev = drush_get_option('dev', 0);
+  $dev = $dev == 1 ? TRUE : FALSE;
+
+
     $label_option_default = 'machine_abbrv';//moot?
     $label_option = drush_get_option('label', $label_option_default);
     $path = dirname(dirname(__FILE__));
     require_once $path . '/src/nodeTypeSQL.php';
-    $node_type_sql = new nodeTypeSQL($bundle);
+    // $node_type_sql = new nodeTypeSQL($bundle);
+    $limit_by_bundle_segment = $bundle_segment !== FALSE ? $bundle_segment : NULL;
+    $node_type_sql = new nodeTypeSQL($bundle, $limit_by_bundle_segment);
+    nodeTypeSQL::$count = 0;
+    if ($dev) {
+      nodeTypeSQL::$devv = $dev;
+    }
     $node_type_sql->label_option = $label_option;
 
     $node_type_sql->database = $databases['default']['default']['database'];
@@ -104,7 +116,9 @@
             }
           }
         }
-        $output_array[$index] = $field_object_this;
+        if ($field_object_this->field_custom_config_is_limited == 0) {
+          $output_array[$index] = $field_object_this;
+        }
       }
     }
 

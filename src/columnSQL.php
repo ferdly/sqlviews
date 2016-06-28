@@ -45,6 +45,7 @@ public function instantiate_columnsFromField($field_object) {
 		// return array('columnSQL: Not Indicated for this Field (it _has_ fields)');
 		return array();
 	}
+	$render_column_array = $field_object->render_column_array;
 	$columns = $field_object->columns;
 	// $supported_columns_key_array = array('value');
 	$supported_columns_key_array = $field_object->render_column_array;
@@ -60,7 +61,7 @@ public function instantiate_columnsFromField($field_object) {
 			$column_array = $field_object->prepareColumnArrayForColumnInstantiation();
 			$column_array['column_key'] = $column_key;
 			$column_object_this = new columnSQL($column_array);
-			$column_object_this->unpack_label();
+			$column_object_this->unpack_label($render_column_array);
 			$column_object_this->unpack_select_string();
 			$column_object_this->unpack_column_is_limited();
 			$column_object_array[] = $column_object_this;
@@ -69,7 +70,7 @@ public function instantiate_columnsFromField($field_object) {
 	return $column_object_array;
 }
 
-	public function unpack_label($label_overload = '') {
+	public function unpack_label($render_column_array = array(), $label_overload = '') {
 		$double_quote = '"';
 		$label = trim($this->label);
 		$label = !empty($label_overload) ? $label_overload : $label;
@@ -115,7 +116,8 @@ public function instantiate_columnsFromField($field_object) {
 					$field = array_shift($label_array);
 				}
 				$last_index = count($label_array) - 1;
-				if ($label_array[$last_index] == 'value') {
+
+				if(in_array($label_array[$last_index], $render_column_array)){
 					$value = array_pop($label_array);
 				}
 				$label = implode('_', $label_array);
@@ -141,6 +143,8 @@ public function instantiate_columnsFromField($field_object) {
 	public function unpack_select_string() {
 		$column_select_string = $this->table_alias . '.' . $this->column_name;
 		$column_select_string .= ' AS ' . $this->label;
+		$column_select_string = $this->render_string_by_limited($column_select_string);
+		// $column_select_string = empty($column_select_string) ? $column_select_string : '/*COLUMN*/' . $column_select_string;
 		$this->column_select_string = $column_select_string;
 	}
     public function unpack_column_is_limited(){
@@ -178,13 +182,24 @@ public function instantiate_columnsFromField($field_object) {
 		// $field_report_singleton_result .= "Holder for {$this->column_name} Field Report Single Row";
 		$field_report_singleton_result .= "{$this->column_name},";
 		$field_report_singleton_result .= "{$this->total_cardinality}";
-		$limited = "/*COLUMN LIMITED: " .$field_report_singleton_result . "*/\r\n";
-        $limited = nodeTypeSQL::$devv === TRUE ? $limited : '';
 		$field_report_singleton_result .= "\r\n";
-		$field_report_singleton_result = $this->column_custom_config_is_limited == 1 ? $limited : $field_report_singleton_result;
+		$field_report_singleton_result = $this->render_string_by_limited($field_report_singleton_result);
+		// $limited = "/*COLUMN LIMITED: " .$field_report_singleton_result . "*/\r\n";
+  //       $limited = nodeTypeSQL::$devv === TRUE ? $limited : '';
+		// $field_report_singleton_result .= "\r\n";
+		// $field_report_singleton_result = $this->column_custom_config_is_limited == 1 ? $limited : $field_report_singleton_result;
 
 		return $field_report_singleton_result;
 	}
+
+	public function render_string_by_limited($string = '') {
+	    if ($this->column_custom_config_is_limited == 0) {
+	        return $string;
+	    }
+	    $return_string = strlen($string) == 0 ? '' : "/*COLUMN LIMITED [{$this->column_custom_config_is_limited}]\r\n" . $string  . "*/\r\n";
+	    $return_string = nodeTypeSQL::$devv === TRUE ? $return_string : '';
+	    return $return_string;
+	} //END public function render_string_by_limited($string = '')
 
 /**
  * END Most Current OO from Local Static Method

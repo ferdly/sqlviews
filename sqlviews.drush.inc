@@ -54,6 +54,7 @@ function sqlviews_drush_command() {
       ),
     'options' => array(
       'label' => 'is option',
+      'bundle-segment' => 'is_option',
       'view-name' => 'is option',
     ),
   );
@@ -68,6 +69,7 @@ function sqlviews_drush_command() {
     ),
     'options' => array(
       'context' => 'is option',
+      'bundle-segment' => 'is_option',
       'dev' => 'is option',
     ),
   );
@@ -310,6 +312,7 @@ function _do_field_report($type_machine_name){
   require_once 'src/nodeTypeSQL.php';
   $limit_by_bundle_segment = $bundle_segment !== FALSE ? $bundle_segment : NULL;
   $node_type_sql = new nodeTypeSQL($type_machine_name, $limit_by_bundle_segment);
+  nodeTypeSQL::$count = 0;
   if ($dev) {
     nodeTypeSQL::$devv = $dev;
   }
@@ -351,6 +354,10 @@ function _do_custom_config_report($type_machine_name, $option_array = array()){
   require_once 'src/nodeTypeSQL.php';
   $limit_by_bundle_segment = $bundle_segment !== FALSE ? $bundle_segment : NULL;
   $node_type_sql = new nodeTypeSQL($type_machine_name, $limit_by_bundle_segment);
+  nodeTypeSQL::$count = 0;
+  if ($dev) {
+    nodeTypeSQL::$devv = $dev;
+  }
   // drush_print("Bundle-Segment: " . $bundle_segment);
   drush_print("THIS->Bundle-Segment: " . $node_type_sql->limit_by_bundle_segment);
   $node_type_sql->label_option = $label_option;
@@ -526,16 +533,26 @@ function _do_custom_config_report($type_machine_name, $option_array = array()){
 }
 
 function _do_sql_view_code($type_machine_name){
-  $label_option_default = 'label';
+  // $label_option_default = 'label';
   // $label_option_default = 'label_machine';
   // $label_option_default = 'machine';
-  // $label_option_default = 'machine_abbrv';
+  $label_option_default = 'machine_abbrv';
   $label_option = drush_get_option('label', $label_option_default);
+  $bundle_segment = drush_get_option('bundle-segment', FALSE);
+  $bundle_segment = $bundle_segment === TRUE ? '1' : $bundle_segment;
+  $dev = drush_get_option('dev', 0);
+  $dev = $dev == 1 ? TRUE : FALSE;
   $view_name_option = drush_get_option('view-name', '');
   $header = 'Result of ' . __FUNCTION__ . '(' . $type_machine_name . ")\r\n==========\r\n";
   require_once 'src/nodeTypeSQL.php';
   // $node_type = new nodeTypeSQL($type_machine_name);
-  $node_type_sql = new nodeTypeSQL($type_machine_name);
+  // $node_type_sql = new nodeTypeSQL($type_machine_name);
+  $limit_by_bundle_segment = $bundle_segment !== FALSE ? $bundle_segment : NULL;
+  $node_type_sql = new nodeTypeSQL($type_machine_name, $limit_by_bundle_segment);
+  nodeTypeSQL::$count = 0;
+  if ($dev) {
+    nodeTypeSQL::$devv = $dev;
+  }
   $node_type_sql->label_option = $label_option;
   if (strlen($view_name_option) > 0) {
     $node_type_sql->view_name = $view_name_option;
@@ -544,7 +561,6 @@ function _do_sql_view_code($type_machine_name){
   $node_type_sql->database = $databases['default']['default']['database'];
   // $node_type_sql->composeViewString();
   $node_type_sql->composeSQL_View();
-
   $output = $node_type_sql->view_string;
 
   $result = $header . print_r($output, TRUE);

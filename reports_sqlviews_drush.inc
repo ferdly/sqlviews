@@ -13,6 +13,10 @@ function _do_reports_sqlviews_drush(){
   $argument_report = $context['drush']['arguments'][0];
   $argument_report = empty($argument_report) ? 'ZXZ' : $argument_report;
 
+  $label_option_default = 'machine_abbrv';//moot?
+  $label_option = drush_get_option('label', $label_option_default);
+
+
 /**
  * Report Names
  * * this array has no effect on the code

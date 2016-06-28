@@ -138,7 +138,9 @@ class fieldSQL /* WILL SOON extend something*/ {
 		$join = 'LEFT JOIN ' . $this->table_name . ' ' . $this->table_alias;
         // $on = 'ON ' . nodeTypeSQL::$all_table_alias_array[$this->of_entity] . '.' . $this->of_foriegn_key . ' = ' . $this->table_alias . '.entity_id';
 		$on = 'ON ' . nodeTypeSQL::$all_table_alias_array[$this->of_foriegn_key_table] . '.' . $this->of_foriegn_key . ' = ' . $this->table_alias . '.entity_id';
-		$this->field_join_string = $join . "\r\n" . $on;
+        $field_join_string = $join . "\r\n" . $on;
+        $field_join_string = $this->render_string_by_limited($field_join_string);
+		$this->field_join_string = $field_join_string;
 	}
 
     public function unpack_field_is_limited(){
@@ -180,6 +182,8 @@ class fieldSQL /* WILL SOON extend something*/ {
         }else{
             foreach ($this->column_object_array as $index => $column_this) {
                 $select = $column_this->column_select_string;
+                $select = $this->render_string_by_limited($select);
+                // $select = empty($select) ? $select : '/*FIELD*/' . $select;
                 $select_array_this[$i] = $select;
                 $i++;
             }
@@ -240,10 +244,14 @@ class fieldSQL /* WILL SOON extend something*/ {
         }
 		// $field_report_singleton_result = "entity,type,table_name,{$this->field_name}|\r\n";
         $field_report_singleton_result .= $column_field_report_buffer;
-		$field_report_singleton_result .= $field_field_report_buffer;
-        $limited = strlen($field_report_singleton_result) == 0 ? '' : "/*FIELD LIMITED [{$this->field_custom_config_is_limited}]\r\n" . $field_report_singleton_result  . "*/\r\n";
-        $limited = nodeTypeSQL::$devv === TRUE ? $limited : '';
-        $field_report_singleton_result = $this->field_custom_config_is_limited == 1 ? $limited : $field_report_singleton_result;
+        $field_report_singleton_result .= $field_field_report_buffer;
+
+        $limited = $this->field_custom_config_is_limited;
+		$field_report_singleton_result = $this->render_string_by_limited($field_report_singleton_result, $limited);
+
+        // $limited = strlen($field_report_singleton_result) == 0 ? '' : "/*FIELD LIMITED [{$this->field_custom_config_is_limited}]\r\n" . $field_report_singleton_result  . "*/\r\n";
+        // $limited = nodeTypeSQL::$devv === TRUE ? $limited : '';
+        // $field_report_singleton_result = $this->field_custom_config_is_limited == 1 ? $limited : $field_report_singleton_result;
         nodeTypeSQL::$count += 1;
 		return $field_report_singleton_result;
 	}
@@ -401,6 +409,16 @@ class fieldSQL /* WILL SOON extend something*/ {
         }
         return $return_array;
     }
+
+public function render_string_by_limited($string = '') {
+    if ($this->field_custom_config_is_limited == 0) {
+        return $string;
+    }
+    $return_string = strlen($string) == 0 ? '' : "/*FIELD LIMITED [{$this->field_custom_config_is_limited}]\r\n" . $string  . "*/\r\n";
+    $return_string = nodeTypeSQL::$devv === TRUE ? $return_string : '';
+    return $return_string;
+} //END public function render_string_by_limited($string = '')
+
 /**
  * END Most Current OO from Local Static Method
  */
