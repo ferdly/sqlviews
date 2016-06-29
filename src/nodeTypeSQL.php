@@ -46,6 +46,7 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 	public $select_string;
 	public $join_string_fields;
 	public $join_string; //for users
+	public $and_not_null_string = '/* DEFAULT AND NOT NULL STRING*/';
 	public $query_string;
 	public $error_array = array();
 	/* <Utility Code> */
@@ -282,6 +283,8 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 		if (count($this->field_object_array) == 0) {
 			$this->gatherFieldsArrayToNodeType();
 		}
+		// $and_not_null_string = '/*Non-Default IS NOT NULL STRING*/';
+		// $this->and_not_null_string = $and_not_null_string;
 		$field_object_array = $this->field_object_array;
 		$select_array = array();
 		$join_array = array();
@@ -300,6 +303,15 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 		}
 		$select_array = array_filter($select_array, function($v){return trim($v) !== '';});
 		$this->select_string = "\r\n," . implode("\r\n,", $select_array);
+		$and_not_null_array = array();
+		foreach ($select_array as $index => $select_string) {
+			$position = strpos($select_string, ' AS ');
+			if ($position > 0) {
+				$select_string = trim(substr($select_string, 0, $position));
+			}
+			$and_not_null_array[] = $select_string;
+		}
+		$this->and_not_null_string = "\r\n AND NOT (" . implode(" IS NULL AND ", $and_not_null_array) . ' IS NULL)';
 		$join_array = array_filter($join_array, function($v){return trim($v) !== '';});
 		$join_string = implode("\r\n", $join_array);
 		// $join_string = $b = array_filter($a, function($v){return $v !== 0;});
@@ -307,7 +319,7 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 
 	} //END public function composeSQL_Query()
 
-	public function composeSQL_Query() {
+	public function composeSQL_Query($option_array = array()) {
 		if (strlen($this->select_string) == 0) {
 			$this->composeSQL_SelectAndJoin();
 		}
@@ -315,6 +327,8 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 			#\_ should be moot, either both or neither
 			$this->composeSQL_SelectAndJoin();
 		}
+		$and_not_null = @$option_array['and_not_null'] === TRUE ? TRUE : FALSE;
+		$and_not_null_string = $and_not_null ? $this->and_not_null_string : '';
 
 		$space_string = ' ';
 		$crlf_string = "\r\n"; // figure this out globally
@@ -343,7 +357,7 @@ CODEREH;
 	  $after = <<<CODEREH
 
 
-WHERE n.type = '{$this->type}'
+WHERE n.type = '{$this->type}'{$and_not_null_string}
 GROUP BY n.nid
 ;
 CODEREH;
@@ -355,9 +369,9 @@ CODEREH;
 		return $this->query_string;
 	} //END public function composeSQL_Query()
 
-	public function composeSQL_View() {
+	public function composeSQL_View($option_array = array()) {
 		if (strlen($this->query_string) == 0) {
-			$this->composeSQL_Query();
+			$this->composeSQL_Query($option_array);
 		}
 
 		if (strlen($this->view_name) == 0) {

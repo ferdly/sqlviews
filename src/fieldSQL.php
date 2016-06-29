@@ -564,6 +564,7 @@ public function render_string_by_limited($string = '') {
 
     public function kludge_fc_view($bundle, $fc_field, $option_array = array()){
         $and_not_null_option = @$option_array['and_not_null'] === TRUE ? TRUE : FALSE;
+        $dev = @$option_array['dev'] === TRUE ? TRUE : FALSE;
       $fc_field_config_instance_array_result = db_select('field_config_instance','fci')
         ->fields('fci')
         // ->addField('fci', 'field_id')
@@ -601,12 +602,28 @@ public function render_string_by_limited($string = '') {
         $select = '';
         $from = '';
         $and_not_null = '';
+
         foreach ($fc_field_config_instance_array as $fid => $field_ob) {
             $table_name = key($field_ob->field_config_ob->data['storage']['details']['sql']['FIELD_LOAD_CURRENT']);
-            $field_name = $field_ob->field_config_ob->data['storage']['details']['sql']['FIELD_LOAD_CURRENT'][$table_name]['value'];
-            $field_name = empty($field_name) ? 'NO_value' : $field_name;
-            $select .= $crlf . $comma . $table_name . $dot . $field_name;
-            $and_not_null .= $and_operator . $table_name . $dot . $field_name . ' IS NULL';
+            $table_name = empty($table_name) ? 'field_data_' . $field_ob->field_name : $table_name;//BEST GUESS
+            // $module = $field_ob->field_config_ob->data['storage']['module'];
+            $module = $field_ob->field_config_ob->module;
+            if ($module == 'file') {
+                $column_array = array('fid','display','description');
+                $inner_and_operator = empty($and_operator) ? '' : ' AND ';
+                foreach ($column_array as $index => $column) {
+                    $field_name = $field_ob->field_config_ob->data['storage']['details']['sql']['FIELD_LOAD_CURRENT'][$table_name][$column];
+                    $field_name = empty($field_name) ? 'NO_value' : $field_name;
+                    $select .= $crlf . $comma . $table_name . $dot . $field_name;
+                    $and_not_null .= $inner_and_operator . $table_name . $dot . $field_name . ' IS NULL';
+                    $inner_and_operator = ' AND ';
+                }
+            }else{
+                $field_name = $field_ob->field_config_ob->data['storage']['details']['sql']['FIELD_LOAD_CURRENT'][$table_name]['value'];
+                $field_name = empty($field_name) ? $field_ob->field_name . '_value' : $field_name;//BEST GUESS
+                $select .= $crlf . $comma . $table_name . $dot . $field_name;
+                $and_not_null .= $and_operator . $table_name . $dot . $field_name . ' IS NULL';
+            }
             $from .= $crlf . "LEFT JOIN {$table_name} {$crlf}ON {$table_name}.entity_type = 'field_collection_item' AND {$table_name}.bundle = '{$fc_field}' AND fc.{$fc_field}_value = {$table_name}.entity_id";
             $and_operator = ' AND ';
         }
@@ -626,9 +643,11 @@ public function render_string_by_limited($string = '') {
         $filename_comment .= $crlf . '/* rendered on ' . $render_date . ' */';
         $view_statememnt = "CREATE OR REPLACE VIEW fc_{$fc_field}_view AS";
         $view = $filename_comment . $crlf . $view_statememnt . $crlf . $crlf . $query;
-
-        // $output = print_r($fc_field_config_instance_array, TRUE);
+        $output = '';
+        $dev_output = print_r($fc_field_config_instance_array, TRUE);
+        $dev_output = $dev ? $dev_output . $crlf . $crlf : '';
         // $output .= $crlf . $crlf  . $query;
+        $output .= $dev_output;
         $output .= $crlf . $crlf  . $view;
         return $output;
 
