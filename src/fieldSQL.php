@@ -562,7 +562,8 @@ public function render_string_by_limited($string = '') {
 		$this->field_join_string .= $field_join_string_scrap;
 	}
 
-    public function kludge_fc_view($bundle, $fc_field){
+    public function kludge_fc_view($bundle, $fc_field, $option_array = array()){
+        $and_not_null_option = @$option['and_not_null'] === TRUE ? TRUE : FALSE;
       $fc_field_config_instance_array_result = db_select('field_config_instance','fci')
         ->fields('fci')
         // ->addField('fci', 'field_id')
@@ -596,22 +597,28 @@ public function render_string_by_limited($string = '') {
         $dot = '.';
         $comma = ',';
         $scolon = ';';
+        $and_operator = '';
         $select = '';
         $from = '';
+        $and_not_null = '';
         foreach ($fc_field_config_instance_array as $fid => $field_ob) {
-            $table_name = 'table_' . $fid . '_name';
             $table_name = key($field_ob->field_config_ob->data['storage']['details']['sql']['FIELD_LOAD_CURRENT']);
-            $field_name = 'field_' . $fid . '_name';
             $field_name = $field_ob->field_config_ob->data['storage']['details']['sql']['FIELD_LOAD_CURRENT'][$table_name]['value'];
             $field_name = empty($field_name) ? 'NO_value' : $field_name;
             $select .= $crlf . $comma . $table_name . $dot . $field_name;
+            $and_not_null .= $and_operator . $table_name . $dot . $field_name . ' IS NULL';
             $from .= $crlf . "LEFT JOIN {$table_name} {$crlf}ON {$table_name}.entity_type = 'field_collection_item' AND {$table_name}.bundle = '{$fc_field}' AND fc.{$fc_field}_value = {$table_name}.entity_id";
+            $and_operator = ' AND ';
         }
         $select = 'SELECT n.nid' . $select;
         $from_header = 'FROM node n' . $crlf;
         $from_header .= "LEFT JOIN field_data_{$fc_field} fc {$crlf}ON fc.entity_type = 'node' AND n.nid = fc.entity_id";
         $from = $from_header . $from;
-        $where = "WHERE n.type = '{$bundle}'";
+        $and_not_null = $crlf . $and_operator . 'NOT (' . $and_not_null . ')';
+        $and_not_null_option = TRUE;//FORCE
+        $and_not_null = $and_not_null_option ? $and_not_null : '';
+        $where = "WHERE n.type = '{$bundle}'" ;
+
 
         $query = $crlf . $select . $crlf . $crlf . $from . $crlf . $crlf . $where . $crlf . $crlf . $scolon;
 
