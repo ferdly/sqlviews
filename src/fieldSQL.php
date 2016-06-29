@@ -621,9 +621,9 @@ public function render_string_by_limited($string = '') {
 
 
         $query = $crlf . $select . $crlf . $crlf . $from . $crlf . $crlf . $where . $crlf . $crlf . $scolon;
-
+        $filename_comment = "/* fc_{$fc_field}_view_ofbundle_" . $bundle . '.sql */';
         $view_statememnt = "CREATE OR REPLACE VIEW fc_{$fc_field}_view AS";
-        $view = $view_statememnt . $crlf . $crlf . $query;
+        $view = $filename_comment . $crlf . $view_statememnt . $crlf . $crlf . $query;
 
         $output = print_r($fc_field_config_instance_array, TRUE);
         // $output .= $crlf . $crlf  . $query;
