@@ -123,6 +123,7 @@ public function instantiate_columnsFromField($field_object) {
 				$label = implode('_', $label_array);
 				$label_append = $this->cardinality + 0 < 0?'_iE':'';
 				$label_append = $this->cardinality + 0 > 1?'_i' . $this->cardinality:$label_append;
+				$label_append .= $this->column_key == 'value2'? '2' : '';
 				$label .= $label_append;
 				// $label .= $this->column_key == 'value'?'':'_' . ucwords(str_replace('_', ' ', $this->column_key));
 				// $label = !empty($field_data_array['label_overload'])?$field_data_array['label_overload']:$label;
