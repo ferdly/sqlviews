@@ -173,7 +173,7 @@ function drush_sqlviews_sql_view_code($which_type = FALSE) {
       drush_user_abort('Buh-Bye! sqlViews Gather Node!');
       return;
     }
-    $string = _which_type_arguments('string');
+    $string = _which_nodetype_arguments('string');
     return drush_set_error(dt('"@type" is not a valid example. ',
       array('@type' => $example)) . $string);
   }
@@ -184,6 +184,74 @@ function drush_sqlviews_sql_view_code($which_type = FALSE) {
 } //END function drush_sqlviews_sql_view_code($which_type = FALSE) {
 
 function drush_sqlviews_sql_view_field_collection_code($bundle = FALSE, $fc_field = FALSE) {
+  // Check for existence of argument
+    $arguments = _which_nodetype_arguments(); //use custom function to encapsulate
+    if (!$bundle) {
+        $bundle = drush_choice($arguments, dt('Which Example would you like to interact with using \'PHP-Coder\'?'));
+    }
+
+  // Check for correct argument
+  $correct_args = array_keys($arguments);
+  if (!in_array($bundle, $correct_args)) {
+    if ($bundle == '0') {
+      drush_user_abort('Buh-Bye! sqlViews Gather Node!');
+      return;
+    }
+    $string = _which_nodetype_arguments('string');
+    return drush_set_error(dt('"@type" is not a valid bundle (content type). ',
+      array('@type' => $bundle)) . $string);
+  }
+  $field_config_instance_array= db_select('field_config_instance','fci')
+    ->fields('fci',array('field_id'))
+    // ->addField('fci', 'field_id')
+    // ->addField('fci', 'data', 'fci_data')
+    // ->condition('entity_type', $entity)
+    ->condition('bundle', $bundle)
+    ->condition('deleted', 0)
+    ->execute()
+    ->fetchAll();
+  $field_id_array = array_map(
+      create_function('$o', 'return $o->field_id;'),
+      $field_config_instance_array);
+  $field_config_array= db_select('field_config','fc')
+    ->fields('fc',array('id','field_name','type','module'))
+    ->condition('id', $field_id_array,'IN')
+    ->condition('active', 1)
+    ->condition('deleted', 0)
+    ->execute()
+    ->fetchAll();
+  // $fc_field_array = array_map(
+  //     create_function('$o', 'return $o->field_name;'),
+  //     $field_config_array);
+  $fc_field_array_all = array_map(
+      create_function('$o', '
+        if($o->module == "field_collection") {
+          return $o->field_name;
+        }
+        return FALSE;
+        '),
+      $field_config_array);
+  $fc_field_array_filtered = array_filter($fc_field_array_all);
+  $fc_field_array = array_combine($fc_field_array_filtered, $fc_field_array_filtered);
+  if (!$fc_filed) {
+    $fc_field = drush_choice($fc_field_array, dt('Which Field-Collection Field would you like to render?'));
+  }
+  if (!in_array($fc_field, $fc_field_array)) {
+    if ($fc_field == '0') {
+      drush_user_abort('Buh-Bye! sqlViews Gather Node!');
+      die();
+    }
+    // $string = _which_nodetype_arguments('string');
+    return drush_set_error(dt('"@type" is not a valid field_collection Field. ',
+      array('@type' => $fc_field)));
+    die();
+  }
+
+  // drush_print('$field_config_array: ' . print_r($field_config_array, TRUE));
+  // drush_print('$fc_field_array: ' . print_r($fc_field_array, TRUE));
+  // return;
+
+
 
   _do_sql_view_field_collection_code($bundle, $fc_field);
 } //END function drush_sqlviews_sql_view_field_collection_code($bundle = FALSE, $fc_field = FALSE)
@@ -590,5 +658,7 @@ function _do_sql_view_field_collection_code($bundle = FALSE, $fc_field = FALSE) 
   $fc_field = $fc_field === FALSE ? 'FFALSE' : $fc_field;
   drush_print('do_$bundle:' . $bundle);
   drush_print('do_$fc_field: ' . $fc_field);
+  $fc_field_view = fieldSQL::kludge_fc_view($bundle, $fc_field);
+  drush_print($fc_field_view);
   return;
 }

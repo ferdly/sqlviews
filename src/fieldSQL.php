@@ -562,4 +562,67 @@ public function render_string_by_limited($string = '') {
 		$this->field_join_string .= $field_join_string_scrap;
 	}
 
+    public function kludge_fc_view($bundle, $fc_field){
+      $fc_field_config_instance_array_result = db_select('field_config_instance','fci')
+        ->fields('fci')
+        // ->addField('fci', 'field_id')
+        // ->addField('fci', 'data', 'fci_data')
+        ->condition('entity_type', 'field_collection_item')
+        ->condition('bundle', $fc_field)
+        ->condition('deleted', 0)
+        ->execute()
+        ->fetchAll();
+        $fc_fieldid_array = array();
+        foreach ($fc_field_config_instance_array_result as $index => $fc_field_config_instance_ob) {
+            $fc_field_config_instance_ob->data = unserialize($fc_field_config_instance_ob->data);
+            $fc_field_config_instance_array[$fc_field_config_instance_ob->field_id] = $fc_field_config_instance_ob;
+            $fc_fieldid_array[] = $fc_field_config_instance_ob->field_id;
+        }
+        $fc_field_config_array_result = db_select('field_config','fc')
+        ->fields('fc')
+        // ->addField('fci', 'field_id')
+        // ->addField('fci', 'data', 'fci_data')
+        ->condition('id', $fc_fieldid_array, 'IN')
+        // ->condition('bundle', $fc_field)
+        ->condition('deleted', 0)
+        ->execute()
+        ->fetchAll();
+        foreach ($fc_field_config_array_result as $index => $fc_field_config_ob) {
+            $fc_field_config_ob->data = unserialize($fc_field_config_ob->data);
+            $fc_field_config_instance_array[$fc_field_config_ob->id]->field_config_ob = $fc_field_config_ob;
+        }
+        $crlf = "\r\n";
+        $space = ' ';
+        $dot = '.';
+        $comma = ',';
+        $scolon = ';';
+        $select = '';
+        $from = '';
+        foreach ($fc_field_config_instance_array as $fid => $field_ob) {
+            $table_name = 'table_' . $fid . '_name';
+            $table_name = key($field_ob->field_config_ob->data['storage']['details']['sql']['FIELD_LOAD_CURRENT']);
+            $field_name = 'field_' . $fid . '_name';
+            $field_name = $field_ob->field_config_ob->data['storage']['details']['sql']['FIELD_LOAD_CURRENT'][$table_name]['value'];
+            $field_name = empty($field_name) ? 'NO_value' : $field_name;
+            $select .= $crlf . $comma . $table_name . $dot . $field_name;
+            $from .= $crlf . "LEFT JOIN {$table_name} {$crlf}ON {$table_name}.entity_type = 'field_collection_item' AND {$table_name}.bundle = '{$fc_field}' AND fc.{$fc_field}_value = {$table_name}.entity_id";
+        }
+        $select = 'SELECT n.nid' . $select;
+        $from_header = 'FROM node n' . $crlf;
+        $from_header .= "LEFT JOIN field_data_{$fc_field} fc {$crlf}ON fc.entity_type = 'node' AND n.nid = fc.entity_id";
+        $from = $from_header . $from;
+        $where = "WHERE n.type = '{$bundle}'";
+
+        $query = $crlf . $select . $crlf . $crlf . $from . $crlf . $crlf . $where . $crlf . $crlf . $scolon;
+
+        $view_statememnt = "CREATE OR REPLACE VIEW fc_{$fc_field}_view AS";
+        $view = $view_statememnt . $crlf . $crlf . $query;
+
+        $output = print_r($fc_field_config_instance_array, TRUE);
+        // $output .= $crlf . $crlf  . $query;
+        $output .= $crlf . $crlf  . $view;
+        return $output;
+
+    }
+
 }
