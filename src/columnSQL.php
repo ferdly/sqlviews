@@ -150,6 +150,7 @@ public function instantiate_columnsFromField($field_object) {
 	}
     public function unpack_column_is_limited(){
         // No attempt to Reconcile Conflicts
+        $fields_included = nodeTypeSQL::$limit_byinclusion_field_fieldname_array;
         $tables_included = nodeTypeSQL::$limit_byinclusion_column_tablename_array;
         $tables_excluded = nodeTypeSQL::$limit_byexclusion_column_tablename_array;
         $columns_included = nodeTypeSQL::$limit_byinclusion_column_columnname_array;
@@ -161,6 +162,7 @@ public function instantiate_columnsFromField($field_object) {
         $column_is_excluded = in_array($this->column_name, $columns_excluded);
         $column_is_included = count($columns_included) == 0 ? TRUE : FALSE;
         $column_is_included = in_array($this->column_name, $columns_included) ? TRUE : $any_is_included;
+        $column_is_included = in_array($this->of_bundle, $fields_included) ? TRUE : $any_is_included;
 
         $is_limited = 1;
         $is_limited = $table_is_included ? 0 : $is_limited;
