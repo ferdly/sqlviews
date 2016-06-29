@@ -70,6 +70,7 @@ function sqlviews_drush_command() {
       'label' => 'is option',
       'bundle-segment' => 'is_option',
       'view-name' => 'is option',
+      'not-null' => 'is option',
     ),
   );
   $items['sql-view-reports'] = array(
@@ -654,11 +655,14 @@ function _do_sql_view_code($type_machine_name){
   drush_print($result);
 }
 function _do_sql_view_field_collection_code($bundle = FALSE, $fc_field = FALSE) {
+  $option_array = array();
+  $not_null = drush_get_option('not-null', 0);
+  $option_array['and_not_null'] = $not_null == 1 ? TRUE : FALSE;
   $bundle = $bundle === FALSE ? 'FFALSE' : $bundle;
   $fc_field = $fc_field === FALSE ? 'FFALSE' : $fc_field;
   drush_print('do_$bundle:' . $bundle);
   drush_print('do_$fc_field: ' . $fc_field);
-  $fc_field_view = fieldSQL::kludge_fc_view($bundle, $fc_field);
+  $fc_field_view = fieldSQL::kludge_fc_view($bundle, $fc_field, $option_array);
   drush_print($fc_field_view);
   return;
 }
