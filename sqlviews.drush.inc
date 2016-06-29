@@ -58,6 +58,20 @@ function sqlviews_drush_command() {
       'view-name' => 'is option',
     ),
   );
+  $items['sql-view-field-collection-code'] = array(
+    'aliases' => array(
+      'sqlv-fc',
+      ),
+    'arguments' => array(
+      'bundle' => 'is argument',
+      'fc-field' => 'is argument',
+    ),
+    'options' => array(
+      'label' => 'is option',
+      'bundle-segment' => 'is_option',
+      'view-name' => 'is option',
+    ),
+  );
   $items['sql-view-reports'] = array(
     'aliases' => array(
       'sqlv-rpt',
@@ -167,7 +181,12 @@ function drush_sqlviews_sql_view_code($which_type = FALSE) {
   // drush_print($which_type);
   // return;
   _do_sql_view_code($which_type);
-} //END function drush_node_tablelist($which_list = FALSE)
+} //END function drush_sqlviews_sql_view_code($which_type = FALSE) {
+
+function drush_sqlviews_sql_view_field_collection_code($bundle = FALSE, $fc_field = FALSE) {
+
+  _do_sql_view_field_collection_code($bundle, $fc_field);
+} //END function drush_sqlviews_sql_view_field_collection_code($bundle = FALSE, $fc_field = FALSE)
 
 function drush_sqlviews_sql_view_reports() {
   require_once 'reports_sqlviews_drush.inc';
@@ -565,4 +584,11 @@ function _do_sql_view_code($type_machine_name){
 
   $result = $header . print_r($output, TRUE);
   drush_print($result);
+}
+function _do_sql_view_field_collection_code($bundle = FALSE, $fc_field = FALSE) {
+  $bundle = $bundle === FALSE ? 'FFALSE' : $bundle;
+  $fc_field = $fc_field === FALSE ? 'FFALSE' : $fc_field;
+  drush_print('do_$bundle:' . $bundle);
+  drush_print('do_$fc_field: ' . $fc_field);
+  return;
 }
