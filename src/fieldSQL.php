@@ -563,7 +563,7 @@ public function render_string_by_limited($string = '') {
 	}
 
     public function kludge_fc_view($bundle, $fc_field, $option_array = array()){
-        $and_not_null_option = @$option['and_not_null'] === TRUE ? TRUE : FALSE;
+        $and_not_null_option = @$option_array['and_not_null'] === TRUE ? TRUE : FALSE;
       $fc_field_config_instance_array_result = db_select('field_config_instance','fci')
         ->fields('fci')
         // ->addField('fci', 'field_id')
@@ -614,10 +614,10 @@ public function render_string_by_limited($string = '') {
         $from_header = 'FROM node n' . $crlf;
         $from_header .= "LEFT JOIN field_data_{$fc_field} fc {$crlf}ON fc.entity_type = 'node' AND n.nid = fc.entity_id";
         $from = $from_header . $from;
-        $and_not_null = $crlf . $and_operator . 'NOT (' . $and_not_null . ')';
-        $and_not_null_option = TRUE;//FORCE
+        $and_not_null = $crlf . trim($and_operator) . ' NOT (' . $and_not_null . ')';
+        // $and_not_null_option = TRUE;//FORCE
         $and_not_null = $and_not_null_option ? $and_not_null : '';
-        $where = "WHERE n.type = '{$bundle}'" ;
+        $where = "WHERE n.type = '{$bundle}'" . $and_not_null;
 
 
         $query = $crlf . $select . $crlf . $crlf . $from . $crlf . $crlf . $where . $crlf . $crlf . $scolon;
