@@ -14,6 +14,15 @@ $type = $this->type;
 $limit_by_bundle_segment = trim($this->limit_by_bundle_segment);
 if ($this->type == 'project_app_gp') {
     switch ($limit_by_bundle_segment) {
+        case 'INCEXP':
+            self::$limit_byinclusion_field_tablename_array = array('field_data_field_app_orgexpense','field_data_field_app_projectexpense','field_data_field_app_projectincome_year1','field_data_field_app_projectincome_year2','field_data_field_app_orgincome_year1','field_data_field_app_orgincome_year2','field_data_field_app_projectincome','field_data_field_app_orgincome');
+            break;
+        case 'RMN':
+            self::$limit_byinclusion_field_tablename_array = array('field_data_field_app_supp_narrative','field_data_field_app_fin_a','field_data_field_app_fin_b','field_data_field_confirm','field_data_field_app_fin_e','field_data_field_app_evaluation_a','field_data_field_app_evaluation_b','field_data_field_app_diversity_a','field_data_field_app_diversity_b','field_data_field_app_selpr_e','field_data_field_app_selpr_g','field_data_field_app_selpr_c','field_data_field_app_selpr_b','field_data_field_app_selpr_h','field_data_field_app_selpr_a','field_data_field_app_selpr_f','field_data_field_app_selpr_i','field_data_field_app_selpr_j','field_data_field_app_board_meetings','field_data_field_app_board_attendance');
+            break;
+        case 'ORG':
+            self::$limit_byinclusion_field_tablename_array = array('field_data_field_app_org_name','field_data_field_app_org_name_aka','field_data_field_app_org_street','field_data_field_app_org_street2','field_data_field_app_org_city','field_data_field_app_org_state','field_data_field_app_org_zip','field_data_field_app_org_county','field_data_field_app_org_borough','field_data_field_app_org_legal','field_data_field_app_org_phone','field_data_field_app_org_fax','field_data_field_app_org_website','field_data_field_app_org_ein','field_data_field_app_org_founded','field_data_field_app_org_exempt','field_data_field_app_org_mission_history','field_data_field_app_org_mission_mission','field_data_field_app_org_mission_goals','field_data_field_app_org_mission_accomplish','field_data_field_app_org_activity_a','field_data_field_app_org_mission_supphist');
+            break;
         case 'ART':
             self::$limit_byinclusion_field_tablename_array = array('field_data_field_app_art_title','field_data_field_app_art_aka','field_data_field_app_art_street','field_data_field_app_art_street2','field_data_field_app_art_city','field_data_field_app_art_state','field_data_field_app_art_zip','field_data_field_app_art_county','field_data_field_app_art_borough','field_data_field_app_art_legal','field_data_field_app_art_phone','field_data_field_app_art_fax','field_data_field_app_art_website','field_data_field_app_art_email','field_data_field_art_mission_a','field_data_field_art_mission_b','field_data_field_art_mission_c','field_data_field_art_mission_d','field_data_field_art_mission_e');
             break;
