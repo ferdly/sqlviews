@@ -311,7 +311,7 @@ class nodeTypeSQL /* WILL SOON extends entityTypeSQL */ {
 			}
 			$and_not_null_array[] = $select_string;
 		}
-		$this->and_not_null_string = "\r\n AND NOT (" . implode(" IS NULL AND ", $and_not_null_array) . ' IS NULL)';
+		$this->and_not_null_string = "\r\nAND NOT (" . implode(" IS NULL AND ", $and_not_null_array) . ' IS NULL)';
 		$join_array = array_filter($join_array, function($v){return trim($v) !== '';});
 		$join_string = implode("\r\n", $join_array);
 		// $join_string = $b = array_filter($a, function($v){return $v !== 0;});
@@ -374,6 +374,8 @@ CODEREH;
 			$this->composeSQL_Query($option_array);
 		}
 
+		$header_comment = $this->renderHeaderComment();
+		#\_ above should make moot the block below
 		if (strlen($this->view_name) == 0) {
 			$view_name = $this->type . '_' . strtoupper($this->entity) . '_VIEW';
 			$view_name = 'sqlVIEW_' . $this->type . '_' . strtoupper($this->entity);
@@ -382,6 +384,7 @@ CODEREH;
 		$space_string = ' ';
 		$crlf_string = "\r\n"; // figure this out globally
 		$view_string = '';
+		$view_string .= $header_comment;
 		$view_string .= $crlf_string . 'CREATE OR REPLACE VIEW' . $space_string;
 		$view_string .= $this->view_name . $space_string . 'AS';
 		$view_string .= $space_string . $crlf_string . $crlf_string . $this->query_string;
@@ -421,6 +424,25 @@ CODEREH;
 			return FALSE;
 		}
 	}
+
+	public function renderHeaderComment($option_array) {
+		$crlf = "\r\n";
+		$bundle = $this->type;
+		$bundle_segment = empty($this->limit_by_bundle_segment) ? '' : '_' . strtolower($this->limit_by_bundle_segment);
+		$view_name_overload = @$option_array['view_name'];
+		$view_name_overload = empty($this->view_name) ? $view_name_overload : $this->view_name;
+		$view_name = 'node_' . $bundle . $bundle_segment . '_view';
+		$view_name = empty($view_name_overload) ? $view_name : $view_name_overload;
+		$this->view_name = $view_name;
+		$file_name = $view_name . '.sql';
+        $render_date = date('F j, Y \a\t g:i:s a');
+        $render_comment = '/* ' . $file_name . ' */';
+        $render_comment .= $crlf . '/* rendered on ' . $render_date . ' */';
+        $render_comment .= $crlf;
+        $render_comment .= $crlf;//two feels right
+
+        return $render_comment;
+	} //END public function renderHeaderComment($option_array)
 
 	/**
 	 * END Most Current OO from Local Static Method
