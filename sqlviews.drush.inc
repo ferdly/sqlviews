@@ -57,6 +57,7 @@ function sqlviews_drush_command() {
       'bundle-segment' => 'is_option',
       'view-name' => 'is option',
       'not-null' => 'is option',
+      'no-replace' => 'is option',
     ),
   );
   $items['sql-view-field-collection-code'] = array(
@@ -626,6 +627,8 @@ function _do_sql_view_code($type_machine_name){
   $option_array = array();
   $not_null = drush_get_option('not-null', 0);
   $option_array['and_not_null'] = $not_null == 1 ? TRUE : FALSE;
+  $no_replace = drush_get_option('no-replace', 0);
+  $option_array['no_replace'] = $no_replace == 1 ? TRUE : FALSE;
   // $label_option_default = 'label';
   // $label_option_default = 'label_machine';
   // $label_option_default = 'machine';

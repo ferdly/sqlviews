@@ -373,6 +373,7 @@ CODEREH;
 		if (strlen($this->query_string) == 0) {
 			$this->composeSQL_Query($option_array);
 		}
+		$no_replace = $option_array['no_replace'] === TRUE ? TRUE : FALSE;
 
 		$header_comment = $this->renderHeaderComment();
 		#\_ above should make moot the block below
@@ -385,7 +386,8 @@ CODEREH;
 		$crlf_string = "\r\n"; // figure this out globally
 		$view_string = '';
 		$view_string .= $header_comment;
-		$view_string .= $crlf_string . 'CREATE OR REPLACE VIEW' . $space_string;
+		$or_replace_string = $no_replace ? '': ' OR REPLACE';
+		$view_string .= $crlf_string . 'CREATE' . $or_replace_string . ' VIEW' . $space_string;
 		$view_string .= $this->view_name . $space_string . 'AS';
 		$view_string .= $space_string . $crlf_string . $crlf_string . $this->query_string;
 		$view_string .= $space_string . $crlf_string;// . ';';
