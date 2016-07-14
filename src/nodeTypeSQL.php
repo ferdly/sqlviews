@@ -427,7 +427,7 @@ CODEREH;
 		}
 	}
 
-	public function renderHeaderComment($option_array) {
+	public function renderHeaderComment($option_array = array()) {
 		$crlf = "\r\n";
 		$bundle = $this->type;
 		$bundle_segment = empty($this->limit_by_bundle_segment) ? '' : '_' . strtolower($this->limit_by_bundle_segment);
