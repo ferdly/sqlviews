@@ -639,7 +639,8 @@ function _do_sql_view_code($type_machine_name){
   $dev = drush_get_option('dev', 0);
   $dev = $dev == 1 ? TRUE : FALSE;
   $view_name_option = drush_get_option('view-name', '');
-  $header = 'Result of ' . __FUNCTION__ . '(' . $type_machine_name . ")\r\n==========\r\n";
+  // $header = 'Result of ' . __FUNCTION__ . '(' . $type_machine_name . ")\r\n==========\r\n";
+  $header = 'Result of ' . __FUNCTION__ . '(' . $type_machine_name . "):";
   require_once 'src/nodeTypeSQL.php';
   // $node_type = new nodeTypeSQL($type_machine_name);
   // $node_type_sql = new nodeTypeSQL($type_machine_name);
@@ -659,7 +660,9 @@ function _do_sql_view_code($type_machine_name){
   $node_type_sql->composeSQL_View($option_array);
   $output = $node_type_sql->view_string;
 
-  $result = $header . print_r($output, TRUE);
+  // $result = $header . print_r($output, TRUE);
+  drush_log($header, 'success');
+  $result = print_r($output, TRUE);
   drush_print($result);
 }
 function _do_sql_view_field_collection_code($bundle = FALSE, $fc_field = FALSE) {
