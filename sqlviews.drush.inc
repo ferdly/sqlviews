@@ -7,6 +7,22 @@ function sqlviews_drush_command() {
 /**
  * Essential to the function of the Drush Command
  */
+  $items['column-report'] = array(
+    'aliases' => array(
+      'c-rpt',
+      ),
+    'arguments' => array(
+      'which' => 'is argument',
+    ),
+    'options' => array(
+      'bundle-segment' => 'is_option',
+      'headers' => 'is option',
+      'context' => 'is option',
+      'count' => 'is option',
+      'dev' => 'is option',
+      'label' => 'is option',
+    ),
+  );
   $items['field-report'] = array(
     'aliases' => array(
       'f-rpt',
@@ -111,6 +127,31 @@ function drush_sqlviews_developer_vardump() {
   require_once 'drush_do_developer_vardump.inc';
   _do_developer_vardump();
 } //END function drush_node_tablelist($which_list = FALSE)
+
+function drush_sqlviews_column_report($which_type = FALSE) {
+//drush_mymodule_custom_save_node
+  // Check for existence of argument
+    $arguments = _which_nodetype_arguments(); //use custom function to encapsulate
+    if (!$which_type) {
+        $which_type = drush_choice($arguments, dt('Which Example would you like to interact with using \'PHP-Coder\'?'));
+    }
+
+  // Check for correct argument
+  $correct_args = array_keys($arguments);
+  if (!in_array($which_type, $correct_args)) {
+    if ($which_type == '0') {
+      drush_user_abort('Buh-Bye! sqlViews Gather Node!');
+      return;
+    }
+    $string = _which_type_arguments('string');
+    return drush_set_error(dt('"@type" is not a valid example. ',
+      array('@type' => $example)) . $string);
+  }
+
+  // drush_print($which_type);
+  // return;
+  _do_field_report($which_type);
+} //END function drush_sqlviews_column_report($which_type = FALSE)
 
 function drush_sqlviews_field_report($which_type = FALSE) {
 //drush_mymodule_custom_save_node
@@ -382,6 +423,51 @@ function _render_header($function, $parameter_string = '', $line = 0) {
   return $header . "\r\n" . $underscore . "\r\n" . $file_line;
 }
 
+function _do_column_report($type_machine_name){
+  $print = drush_get_option('context', 0);
+  $print = $print == 1 ? TRUE : FALSE;
+  // $print = TRUE;
+  $context = _render_drush_context_sqlviews($print);
+  $headers = drush_get_option('headers', 0);
+  $headers = $headers == 1 ? TRUE : FALSE;
+  $dev = drush_get_option('dev', 0);
+  $dev = $dev == 1 ? TRUE : FALSE;
+  $bundle_segment = drush_get_option('bundle-segment', FALSE);
+  $bundle_segment = $bundle_segment === TRUE ? '1' : $bundle_segment;
+
+  $dev = drush_get_option('dev', 0);
+  $dev = $dev == 1 ? TRUE : FALSE;
+
+  $line = 0; //__LINE__;
+  $header = _render_header(__FUNCTION__, $type_machine_name, $line);
+  $label_option_default = 'machine_abbrv';//moot?
+  require_once 'src/nodeTypeSQL.php';
+  $limit_by_bundle_segment = $bundle_segment !== FALSE ? $bundle_segment : NULL;
+  $node_type_sql = new nodeTypeSQL($type_machine_name, $limit_by_bundle_segment);
+  nodeTypeSQL::$count = 0;
+  if ($dev) {
+    nodeTypeSQL::$devv = $dev;
+  }
+  $node_type_sql->label_option = $label_option;
+  drush_print("Bundle-Segment: " . $bundle_segment);
+  drush_print("THIS->Bundle-Segment: " . $node_type_sql->limit_by_bundle_segment);
+
+  $node_type_sql->database = $databases['default']['default']['database'];
+  $node_type_sql->composeFieldReport();
+
+  $error_string = $node_type_sql->renderErrorArray($dev);
+  if ($error_string !== FALSE) {
+    $output = $error_string;
+  }else{
+    $headers_string = $headers ? "entity,bundle,table_name,field_name,cardinality\r\n" : '';;
+    $output = $node_type_sql->view_string;
+    $output = $headers_string . $output;
+  }
+
+  $result = $header . $output;
+  drush_print($result);
+} //END function _do_column_report($type_machine_name)
+
 function _do_field_report($type_machine_name){
   $print = drush_get_option('context', 0);
   $print = $print == 1 ? TRUE : FALSE;
@@ -425,7 +511,7 @@ function _do_field_report($type_machine_name){
 
   $result = $header . $output;
   drush_print($result);
-}
+} //END function _do_field_report($type_machine_name)
 
 function _do_custom_config_report($type_machine_name, $option_array = array()){
   $print = drush_get_option('context', 0);
